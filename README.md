@@ -11,7 +11,7 @@ You need [Java](https://adoptium.net) and [KickAssembler](https://theweb.dk/Kick
 java -jar /path/to/KickAss.jar src/motr.asm -o motr.prg
 ```
 
-That's it. The output `motr.prg` is a standard C64 PRG file.
+The output `motr.prg` is a standard C64 PRG file.
 
 To run in VICE, the game has no BASIC stub so `RUN` won't work. Pass the
 `sys` command directly via the keyboard buffer:
