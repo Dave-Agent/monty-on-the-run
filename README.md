@@ -13,6 +13,13 @@ java -jar /path/to/KickAss.jar src/motr.asm -o motr.prg
 
 That's it. The output `motr.prg` is a standard C64 PRG file.
 
+To run in VICE, the game has no BASIC stub so `RUN` won't work. Pass the
+`sys` command directly via the keyboard buffer:
+
+```bash
+x64 -keybuf "sys 2064\x0d" motr.prg
+```
+
 ## How it started
 
 The source was bootstrapped by disassembling the tape binary in [Ghidra](https://ghidra-sre.org) and exporting it with the [ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export) plugin, which produces a KickAssembler-syntax `.asm` file directly from the Ghidra project. That gave an assembler-ready starting point with all the original addresses preserved; everything since has been renaming, commenting, and understanding.
@@ -48,7 +55,7 @@ docs/             Standalone HTML viewers — open in any browser, no server nee
 *Monty on the Run* was written by Peter Harrap and published by Gremlin Graphics in 1985. Music by Rob Hubbard. This repository contains only reconstructed
 source code and does not include the original binary.
 
-The byte-perfect target is a clean copy loaded directly from the original tape release — no patches, cracks, or modifications. You will need a legal copy of that tape version to verify byte-identity.
+The byte-perfect target is a clean copy loaded directly from the original tape release with no patches, cracks, or modifications. You will need a legal copy of that tape version if you want to verify byte-identity.
 
 ---
 
@@ -69,3 +76,4 @@ The byte-perfect target is a clean copy loaded directly from the original tape r
     ██████████      ██████                      
       ██████    ████████                        
 ```
+
