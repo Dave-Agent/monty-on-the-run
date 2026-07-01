@@ -1,0 +1,204 @@
+<title>room_exit_dest_tbl · Monty on the Run World Map</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #111;
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 24px;
+}
+h1 { font-size: 14px; color: #eee; margin-bottom: 4px; }
+.desc { color: #777; margin-bottom: 4px; font-size: 11px; }
+.desc code { color: #aaa; }
+.note { color: #666; font-size: 10px; margin-bottom: 16px; }
+
+.wrap { overflow-x: auto; }
+
+table { border-collapse: separate; border-spacing: 2px; font-variant-numeric: tabular-nums; }
+
+th.corner { width: 24px; }
+th.col-h {
+  font-size: 9px; color: #555; text-align: center;
+  width: 38px; padding-bottom: 3px; font-weight: normal;
+}
+th.row-h {
+  font-size: 9px; color: #555; text-align: right;
+  padding-right: 6px; font-weight: normal;
+}
+
+td.cell {
+  width: 38px; height: 24px;
+  text-align: center; vertical-align: middle;
+  font-size: 10px; font-weight: bold;
+  cursor: default;
+}
+td.wall { background: #0d0d0d; color: #222; font-weight: normal; }
+td.room:hover { filter: brightness(1.35); }
+td.dyn { outline: 1px solid #aa8800; outline-offset: -1px; }
+
+/* sector backgrounds + text */
+.s-house    { background: #172a09; color: #80c050; }
+.s-hall     { background: #1a0d35; color: #9070cc; }
+.s-pie      { background: #2a1008; color: #cc7060; }
+.s-escape   { background: #091f1a; color: #30bc98; }
+.s-sewerage { background: #182508; color: #88b02c; }
+.s-ultimate { background: #081430; color: #4488dc; }
+.s-tree     { background: #0a2408; color: #44bb44; }
+.s-c5       { background: #051c2a; color: #20b0d4; }
+.s-boat     { background: #060b26; color: #2c54c8; }
+.s-voyage   { background: #1e0832; color: #bb44d4; }
+
+.legend {
+  display: flex; flex-wrap: wrap;
+  gap: 6px 18px; margin-top: 14px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; }
+.swatch { width: 28px; height: 14px; border-radius: 1px; }
+
+#tip {
+  position: fixed; display: none;
+  background: #1c2838; border: 1px solid #334;
+  padding: 6px 10px; font-size: 11px; color: #ccc;
+  pointer-events: none; z-index: 100; line-height: 1.6;
+}
+.tip-id { font-size: 15px; color: #eee; font-weight: bold; }
+.tip-sec { font-size: 10px; }
+.tip-dyn { font-size: 9px; color: #bb9900; margin-top: 2px; }
+</style>
+
+<!--
+  room_exit_dest_tbl — World map lookup table
+
+  Indexed as: room_exit_dest_tbl[ room_exit_offset_tbl[zp_map_row] + zp_exit_tile_col ]
+
+  Returns the destination room_id when Monty exits at that grid position.
+  $FF = wall (no exit possible at this position).
+
+  Grid is 6 rows × 23 columns:
+    rows 0-5  → zp_map_row     (vertical world position)
+    cols 0-22 → zp_exit_tile_col (horizontal world position, = tile column on exit)
+
+  room_exit_dest_dyn (row 2, col 4):
+    Mutable slot. Initialised to $33 (C5 return room) at game start.
+    Cleared to $FF after the first C5 exit — one-shot connection.
+    Highlighted with a gold border below.
+-->
+
+<h1>room_exit_dest_tbl  ·  $187A</h1>
+<p class="desc">
+  Indexed by <code>zp_map_row</code> (rows 0–5) × <code>zp_exit_tile_col</code> (cols 00–16 hex) → destination room_id
+</p>
+<p class="note">$FF = wall · hover a cell for detail · gold border = <code>room_exit_dest_dyn</code> (one-shot C5 return)</p>
+
+<div class="wrap">
+  <table id="grid"></table>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<div id="tip"></div>
+
+<script>
+// Full 6×23 grid from room_exit_dest_tbl ($187A–$18FC)
+// Each row corresponds to one zp_map_row value (0–5)
+const GRID = [
+  // col:  00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F    10    11    12    13    14    15    16
+  [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x23, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff], // row 0
+  [0xff, 0x2f, 0x2e, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x22, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x06, 0x07, 0x08, 0x09, 0xff, 0xff], // row 1
+  [0x2d, 0x2c, 0x27, 0x26, 0x33, 0x32, 0x31, 0x25, 0x24, 0x20, 0x21, 0xff, 0xff, 0xff, 0xff, 0xff, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00, 0xff], // row 2
+  [0x2b, 0x2a, 0x28, 0x29, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0xff, 0xff, 0x1b, 0xff, 0xff, 0x0f, 0x0c, 0x0d, 0x0e, 0x0b, 0x0a, 0xff, 0xff], // row 3
+  [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1e, 0xff, 0x1a, 0x19, 0x18, 0xff, 0x10, 0x11, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff], // row 4
+  [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1d, 0x1c, 0x17, 0x16, 0x15, 0x14, 0x12, 0x13, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff], // row 5
+];
+
+// Sector definitions (from room_msg_idx_tbl + sector_name_tbl)
+const SECTORS = [
+  { cls:'house',    name:'THE HOUSE',                    test: v => v<=0x04||(v>=0x06&&v<=0x07)||(v>=0x09&&v<=0x0e) },
+  { cls:'hall',     name:'THE HALL OF JOW-AN',           test: v => v===0x05 },
+  { cls:'pie',      name:'PIE ARE SQUARE',               test: v => v===0x08 },
+  { cls:'escape',   name:'ESCAPE TUNNEL',                test: v => v>=0x0f&&v<=0x13 },
+  { cls:'sewerage', name:'SEWERAGE WORKS',               test: v => v>=0x14&&v<=0x1c },
+  { cls:'ultimate', name:'THE ULTIMATE EXPERIENCE',      test: v => v>=0x1d&&v<=0x1f },
+  { cls:'tree',     name:'TREE STUMP',                   test: v => v>=0x20&&v<=0x23 },
+  { cls:'c5',       name:"DRIVE SIR CLIVE'S C5",         test: v => v===0x24||v===0x25||(v>=0x31&&v<=0x34) },
+  { cls:'boat',     name:'DAS BOAT',                     test: v => v>=0x26&&v<=0x2f },
+  { cls:'voyage',   name:'BON VOYAGE MONSIEUR LE MONTY', test: v => v===0x30 },
+];
+
+function getSector(v) { return SECTORS.find(s => s.test(v)) || null; }
+
+// Build table
+(function() {
+  const tbl = document.getElementById('grid');
+  const thead = tbl.createTHead();
+
+  // Column header row
+  const hr = thead.insertRow();
+  const c0 = document.createElement('th'); c0.className = 'corner'; hr.appendChild(c0);
+  for (let c = 0; c < 23; c++) {
+    const th = document.createElement('th');
+    th.className = 'col-h';
+    th.textContent = c.toString(16).toUpperCase().padStart(2,'0');
+    hr.appendChild(th);
+  }
+
+  const tbody = tbl.createTBody();
+  GRID.forEach((row, r) => {
+    const tr = tbody.insertRow();
+    const rh = document.createElement('th');
+    rh.className = 'row-h';
+    rh.textContent = r;
+    tr.appendChild(rh);
+
+    row.forEach((val, c) => {
+      const td = tr.insertCell();
+      const isDyn = r===2 && c===4;
+
+      if (val === 0xff) {
+        td.className = 'cell wall';
+        td.textContent = '·';
+      } else {
+        const sec = getSector(val);
+        td.className = 'cell room s-' + (sec ? sec.cls : '') + (isDyn ? ' dyn' : '');
+        td.textContent = '$' + val.toString(16).toUpperCase().padStart(2,'0');
+
+        td.addEventListener('mouseenter', e => {
+          const tip = document.getElementById('tip');
+          tip.style.display = 'block';
+          tip.innerHTML =
+            '<div class="tip-id">$' + val.toString(16).toUpperCase().padStart(2,'0') + '</div>' +
+            '<div>row ' + r + '  col $' + c.toString(16).toUpperCase().padStart(2,'0') + '</div>' +
+            (sec ? '<div class="tip-sec">' + sec.name + '</div>' : '') +
+            (isDyn ? '<div class="tip-dyn">room_exit_dest_dyn · one-shot</div>' : '');
+          move(e);
+        });
+        td.addEventListener('mousemove', move);
+        td.addEventListener('mouseleave', () => { document.getElementById('tip').style.display='none'; });
+      }
+    });
+  });
+
+  function move(e) {
+    const tip = document.getElementById('tip');
+    tip.style.left = Math.min(e.clientX+14, window.innerWidth-160) + 'px';
+    tip.style.top  = Math.max(e.clientY-8, 4) + 'px';
+  }
+})();
+
+// Build legend
+(function() {
+  const el = document.getElementById('legend');
+  SECTORS.forEach(s => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    const sw = document.createElement('div');
+    sw.className = 'swatch s-' + s.cls;
+    const lbl = document.createElement('span');
+    lbl.textContent = s.name;
+    item.appendChild(sw);
+    item.appendChild(lbl);
+    el.appendChild(item);
+  });
+})();
+</script>

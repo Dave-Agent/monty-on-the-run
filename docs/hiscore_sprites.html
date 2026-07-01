@@ -1,0 +1,293 @@
+<title>Hi-Score Sprite Banks · Monty on the Run</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c12;--card:#0d1620;--border:#1b2d44;--input-bg:#080f1c;
+  --px:#b8f040;--id:#3a8ccc;--text:#b8ccd8;--muted:#3a5060;--addr:#2a6040;
+  --banner-bg:#0b1820;
+}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',Courier,monospace;font-size:12px;padding:18px 20px;line-height:1.4}
+
+header{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:14px}
+h1{font-size:13px;font-weight:bold;color:var(--text);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.hdr-sub{color:var(--muted);font-size:10px;flex:1;min-width:0}
+.hdr-sub code{color:var(--id);letter-spacing:.02em}
+#copy-btn{background:var(--border);color:var(--text);border:1px solid #253d56;padding:4px 10px;font-family:inherit;font-size:10px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+#copy-btn:hover{background:#1c3050}
+#copy-btn:focus-visible{outline:1px solid var(--id);outline-offset:2px}
+
+.section-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.section-label code{color:var(--id)}
+
+/* ── Banner composite ─────────────────────────────────────────────────── */
+.banner-section{background:var(--banner-bg);border:1px solid var(--border);padding:14px;margin-bottom:22px}
+.banner-row{display:flex;gap:2px;align-items:flex-start;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.banner-sprite{display:flex;flex-direction:column;gap:4px;align-items:center}
+.banner-sprite .baddr{font-size:9px;color:var(--addr);letter-spacing:.06em;text-align:center}
+.banner-ctrl{display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap}
+.banner-ctrl .ctrl-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:14px;line-height:1;cursor:pointer;padding:0;width:14px}
+.banner-ctrl .ctrl-btn:hover{color:var(--text)}
+.banner-ctrl .ctrl-btn:focus-visible{outline:1px solid var(--id)}
+.banner-ctrl .fnum{font-size:9px;color:var(--muted);letter-spacing:.06em}
+.banner-ctrl .pause-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:10px;cursor:pointer;padding:2px 7px;letter-spacing:.06em}
+.banner-ctrl .pause-btn:hover{color:var(--text);border-color:#253d56}
+.banner-ctrl .pause-btn:focus-visible{outline:1px solid var(--id)}
+.banner-note{font-size:10px;color:var(--muted);margin-top:8px}
+
+/* ── Sprite grids ─────────────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:860px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:580px){.grid,.grid-3{grid-template-columns:repeat(2,1fr)}}
+
+.card{background:var(--card);border:1px solid var(--border);padding:9px;display:flex;flex-direction:column;gap:7px}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px}
+.caddr{color:var(--id);font-size:11px;letter-spacing:.1em;font-weight:bold}
+.cfnum{font-size:9px;color:var(--muted);letter-spacing:.06em}
+
+.canvas-wrap{align-self:center;line-height:0}
+canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:pointer;filter:drop-shadow(0 0 3px rgba(184,240,64,.25))}
+
+.ctrl{display:flex;align-items:center;gap:5px}
+.ctrl-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:14px;line-height:1;cursor:pointer;padding:0;width:14px}
+.ctrl-btn:hover{color:var(--text)}
+.ctrl-btn:focus-visible{outline:1px solid var(--id)}
+.fnum{font-size:9px;color:var(--muted);letter-spacing:.06em;flex:1;text-align:right}
+
+.name-input{background:var(--input-bg);border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:inherit;font-size:11px;padding:5px 3px;width:100%;outline:none}
+.name-input::placeholder{color:var(--muted)}
+.name-input:focus{border-bottom-color:var(--id)}
+
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(6px);background:#132038;color:var(--text);padding:7px 16px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;border:1px solid #253d56}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<header>
+  <h1>Hi-Score Sprite Banks</h1>
+  <span class="hdr-sub">
+    <code>hiscore_and_sprite_data</code> · $7740–$7FFF ·
+    flying banner composite + 23 unknown frames ·
+    click sprite to pause/cycle · fill names then copy
+  </span>
+  <button id="copy-btn" onclick="copyNames()">Copy names</button>
+</header>
+
+<!-- ── Banner composite ─────────────────────────────────────────────── -->
+<div class="section-label">Flying Banner Composite &nbsp;·&nbsp; <code>flying_banner_1/2/3_spr</code> · $7800–$7AFF · 3 sprites × 4 frames · 8-frame animation cycle</div>
+<div class="banner-section">
+  <div class="banner-row" id="banner-row"></div>
+  <div class="banner-ctrl">
+    <button class="pause-btn" id="banner-pause" onclick="toggleBanner()">pause</button>
+    <button class="ctrl-btn" title="prev frame" onclick="stepBanner(-1)">◂</button>
+    <button class="ctrl-btn" title="next frame" onclick="stepBanner(1)">▸</button>
+    <span class="fnum" id="banner-fnum">1/4</span>
+  </div>
+  <div class="banner-note">Three sprites placed side-by-side form one full-width banner that scrolls across the screen in the attract sequence.</div>
+</div>
+
+<!-- ── Block A ─────────────────────────────────────────────────────── -->
+<div class="section-label">Block A · $7740–$77FF · 3 frames · purpose unknown</div>
+<div class="grid grid-3" id="grid-a"></div>
+
+<!-- ── Block B ─────────────────────────────────────────────────────── -->
+<div class="section-label">Block B · $7B00–$7FC0 · 20 frames · purpose unknown</div>
+<div class="grid" id="grid-b"></div>
+
+<div id="toast">Names copied to clipboard</div>
+
+<script>
+const SCALE = 4;
+const W = 24*SCALE, H = 21*SCALE;
+const PX = '#b8f040', BG = '#060a10';
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function parseFrame(hex) {
+  const b = new Uint8Array(64);
+  for (let i = 0; i < 64; i++) b[i] = parseInt(hex.substr(i*2,2),16);
+  return b;
+}
+function drawFrame(ctx, bytes) {
+  ctx.fillStyle = BG;
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = PX;
+  for (let row = 0; row < 21; row++) {
+    const bits = (bytes[row*3]<<16)|(bytes[row*3+1]<<8)|bytes[row*3+2];
+    for (let col = 0; col < 24; col++) {
+      if (bits & (1<<(23-col))) ctx.fillRect(col*SCALE, row*SCALE, SCALE, SCALE);
+    }
+  }
+}
+
+// ── Banner data ────────────────────────────────────────────────────────
+const BANNER_DATA = [
+  { addr: 0x7800, label: 'flying_banner_1_spr', frames: [
+    "0000070890bfdfb80000028785effd3fb71b010000000000decce0f0000000000000070810bfdfb80000028785effd3f371b010000000000decce0f000000000",
+    "00000708103fdf380000028785effd3f371b010000000000decce0f0000000000000070810bf5fb80000028785effd3f371b010000000000decce0f000000000",
+    "00ff40211212222100ff00c0064929c640424282824340ff0000090909e600ff00ff40414242428100ff00c0064929c680824222224340ff0000090909e600ff",
+    "00ff40212222422100ff00c0064929c620224282828340ff0000090909e600ff003f40211212628100ff00c0064929c680824282828340ff0000090909e600ff"
+  ]},
+  { addr: 0x7900, label: 'flying_banner_2_spr', frames: [
+    "007f4058585c5f5b00ff006766e6e666d85858585858407f67666666666600ff007f4058585c5f5b00ff006766e6e666d85858585858407f67666666666600ff",
+    "007f4058585c5f5b00ff006766e6e666d85858585858407f67666666666600ff007f4058585c5f5b00ff006766e6e666d85858585858407f67666666666600ff",
+    "00ff0000334a4a3300fe02028a4a4a8a00003a43433a00ff0a0b8a0a028a02fe00ff0000334a4a3300fe02028a4a4a8a00003a43433a00ff0a0b8a0a028a02fe",
+    "00ff0000334a4a3300fe02028a4a4a8a00003a43433a00ff0a0b8a0a028a02fe00ff0000334a4a3300fe02028a4a4a8a00003a43433a00ff0a0b8a0a028a02fe"
+  ]},
+  { addr: 0x7A00, label: 'flying_banner_3_spr', frames: [
+    "00ff00f11919191900ff028488888484f1010101010100ff82828281f9fa02fe00ff00f11919191900ff028482828484f1010101010100ff82818281f9f902fc",
+    "00ff00f11919191900fe048884848484f1010101010100ff88888482fafa02fc00ff00f11919191900fc048884848484f1010101010100ff82838181fafa01ff",
+    "000040e1a1f7bffc0000e01009fdfb1d7b33070f00000000edd8800000000000000040e1a1f7bffc0000e01008fdfb1d7b33070f00000000ecd8800000000000",
+    "000040e1a1f7bffc0000e01008fcfb1c7b33070f00000000ecd8800000000000000040e1a1f7bffc0000e01008fdfa1d7b33070f00000000ecd8800000000000"
+  ]}
+];
+
+// ── Block A data ───────────────────────────────────────────────────────
+const BLOCK_A = [
+  { addr: 0x7740, frames: ["8800ffff0008ffff0040ffff0101feff0000ffff0000ffff0043ffffcb40feff0000ffbf4242fffe0000ffff0044ff354000ffff0000ffff00897fb5018cfaff"] },
+  { addr: 0x7780, frames: ["ef09ffff0000ffff0000ffff0000fffb1000ffff0008ffff0000ffff0000fffe0000ffff0100ffff0000fffe000011fe0000ffff0000ffff0000ffff080011fb"] },
+  { addr: 0x77C0, frames: ["8000ffff0000fffe0000ffbe0101fefe0000ffff0000ffff0001ffff4b00feff0000fffd0000fffe4000fffe00a0fef50000ffff0000fbff00097ff50190feff"] }
+];
+
+// ── Block B data ───────────────────────────────────────────────────────
+const BLOCK_B = [
+  { addr: 0x7B00, frames: ["ef41bdff0100ffff0000ffff0000ffff1400fffd0000ffff1100ffff0000ffbe0200fff72100ffff0000fffb000011fc0000ffff0100ffff0000ffff810011ff"] },
+  { addr: 0x7B40, frames: ["8800ffff0008ffff0040ffff0101eeff0000ffff0000ffff0043ffffcb40feff0000ffbf0242fffe0000ffff0064ff354000ffff0000ffff00897fb50184baff"] },
+  { addr: 0x7B80, frames: ["eb49ffff0000ffff0000ffff0000fffb1000ffff0000ffff0000ffff0000fffe0000ffff2100ffff0000fffe000011fe0000ffff0000ffff0000ffff080011fb"] },
+  { addr: 0x7BC0, frames: ["8800ffff0008fffe0000ffbe0101fefe0000ffff0000ffff0001ffff4b00feff0000fffd0000fffe4200fffe0020fff50000ffff0000fbff00097ff50198feff"] },
+  { addr: 0x7C00, frames: ["98be4200feff0000ffff0000ffff0088ebff0202ffff0000eeff0000ffff0003bfff0088feff0000ffff0025ffffee03ffff0000ffff0000ffff0000ffffee00"] },
+  { addr: 0x7C40, frames: ["ffff0000ffff0001ffbf0003fefe1101ffff0200ffff0200ffbe880034bf0100ffff0042bdbf0001ffff0001ff9b02cabfff0000ffff0000ff76804afefbad00"] },
+  { addr: 0x7C80, frames: ["14f60000ffff0000ffff0000ffff008cefff0000ffff0000ffff0000ffff0003ffff008cfeff0000ffff0001ffffee01ffff0000ffff0000ffff0000ffffee04"] },
+  { addr: 0x7CC0, frames: ["ffff0000ffff0001ffff0041fefe0101ffff0000ffff0000fffe8800f4ff0100ffff0002ffff0001ffff0001ffff014affff0000ffff0400fff6800afeef4900"] },
+  { addr: 0x7D00, frames: ["ef03bfff0100ffff0000ffff0000ffb71600fffd0000ffbf1100ffff0000ffbe0200fff72100ffff0000fffb000011fc0000ffff0100ffff0000ffff810011ff"] },
+  { addr: 0x7D40, frames: ["0800ffff0000ffff0000ffbf0101eeff0000bfff0000bfff0003ffffcb00feff0000ffbf4202fffe0000ffff0024bf350000ffff0000ffff00897fb50184baff"] },
+  { addr: 0x7D80, frames: ["ef09ffff0000ffff0000ffff0000ffff1000ffff0000ffff0000ffff0000fffe0000ffff8500ffff0000fffe000011fe0000ffff0000ffff0000ffff080011fb"] },
+  { addr: 0x7DC0, frames: ["8800ffff0008fffe0000fffe0101fefe0000ffff0000ffff0001ffff4b00feff0000fffd0000fffe4000fffe0080fef50000ffff0000fbff00097ff50188feff"] },
+  { addr: 0x7E00, frames: ["18be4200feff0000ffff0000ffff0088ebff0002ffff0000eeff0000ffff000bbfff0088deff0000ffff0001ffffee03ffff0000feff0000ffff00007effee00"] },
+  { addr: 0x7E40, frames: ["ffbf0000ffff0000ffbf0002fefe0100bfff0200ffff0000ffbe88003cbf0100ffff0040bdbf0001bfff0008ff9b02cabfff0000ffff0000ff7e804afefb8d00"] },
+  { addr: 0x7E80, frames: ["34f60000ffff0000ffff0000ffff00acefff0000ffff0000ffff0000ffff0021ffff008cfeff0000ffff0001ffffee01ffff0000ffff0000ffff0000ffffee04"] },
+  { addr: 0x7EC0, frames: ["ffff0000ffff0001ffff0041fefe0101ffff0000ffff0000fffe8800f4ff0100ffff0002ffff0001ffff0001ffff01caffff0000ffff0400fff6800afeff2900"] },
+  { addr: 0x7F00, frames: ["ef01bdff0100ffff0000ffff0000fff71000fffd0000ffff1100ffff0000ffbe4000ffff2100ffff0000fffb000011fd0000ffff0100ffff0000ffff810011ff"] },
+  { addr: 0x7F40, frames: ["8800ffff0000ffff0000fffd0101fefb0000ffff0000ffff0041ffffcb00feff0000ffbf0240ffff0000ffff0024ff350000ffff0000ffff00897fb5018cfaff"] },
+  { addr: 0x7F80, frames: ["ef09ffff0000ffff0000ffff0000fffb1000ffff0000ffff0000ffff0000fffe0000ffff0100ffff0000fffe000011fe0000ffff0100ffff0000ffff090011fb"] },
+  { addr: 0x7FC0, frames: ["8000ffff0080ffff0000ffff0101feff0000ffff0000ffff0001ffff4b00feff0000fffd0000fffe0200ffff0080fff50000ffff0000fbff00097ff50190feff"] }
+];
+
+// ── Banner composite setup ─────────────────────────────────────────────
+const bannerRow = document.getElementById('banner-row');
+const bannerCtxs = [];
+const bannerFrames = BANNER_DATA.map(b => b.frames.map(parseFrame));
+let bannerCur = 0, bannerLast = 0, bannerPaused = reduced;
+
+for (const b of BANNER_DATA) {
+  const wrap = document.createElement('div');
+  wrap.className = 'banner-sprite';
+  const addrHex = b.addr.toString(16).toUpperCase().padStart(4,'0');
+  const lbl = document.createElement('div');
+  lbl.className = 'baddr';
+  lbl.textContent = '$'+addrHex;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  cv.style.cssText = 'display:block;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 0 3px rgba(184,240,64,.25))';
+  wrap.appendChild(cv);
+  wrap.appendChild(lbl);
+  bannerRow.appendChild(wrap);
+  bannerCtxs.push(cv.getContext('2d'));
+}
+
+function drawBannerFrame(n) {
+  bannerCur = ((n%4)+4)%4;
+  document.getElementById('banner-fnum').textContent = (bannerCur+1)+'/4';
+  for (let i = 0; i < 3; i++) drawFrame(bannerCtxs[i], bannerFrames[i][bannerCur]);
+}
+function toggleBanner() {
+  bannerPaused = !bannerPaused;
+  document.getElementById('banner-pause').textContent = bannerPaused ? 'play' : 'pause';
+}
+function stepBanner(d) { bannerPaused = true; document.getElementById('banner-pause').textContent = 'play'; drawBannerFrame(bannerCur+d); }
+drawBannerFrame(0);
+
+// ── Card grid builder ──────────────────────────────────────────────────
+const cardAnims = [];
+function buildGrid(containerId, entries) {
+  const container = document.getElementById(containerId);
+  for (const entry of entries) {
+    const frames = entry.frames.map(parseFrame);
+    const nf = frames.length;
+    const addrHex = entry.addr.toString(16).toUpperCase().padStart(4,'0');
+    const key = 'addr-'+addrHex;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="card-head">' +
+        '<span class="caddr">$'+addrHex+'</span>' +
+        '<span class="cfnum">'+nf+'f</span>' +
+      '</div>' +
+      '<div class="canvas-wrap"><canvas width="'+W+'" height="'+H+'" title="click to pause/cycle"></canvas></div>' +
+      '<div class="ctrl">' +
+        '<button class="ctrl-btn" title="prev">◂</button>' +
+        '<button class="ctrl-btn" title="next">▸</button>' +
+        '<span class="fnum">1/'+nf+'</span>' +
+      '</div>' +
+      '<input class="name-input" id="'+key+'" type="text" placeholder="identify…" autocomplete="off" spellcheck="false">';
+    container.appendChild(card);
+
+    const ctx = card.querySelector('canvas').getContext('2d');
+    const fnumEl = card.querySelector('.fnum');
+    const [prevBtn, nextBtn] = card.querySelectorAll('.ctrl-btn');
+    const anim = {ctx, frames, nf, cur:0, last:0, paused:reduced, fnumEl};
+    cardAnims.push(anim);
+    drawFrame(ctx, frames[0]);
+
+    (function(a) {
+      function setCur(n) {
+        a.cur = ((n%a.nf)+a.nf)%a.nf;
+        drawFrame(a.ctx, a.frames[a.cur]);
+        a.fnumEl.textContent = (a.cur+1)+'/'+a.nf;
+      }
+      card.querySelector('canvas').addEventListener('click', () => { a.paused = !a.paused; });
+      prevBtn.addEventListener('click', () => { a.paused = true; setCur(a.cur-1); });
+      nextBtn.addEventListener('click', () => { a.paused = true; setCur(a.cur+1); });
+    })(anim);
+  }
+}
+
+buildGrid('grid-a', BLOCK_A);
+buildGrid('grid-b', BLOCK_B);
+
+// ── Animation loop ─────────────────────────────────────────────────────
+if (!reduced) {
+  const FPS = 160;
+  function loop(ts) {
+    if (!bannerPaused && ts - bannerLast > FPS) {
+      bannerLast = ts;
+      drawBannerFrame(bannerCur+1);
+    }
+    for (const a of cardAnims) {
+      if (a.paused) continue;
+      if (ts - a.last > FPS) {
+        a.last = ts;
+        a.cur = (a.cur+1) % a.nf;
+        drawFrame(a.ctx, a.frames[a.cur]);
+        a.fnumEl.textContent = (a.cur+1)+'/'+a.nf;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+
+// ── Copy ───────────────────────────────────────────────────────────────
+function copyNames() {
+  const all = [...BLOCK_A, ...BLOCK_B];
+  const lines = all.map(e => {
+    const hex = e.addr.toString(16).toUpperCase().padStart(4,'0');
+    const name = (document.getElementById('addr-'+hex)||{}).value||'';
+    return '$'+hex+': '+(name.trim()||'(unnamed)');
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  });
+}
+</script>

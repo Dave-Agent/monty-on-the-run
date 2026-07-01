@@ -1,0 +1,467 @@
+<title>decor_viewer · Monty on the Run</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050810;
+  --surface:#0c1422;
+  --lift:#111d2e;
+  --border:#1a3050;
+  --border-hi:#254468;
+  --text:#8ab0c8;
+  --muted:#2e4a68;
+  --accent:#3ea8d0;
+  --warm:#c09038;
+  --dim:#4a7090;
+  --id:#4898c0;
+  --addr:#2c6648;
+  --filt-active-bg:#0e2034;
+  --filt-active-border:#3888b0;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Consolas,'Courier New',monospace;
+  font-size:11px;
+  line-height:1.5;
+  min-height:100vh;
+}
+
+/* ── sticky header ── */
+#top{
+  position:sticky;top:0;z-index:10;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  padding:10px 14px 0;
+}
+.title-row{
+  display:flex;align-items:baseline;gap:12px;
+  padding-bottom:9px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:8px;
+}
+.brand{
+  font-size:13px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:#a8c8e0;
+}
+.sub{
+  font-size:10px;color:var(--muted);
+  flex:1;
+}
+.sub code{color:var(--id);letter-spacing:.04em}
+.actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+#counter{
+  font-size:10px;color:var(--dim);
+  letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;
+}
+#counter .n{color:var(--accent)}
+#copy-btn{
+  background:var(--lift);border:1px solid var(--border-hi);
+  color:var(--text);font-family:inherit;font-size:10px;
+  padding:3px 10px;cursor:pointer;
+  letter-spacing:.08em;text-transform:uppercase;
+  white-space:nowrap;
+}
+#copy-btn:hover{background:var(--filt-active-bg);border-color:var(--accent)}
+#copy-btn:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+
+/* ── filter bar ── */
+.filters{
+  display:flex;align-items:center;gap:4px;
+  padding-bottom:8px;
+  flex-wrap:wrap;
+}
+.filter-group{display:flex;gap:2px}
+.filt{
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-family:inherit;font-size:10px;
+  padding:2px 8px;cursor:pointer;
+  letter-spacing:.06em;
+  transition:color .12s,background .12s,border-color .12s;
+}
+.filt:hover{color:var(--text);border-color:var(--border-hi)}
+.filt.active{
+  background:var(--filt-active-bg);
+  border-color:var(--filt-active-border);
+  color:var(--accent);
+}
+.filt .badge{
+  font-size:9px;color:var(--dim);
+  margin-left:3px;
+}
+.filt.active .badge{color:var(--accent)}
+.filter-sep{
+  width:1px;height:14px;
+  background:var(--border);
+  margin:0 4px;align-self:center;
+}
+
+/* ── grid ── */
+#grid{
+  display:flex;flex-wrap:wrap;
+  gap:7px;align-items:flex-start;
+  padding:12px 14px;
+}
+
+/* ── card ── */
+.card{
+  width:216px;flex-shrink:0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:7px;
+  display:flex;flex-direction:column;gap:5px;
+}
+.card-head{
+  display:flex;align-items:baseline;
+  justify-content:space-between;gap:4px;
+}
+.type-id{
+  font-size:12px;font-weight:700;
+  color:var(--id);letter-spacing:.1em;
+}
+.meta-right{
+  display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end;
+}
+.chip{
+  font-size:9px;padding:1px 5px;
+  border:1px solid;letter-spacing:.04em;
+  white-space:nowrap;
+}
+.chip-dim{color:var(--dim);border-color:var(--muted)}
+.chip-solid{color:var(--dim);border-color:var(--muted)}
+.chip-stream{color:var(--warm);border-color:#6a5020}
+.addr-tag{
+  font-size:9px;color:var(--addr);letter-spacing:.04em;
+}
+
+/* ── canvas wrapper ── */
+.cv-wrap{
+  background:#000;
+  display:flex;justify-content:center;align-items:center;
+  line-height:0;
+  border:1px solid #0d1c2c;
+}
+canvas{
+  display:block;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+}
+
+/* ── name input ── */
+.name-input{
+  background:transparent;
+  border:none;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+  font-family:inherit;font-size:11px;
+  padding:3px 2px;width:100%;
+  outline:none;
+}
+.name-input::placeholder{color:var(--muted)}
+.name-input:focus{border-bottom-color:var(--accent)}
+.name-input.has-name{color:#b8d8f0;border-bottom-color:var(--border-hi)}
+
+/* ── toast ── */
+#toast{
+  position:fixed;bottom:16px;left:50%;
+  transform:translateX(-50%) translateY(6px);
+  background:#0e1e30;color:var(--text);
+  padding:6px 16px;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;
+  opacity:0;transition:opacity .18s,transform .18s;
+  pointer-events:none;border:1px solid var(--border-hi);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── empty-filter message ── */
+#empty{
+  display:none;padding:24px 14px;
+  font-size:11px;color:var(--muted);letter-spacing:.06em;
+}
+</style>
+
+<div id="top">
+  <div class="title-row">
+    <span class="brand">decor_types</span>
+    <span class="sub"><code>decor_rom_hdr</code> · $E000 · 97 decoration types · char graphics</span>
+    <div class="actions">
+      <span id="counter"><span class="n">0</span> / 97 named</span>
+      <button id="copy-btn" onclick="copyNames()">Copy names</button>
+    </div>
+  </div>
+  <div class="filters" id="filters">
+    <div class="filter-group" data-group="status">
+      <button class="filt active" data-val="all">All <span class="badge" id="badge-all">97</span></button>
+      <button class="filt" data-val="unnamed">Unnamed <span class="badge" id="badge-unnamed">97</span></button>
+      <button class="filt" data-val="named">Named <span class="badge" id="badge-named">0</span></button>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group" data-group="mode">
+      <button class="filt active" data-val="all">Any mode</button>
+      <button class="filt" data-val="solid">Solid</button>
+      <button class="filt" data-val="stream">Stream</button>
+    </div>
+  </div>
+</div>
+
+<div id="grid"></div>
+<div id="empty">No types match the current filter.</div>
+<div id="toast"></div>
+
+<script>
+const C64 = ["#000000","#FCFCFC","#9F4E44","#6ABFC6","#A057A3","#5CAB5E","#50459B","#C9D487","#A1683C","#6D5412","#CB7E75","#626262","#898989","#9AE29B","#887ECB","#C9C9C9"];
+
+const TYPES = [
+  {id:0,w:1,h:2,cells:2,bmpAddr:"$E188",colDesc:"solid $0C",bmp:"1818183c3c6e5e5e5e5e5e5e5e5e5eff",cols:"0c0c"},
+  {id:1,w:1,h:4,cells:4,bmpAddr:"$E198",colDesc:"solid $0C",bmp:"1818181818181818181818181818181818181818181818181818181818181818",cols:"0c0c0c0c"},
+  {id:2,w:3,h:2,cells:6,bmpAddr:"$E1B8",colDesc:"stream $E1B8",bmp:"0000000003060c1f00000000fffcfeff00000000c0e07030000f1f0c0700000000feff06fc0000003030301818181818",cols:"0c0c0c07070c"},
+  {id:3,w:3,h:3,cells:9,bmpAddr:"$E1EE",colDesc:"solid $0F",bmp:"7fffffe0eee8e8e0ffffff181b1a1a18fec1fd0585050507e0e0e0ffffe0eee8181818ffff181b1a070707ffff078707e8a0a0a0a0bf837f1a18181818ffffff0707070707fffffe",cols:"0f0f0f0f0f0f0f0f0f"},
+  {id:4,w:5,h:1,cells:5,bmpAddr:"$E254",colDesc:"solid $01",bmp:"7fffc0dbdbdbdb7fffff616d616f6fffffffbfbfbfbf8fffffff84bf87f787fffeff1f7f7f7f77fe",cols:"0101010101"},
+  {id:5,w:1,h:3,cells:3,bmpAddr:"$E236",colDesc:"stream $E236",bmp:"0000002a5d3e360899d36e10d36e0c08ffdfdf6e6e7e3c3c",cols:"070d0a"},
+  {id:6,w:1,h:3,cells:3,bmpAddr:"$E236",colDesc:"stream $E236",bmp:"0000002a5d3e360899d36e10d36e0c08ffdfdf6e6e7e3c3c",cols:"08050a"},
+  {id:7,w:4,h:3,cells:12,bmpAddr:"$E27C",colDesc:"solid $0F",bmp:"182442818142241818245aadb55a241818244281814224181824428181422418245ab5ad5a241824245aa5bd5a241824245ab5b55a241824245aadad5a2418245ab5ad5aff8ff0605abda55affff00005aadb55affff000042818142fff10f06",cols:"0f0f0f0f0f0f0f0f0f0f0f0f"},
+  {id:8,w:4,h:2,cells:8,bmpAddr:"$E2FC",colDesc:"solid $08",bmp:"809f5f409d955d5c00f8fc00dc5ceeee00000000382828300101020239295252949c545c9c80ff7fd7776b3b3b00ffff2828b9a9b900ffffa1a14242c101fffe",cols:"0808080808080808"},
+  {id:9,w:1,h:2,cells:2,bmpAddr:"$E2DC",colDesc:"solid $05",bmp:"18001818183c2c6e5e5eff81db81db7e",cols:"0505"},
+  {id:10,w:1,h:2,cells:2,bmpAddr:"$E2DC",colDesc:"solid $0D",bmp:"18001818183c2c6e5e5eff81db81db7e",cols:"0d0d"},
+  {id:11,w:1,h:2,cells:2,bmpAddr:"$E2EC",colDesc:"solid $06",bmp:"181818183c0076007a7a7a7a7a7a007e",cols:"0606"},
+  {id:12,w:1,h:2,cells:2,bmpAddr:"$E2EC",colDesc:"solid $0A",bmp:"181818183c0076007a7a7a7a7a7a007e",cols:"0a0a"},
+  {id:13,w:2,h:3,cells:6,bmpAddr:"$E33C",colDesc:"solid $07",bmp:"03040301010f3a658040800000e0b84449f29f9292929292249ef29292929292929292929292d23f92929292929296f8",cols:"070707070707"},
+  {id:14,w:2,h:2,cells:4,bmpAddr:"$E36C",colDesc:"stream $E36C",bmp:"0f3f7f63e7d77873f03c9ebff9f93b9e17070707070f0f07c8e8e0e0e0c0c080",cols:"02020f0f"},
+  {id:15,w:1,h:1,cells:1,bmpAddr:"$E390",colDesc:"solid $01",bmp:"5f6f2e361c08143e",cols:"01"},
+  {id:16,w:1,h:1,cells:1,bmpAddr:"$E390",colDesc:"solid $0F",bmp:"5f6f2e361c08143e",cols:"0f"},
+  {id:17,w:1,h:2,cells:2,bmpAddr:"$E398",colDesc:"solid $0E",bmp:"0000c6ba82c6446c283810101010107c",cols:"0e0e"},
+  {id:18,w:1,h:1,cells:1,bmpAddr:"$E398",colDesc:"solid $01",bmp:"0000c6ba82c6446c",cols:"01"},
+  {id:19,w:2,h:3,cells:6,bmpAddr:"$E3A8",colDesc:"solid $08",bmp:"01030c7fe699bfbe008060fc364a76fadeb9b7cb7c1f3d29faf6cab67cf078282929292b2b3d1c0f282828a8a87870e0",cols:"080808080808"},
+  {id:20,w:2,h:2,cells:4,bmpAddr:"$E3D8",colDesc:"solid $0A",bmp:"071c316441d181a1e0388c26828b8185a180d04064311c07c5613b02268c38e0",cols:"0a0a0a0a"},
+  {id:21,w:3,h:2,cells:6,bmpAddr:"$E3F8",colDesc:"solid $0D",bmp:"0000007fc082858a1038c6ff05081582000000fe438151a1978d888d8dbfc07f458b838387ff00ff4d091d1d95fd03fe",cols:"0d0d0d0d0d0d"},
+  {id:22,w:2,h:2,cells:4,bmpAddr:"$E428",colDesc:"solid $0F",bmp:"0379fdfd7933b7b7fc7eff0357035703b7b7b379fdfd49b3570313fefefefcfc",cols:"0f0f0f0f"},
+  {id:23,w:2,h:2,cells:4,bmpAddr:"$E428",colDesc:"solid $0E",bmp:"0379fdfd7933b7b7fc7eff0357035703b7b7b379fdfd49b3570313fefefefcfc",cols:"0e0e0e0e"},
+  {id:24,w:2,h:2,cells:4,bmpAddr:"$E428",colDesc:"solid $0A",bmp:"0379fdfd7933b7b7fc7eff0357035703b7b7b379fdfd49b3570313fefefefcfc",cols:"0a0a0a0a"},
+  {id:25,w:3,h:9,cells:27,bmpAddr:"$E448",colDesc:"solid $09",bmp:"1f3f7067efcfdfddffff00ffe77efbfbf8fc0ee6f7f3fbbbdfdbdbdfcdef6f67fbf7e7dfbf7f7ee7fbdbdbf3b7f6f6e673303f151f151d19ff00ffff81181818ce0cfca8f8a8b898191919191919191918181818191919199898989858d8d8d8191919191919191918181818181818189818181818181818191919191919191a181818181818189818181818181818181b1b1b19181818189898981818247edf18181818181818181818181c14161b3d9f9bdf7e3c0081ff181818382868d8bc3f7ffefeff7f0f60ff0055aa00ffff00fcfe7f7ffffef006",cols:"090909090909090909090909090909090909090909090909090909"},
+  {id:26,w:3,h:2,cells:6,bmpAddr:"$E520",colDesc:"solid $03",bmp:"00000f30ffa480ff013ec000ff9240ffe0100000ff3321edd5aad5aad5ff0f6054ad54ad54ffff00135f995719fff006",cols:"030303030303"},
+  {id:27,w:2,h:1,cells:2,bmpAddr:"$E550",colDesc:"solid $08",bmp:"ffc0e0e0c3fcc080ff06186080000000",cols:"0808"},
+  {id:28,w:2,h:1,cells:2,bmpAddr:"$E560",colDesc:"solid $08",bmp:"ff60180601000000ff030707c33f0301",cols:"0808"},
+  {id:29,w:3,h:2,cells:6,bmpAddr:"$E570",colDesc:"solid $07",bmp:"ff7f18181818181fffff0000000000fffffe1818181818f8181f18181830306000ff00000000000018f81818180c0c06",cols:"070707070707"},
+  {id:30,w:3,h:2,cells:6,bmpAddr:"$E570",colDesc:"solid $09",bmp:"ff7f18181818181fffff0000000000fffffe1818181818f8181f18181830306000ff00000000000018f81818180c0c06",cols:"090909090909"},
+  {id:31,w:3,h:2,cells:6,bmpAddr:"$E5A0",colDesc:"solid $0F",bmp:"7f808080879f9f87ff0000807070e89cfe01456d7d554501889d9d9b87807f006eae8bfbdb00ff00456d7d554501fe00",cols:"0f0f0f0f0f0f"},
+  {id:32,w:4,h:2,cells:8,bmpAddr:"$E5D0",colDesc:"solid $01",bmp:"0000000001030f170000007cf8f0e0c0000000000000000108080818183878f8374f7f7f3f417438c6d9eff0ffff000003cfbf7efdfd0100f8fc1eee76b6d0e0",cols:"0101010101010101"},
+  {id:33,w:3,h:3,cells:9,bmpAddr:"$E610",colDesc:"solid $0C",bmp:"ff809fa0a7a4a4a0ff00ff0000000000ff01f90505050505a0a0a0a0a0a0a0a0000000000000000005050505050505059f807f80a480ff38ff00ff7e0000ff00f901fe0d0d01ff1c",cols:"0c0c0c0c0c0c0c0c0c"},
+  {id:34,w:3,h:1,cells:3,bmpAddr:"$E658",colDesc:"solid $0F",bmp:"ff90909f8095ff38ff0809f90001ff00ff01555501e1ff1c",cols:"0f0f0f"},
+  {id:35,w:3,h:2,cells:6,bmpAddr:"$E6C0",colDesc:"solid $08",bmp:"60f0f83c1e03010000000000000080c00000000000000000000000000000000360371f0f1738ffff000080808060f0ff",cols:"080808080808"},
+  {id:36,w:4,h:5,cells:20,bmpAddr:"$E6F0",colDesc:"stream $E6F0",bmp:"001f3f3037373f3f00ffffffffffffff00ffffffffffffff00f8fcfcfcfcfcfc3f3f3f3f3f3f3f3f00ffff7f7f7f7f5500fffffefefefe54fcfcfcfcfcfcfcfc3f3f3f3f3f3f3f3f2a01010101010101aa80808080808080fcfcfcfcfcfcfcfc3f3f3f3f3f3f3f3f0303000040407000c0c0000000000000fcfcfcfcfcfcfcec7f777770ffffffffffffff01ffffffffffffffffffffffffeeeeee8effffffff",cols:"0f0f0f0f0f07070f0f0e0e0f0f0e0e0f0f0f0f0f"},
+  {id:37,w:4,h:2,cells:8,bmpAddr:"$E7A4",colDesc:"solid $07",bmp:"ffc0808080808080ff01010101010105ff808080808080a0ff03010101010101808080808080c0ff05010101010101ffa0808080808080ff01010101010103ff",cols:"0707070707070707"},
+  {id:38,w:4,h:2,cells:8,bmpAddr:"$E7E4",colDesc:"solid $0A",bmp:"ffc0808080808080ff01010101010105ff0022232323ff00ff03033b2b2bff03808080808080c0ff05010101010101ff616969ff000373ffe3e3e3ff03f3f3ff",cols:"0a0a0a0a0a0a0a0a"},
+  {id:39,w:5,h:2,cells:10,bmpAddr:"$E670",colDesc:"solid $0A",bmp:"071f3f3f7c787870ffffffff00000000ffffffff00000000ffffffff00000000e0f8fcfc3e1e1e0e70707070707070fc0000000000000000000000000000000000000000000000000e0e0e0e0e0e0e3f",cols:"0a0a0a0a0a0a0a0a0a0a"},
+  {id:40,w:3,h:3,cells:9,bmpAddr:"$E824",colDesc:"solid $0E",bmp:"0000001c3e7fffff00187cf8f06c9edf00000000000000007fbfdfef76000000cfc783010000000180c0e0f08868e8e80000000000040f0f03070f1f265affffe0c0800000008080",cols:"0e0e0e0e0e0e0e0e0e"},
+  {id:41,w:2,h:2,cells:4,bmpAddr:"$E86C",colDesc:"solid $07",bmp:"e0e0f8176f09090f06071fc8e62020e00e0607d530fae263e0c0d6581f878780",cols:"07070707"},
+  {id:42,w:2,h:2,cells:4,bmpAddr:"$E88C",colDesc:"solid $0C",bmp:"033574c38003030383dbd9830080808003070707070707078080808080808080",cols:"0c0c0c0c"},
+  {id:43,w:4,h:4,cells:16,bmpAddr:"$E8AC",colDesc:"solid $0E",bmp:"0000000007080b0a0103060cff3fff0080c06030ffffff0000000000e0f0f0700a0a0e0e0e0e0e0e0000000000000000000000000000000070707070707070700e0e0e0e0e0e0e0e0000000000000000000000000000000070707070707050500e0f0f070000000000ffffff0000000000fff8ff0000000050d010e000000000",cols:"0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e"},
+  {id:44,w:2,h:2,cells:4,bmpAddr:"$E92C",colDesc:"solid $0B",bmp:"000000ff33333333000000ff333333333333333333ffc0c03333333333ffc0c0",cols:"0b0b0b0b"},
+  {id:45,w:1,h:2,cells:2,bmpAddr:"$E94C",colDesc:"solid $0B",bmp:"0000003f3333333333333333333f3030",cols:"0b0b"},
+  {id:46,w:2,h:2,cells:4,bmpAddr:"$E95C",colDesc:"solid $0C",bmp:"165916e850a02058519569170905050258a020d0285611fe0205050b156d917f",cols:"0c0c0c0c"},
+  {id:47,w:2,h:3,cells:6,bmpAddr:"$E97C",colDesc:"solid $07",bmp:"fffff5eaf5eaf5eafeff57af57af57aff5eaffffffffffff57affffffff9fffffffffffffffffffffffffffffffffffe",cols:"070707070707"},
+  {id:48,w:2,h:3,cells:6,bmpAddr:"$E9AC",colDesc:"solid $0A",bmp:"7cffffffffffffff00c0f0f8f8fcfcfefffffffff7cf0f0ffefefefefefefefe0f0f0f0f0f000f1ffefefefefe00feff",cols:"0a0a0a0a0a0a"},
+  {id:49,w:5,h:5,cells:25,bmpAddr:"$E9DC",colDesc:"solid $0E",bmp:"fffffffffffffffffffffffffffffffe39393993c7efef00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc7c7c7c7c7c7c7c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc7c7c7c7c7c7c7c7fffffffffffffffffffffffffffffffffffffff7e3e3e1e1ffffffffffffffffc7c7c7c7c7c7c7c7ffffffffffffffffffffffdf8f8f0f0ff0f0f8fcffffffff7f3f0f0100c0f0ffc7c7ff8300000001fcf8e00001071fff1f1f3f7fffffffff",cols:"0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e"},
+  {id:50,w:4,h:4,cells:16,bmpAddr:"$EAA4",colDesc:"solid $02",bmp:"0000070f0e0e0e0e000fff0007172b5500f0ff00e0e8d4aa0000c0f0707070700e0e0e0e0e0e0e0e2af4f8f8d42a552b562f1f172b15eaf470707070707070700e0e0f0700000000170700ff0f000303f8e000fff000c0c07070f0e0000000000000000000000000030303030300071fc0c0c0c0c000e0f80000000000000000",cols:"02020202020202020202020202020202"},
+  {id:51,w:4,h:4,cells:16,bmpAddr:"$EB24",colDesc:"stream $EB24",bmp:"0000031e756ad5ff077fdebd7af5faffe07ebb5dae57afff0000c078ae56abffaa00000000000000aa00010101010101aa00808080808080aa000000000000000000000f03030303010100ff80010101808000ff01808080000000f0c0c0c0c0030303030303030301010101000b17178080808000f0f8f8c0c0c0c0c0c0c0c0",cols:"08080808010101010101010101020201"},
+  {id:52,w:4,h:4,cells:16,bmpAddr:"$EB24",colDesc:"stream $EB24",bmp:"0000031e756ad5ff077fdebd7af5faffe07ebb5dae57afff0000c078ae56abffaa00000000000000aa00010101010101aa00808080808080aa000000000000000000000f03030303010100ff80010101808000ff01808080000000f0c0c0c0c0030303030303030301010101000b17178080808000f0f8f8c0c0c0c0c0c0c0c0",cols:"0e0e0e0e010101010101010101030301"},
+  {id:53,w:1,h:3,cells:3,bmpAddr:"$EBC4",colDesc:"solid $01",bmp:"0000000000010303030303030302007fe7c3c3c3c3c3c3c3",cols:"010101"},
+  {id:54,w:2,h:3,cells:6,bmpAddr:"$EBC4",colDesc:"solid $01",bmp:"0000000000010303030303030302007fe7c3c3c3c3c3c3c300000000007fd5aa000000000080c0c0d5aad5aad5ca7f00",cols:"010101010101"},
+  {id:55,w:3,h:3,cells:9,bmpAddr:"$EC0C",colDesc:"solid $05",bmp:"000d04136e2912763692bc29452aea8140f09438b29665c9440dd9d94b32e4927708eaf0672d4af7245cd0d94b32e4b22e68474b1a000000f6128df964cafb7f9664c8245cd08800",cols:"050505050505050505"},
+  {id:56,w:3,h:3,cells:9,bmpAddr:"$EC0C",colDesc:"solid $0D",bmp:"000d04136e2912763692bc29452aea8140f09438b29665c9440dd9d94b32e4927708eaf0672d4af7245cd0d94b32e4b22e68474b1a000000f6128df964cafb7f9664c8245cd08800",cols:"0d0d0d0d0d0d0d0d0d"},
+  {id:57,w:1,h:3,cells:3,bmpAddr:"$EC54",colDesc:"solid $09",bmp:"3d791bdbd99db5b53d791bdbd99db5b53d791bdbd99db5b5",cols:"090909"},
+  {id:58,w:3,h:3,cells:9,bmpAddr:"$EC6C",colDesc:"solid $07",bmp:"7fffc7dac6dedeffffff39d611d5d6fffeffb7af9fafb7ffc0ffc0ffff7f000000ff00ffd7833838dbef07efdffe000000000000000000003838383838385cbe0000000000000000",cols:"070707070707070707"},
+  {id:59,w:5,h:3,cells:15,bmpAddr:"$ECB4",colDesc:"solid $08",bmp:"3f405f5f401fcfe0ff00ffff00ffff00ff00ffff00ffff00ff00ffff00ffff00fc02fafa02f8f307efefe0ab7fc7bb38ffff0033ffffff00ffff0033ffffff00ffff0033ffffff00f7f70735fee3dd1c383838303730383800000000ff00000000000000ff00000000000000ff0000001c1c1c0cec0c1c1c",cols:"080808080808080808080808080808"},
+  {id:60,w:2,h:2,cells:4,bmpAddr:"$ED2C",colDesc:"solid $07",bmp:"007f505f505f582f00fe0afa0afa1af4282f1417140b0a0f14f428e828d050f0",cols:"07070707"},
+  {id:61,w:2,h:3,cells:6,bmpAddr:"$ED4C",colDesc:"stream $ED4C",bmp:"0000000005ab63f10000000aa5cfce85a153566d2562260015694a523c301000ffaa554a252a1f10ffab52aa54a4f808",cols:"080805050a0a"},
+  {id:62,w:2,h:3,cells:6,bmpAddr:"$ED4C",colDesc:"stream $ED4C",bmp:"0000000005ab63f10000000aa5cfce85a153566d2562260015694a523c301000ffaa554a252a1f10ffab52aa54a4f808",cols:"07070d0d0202"},
+  {id:63,w:2,h:2,cells:4,bmpAddr:"$ED88",colDesc:"stream $ED88",bmp:"92b2a6d8702127807323c69c898dde01ffdfef6f77373f10fffffffefefcfc08",cols:"0d0d0909"},
+  {id:64,w:2,h:2,cells:4,bmpAddr:"$ED88",colDesc:"stream $ED88",bmp:"92b2a6d8702127807323c69c898dde01ffdfef6f77373f10fffffffefefcfc08",cols:"06060a0a"},
+  {id:65,w:3,h:3,cells:9,bmpAddr:"$EDB0",colDesc:"stream $EDB0",bmp:"000000041c2c1c0a0000a0d8d079212000000040e090e000000c1d3e040d0206a658a02f1ab06080006070d8f8a000003d792810000000007e7ebcbcbc5858580000000000000000",cols:"0708030a0504080200"},
+  {id:66,w:4,h:4,cells:16,bmpAddr:"$EE01",colDesc:"stream $EE01",bmp:"000001070f1f3f3f000080c1e2e6e6ef003fffffffffbfbf00e0f0f8f8f8fcfc7f7f3c3c111f0c00febe7ece8f07c7e79fc0780f2170f0e0e4040c18f00000000000000000000000677f3f0e0e0e0700800000000000000000000000000000000100000000000000dfdfdfdfef6f773ff8f0f0f0f0e0e0800000000000000000",cols:"04040404040505040505050508080808"},
+  {id:67,w:3,h:3,cells:9,bmpAddr:"$EE91",colDesc:"stream $EE91",bmp:"000000071c3161070c0818d326acc969000000c020329ace1c103121276447403714d77d1b3a38006030109cc0c07808f6faf6770f030000ffffff7e7e7e3c3c1e0f0e0600000000",cols:"050505050505070a08"},
+  {id:68,w:3,h:3,cells:9,bmpAddr:"$EED9",colDesc:"stream $EED9",bmp:"01090d0a0848284a4e2638748c9290924080a058b0409ea44a444848120201005351888a109424004a5054202040000001010100000000007f3fbfbf9fdf6e7e8080800000000000",cols:"0d0d0d0d0d0d090909"},
+  {id:69,w:2,h:3,cells:6,bmpAddr:"$EF33",colDesc:"stream $EF33",bmp:"0001010303030307008080c0c0c0c0e00707070f0f0f0f1fe0e0e0f0f0f0f0f81f1f3f3f3f00fffff8f8fcfcfc00ffff",cols:"080801010808"},
+  {id:70,w:2,h:5,cells:10,bmpAddr:"$EF69",colDesc:"stream $EF69",bmp:"00071c306060c1c300f0182c76faf3e3c7cf5f6e34180f01c38306060c38e080020301010101010140c0808080808080010101010101010180808080808080800101010101040f3f808080808020f0fc",cols:"0a0a0a0a010101010f0f"},
+  {id:71,w:2,h:4,cells:8,bmpAddr:"$EFC3",colDesc:"stream $EFC3",bmp:"0f06010101010101e0c0000000000000010101010101010100000000000000000508172f5f3fff004060f0f8fcfeff001f17170b05000000f0f0f0e0c0000000",cols:"010101010c0c0707"},
+  {id:72,w:2,h:2,cells:4,bmpAddr:"$F00B",colDesc:"solid $0F",bmp:"7fb3ccccccccccccfecd333333333333ccccccccccccb37f333333333333cdfe",cols:"0f0f0f0f"},
+  {id:73,w:2,h:1,cells:2,bmpAddr:"$F02B",colDesc:"solid $01",bmp:"00000000ff7cecc0000e1931f131190e",cols:"0101"},
+  {id:74,w:2,h:1,cells:2,bmpAddr:"$F03B",colDesc:"solid $01",bmp:"007098cccfcc987000000000ff3e3928",cols:"0101"},
+  {id:75,w:3,h:3,cells:9,bmpAddr:"$F04B",colDesc:"stream $F04B",bmp:"0f181f181b191b18ff00ff75adddad75f018f818b8b8b8b81f1e1e1e1f16130fffdbdbdbffdbfffff8787878f868c8f0000f1b366dff80ff00ff6ddbb6ff00ff00f0c87ce6ff01ff",cols:"010101010101080808"},
+  {id:76,w:3,h:3,cells:9,bmpAddr:"$F09C",colDesc:"solid $0E",bmp:"00030f1c383070607eff81000000000200c0f0381c0c0e0660e0c7c7c7c7c0600303ffffffff03030687c3e3e3c38706607030381c0f0300020000000081ff7e060e0c1c38f0c000",cols:"0e0e0e0e0e0e0e0e0e"},
+  {id:77,w:3,h:3,cells:9,bmpAddr:"$F0E4",colDesc:"solid $0A",bmp:"00030f1c383070607eff8100000047cf00c0f0381c0c8ec661e3c7c1c1c1c161cfcccccccccccccfc6c7c3c3c3c3c7c6637330381c0f0300efe700000081ff7ec68e0c1c38f0c000",cols:"0a0a0a0a0a0a0a0a0a"},
+  {id:78,w:3,h:3,cells:9,bmpAddr:"$F12C",colDesc:"solid $04",bmp:"0000000000000001183c3c7e66e7c3c3000000000000008001030307060e0c1c818100000000008180c0c0e060703038193b377760ffff00c3e7ffff00ffff0098dcecee06ffff00",cols:"040404040404040404"},
+  {id:79,w:1,h:3,cells:3,bmpAddr:"$F174",colDesc:"solid $01",bmp:"747474747474747474747474747474747474747474747474",cols:"010101"},
+  {id:80,w:2,h:1,cells:2,bmpAddr:"$F18C",colDesc:"solid $0F",bmp:"0000000000000001747474007474fafb",cols:"0f0f"},
+  {id:81,w:3,h:3,cells:9,bmpAddr:"$F19C",colDesc:"solid $0F",bmp:"7ff1c4cececececeffc3183434343434fe8f237373737373cececececececece34343434343434347373737373737373cececececec4f17f343434343418c3ff7373737373238ffe",cols:"0f0f0f0f0f0f0f0f0f"},
+  {id:82,w:3,h:5,cells:15,bmpAddr:"$F1E4",colDesc:"solid $08",bmp:"7fc0bfb0b6b2b2b2ff00ffc3dbcbcbcbfe03fd0d6d2d2f2fb2b2b2b2b2b2b2b2cbcbcbcbcbcbcbcb2f2d2d2d2d2d2d2db0bcb7b1bfb6bcb0cbc3ffffffc3dbcb2d0dfdfdfd0d6d2db2b2b2b2b2b2b2b2cbcbcbcbcbcbcbcb2d2d2d2d2d2d2d2db2b2b2b2b2b0bfbfcbcbcbcbcbc3ffff2f2f2f2d2d0dfdfd",cols:"080808080808080808080808080808"},
+  {id:83,w:4,h:5,cells:20,bmpAddr:"$F25C",colDesc:"solid $07",bmp:"ff80bfa0a7aeadadff00ff00ff73ed2dff00ff00ff986b6bff01fd05e5f57575adaeafadadadadacad73ffedededed336b98ff9b6a796a9b75f5f575f5f5f575a7a0a0a0a0a0a0a0ff0000e098d59994ff000000945c5494e505050505050505a0a0a1a3a5a1a1a1000c12904c02120c0000649695f49494050545c545454545a1a1a1a0a0bf80ff00100f0000ff00ff0000ff0000ff00ff0505854505fd01ff",cols:"0707070707070707070707070707070707070707"},
+  {id:84,w:2,h:1,cells:2,bmpAddr:"$F2FC",colDesc:"solid $0C",bmp:"ff6d6d350a0a0a0affb6b6ac50505050",cols:"0c0c"},
+  {id:85,w:2,h:1,cells:2,bmpAddr:"$F30C",colDesc:"solid $0C",bmp:"0a0a0a0a356d6dff50505050acb6b6ff",cols:"0c0c"},
+  {id:86,w:2,h:3,cells:6,bmpAddr:"$F31C",colDesc:"solid $0C",bmp:"0a0a0a0a0a0a0a0a50505050505050500a0a0a0a0a0a0a0a50505050505050500a0a0a0a0a0a0a0a5050505050505050",cols:"0c0c0c0c0c0c"},
+  {id:87,w:3,h:2,cells:6,bmpAddr:"$F414",colDesc:"solid $04",bmp:"00000000001f3f3100003e63c1ffff680000000080f8fcbc373337373f303f1f6b696b98ff00ffffbcbcbc8cfc0cfcf8",cols:"040404040404"},
+  {id:88,w:5,h:5,cells:25,bmpAddr:"$F34C",colDesc:"solid $07",bmp:"0000000014080808000000070807000024181818ff181818000000e010e000000000000028101010141408080808080800000000070f0c0d18245a5a99ff00ff00000000e0f030b02828101010101010081c1c143e362b351d191b3b32347464e7dba5bda5db663cb898d8dc4c2c2e26103838287c6cd4ac2b352a352f3b3030ef60ff7ff9301010ff00ffffff3c2424f706fffe9f0c0808d4ac54acf4dc0c0c200000000100010710306060f060f0fc1818246618000000080c06060f060f3f04000000800080e0",cols:"07070707070707070707070707070707070707070707070707"},
+  {id:89,w:1,h:3,cells:3,bmpAddr:"$F746",colDesc:"solid $0F",bmp:"3c18181818ff181818181818181818181818181818181818",cols:"0f0f0f"},
+  {id:90,w:10,h:5,cells:50,bmpAddr:"$F584",colDesc:"stream $F584",bmp:"0000000000000000000000000000000000000000000000000000000001061c300000003fff3060c0000000f0fe31180c000000000080e03000000000000000000102040810102040a0500000000000000000000000000000000000000000000000000103070e1c1c61c386860c181931800020204080009c060301313070f0e0180c8687c36160300000000080c1e1e1408080808000000000000000000000000000000000000000000080c0f0fefbf33c3f30373636363030ff00fededede0000ff007f677f600000ff003838383e0030ff006666006600f1f1323232323232000000000000000000000000000000000000000000010307c383037fffe0c0001f0606ffff7e3c18ff6666ffff000000ff6666ffff7e3c18ff6666ffff000000ff6666ffff7e3c18e70707ffff070300000000000080c0e000000000000000000e0c0c0800000000187e7ee7e77e7e181818180000000000187e7ee7e77e7e181818180000000000187e7ee7e77e7e181818180000000000187e7ee7e77e7e1870303010000000000000000000000000",cols:"0c0c0c080808080c0f0f0c0c0808080808080f0f0c0c0707070707070f0f0c0c0c0c0c0c0c0c0f0c0c0e0c0e0c0e0c0e0c0e"},
+  {id:91,w:5,h:4,cells:20,bmpAddr:"$F444",colDesc:"solid $0C",bmp:"eae0504844424140a80200000000008000a00a00000000000000e06060606060000000000000000040404040402020204020100c0e07030100000000010181b9c0c0c0c0c0c0808000000000000000002020201010101010000000000000017f7bf3e7ce1e79f180000000000080c0e000000000000000001f1f000000000000fe800000000000030000000000077fff50307070f8ffffff000000000000f0fc",cols:"0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"},
+  {id:92,w:5,h:4,cells:20,bmpAddr:"$F4E4",colDesc:"solid $0C",bmp:"000000000000000000000706060606060005500000000000154000000000000157070a122242820200000000000000000303030303030101000000008080819d0204083070e0c080020202020204040400000000000000000000000000010307decfe773789e8f0100000000000080fe04040408080808080000000000000f3f0a0c0e0e1fffffff0000000000e0feff7f010000000000c0f8f8000000000000",cols:"0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"},
+  {id:93,w:3,h:5,cells:15,bmpAddr:"$F75E",colDesc:"solid $0E",bmp:"ffffffffefefe7eb7f7f7f7e3cbb84cfffffdfbfbf7ef8f6e1e5f3fbfcffbfbfe7e3f0f9fc78a1c3c5973fffffffffff1faf57a6d6ece4f18f9f3f0473ffffffffcf1713c5f0fafff9fcfcfcfefefefeffffff7f7f7e7c79fffffff00d53a70fff1fa7d3cae4fcfc3b033f3f7fffffffffffffffffffffff",cols:"0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e"},
+  {id:94,w:3,h:5,cells:15,bmpAddr:"$F7D6",colDesc:"solid $0E",bmp:"fffffbfdfd7e1f6ffefefe7e3cdd21f3fffffffff7f7e7d7a3e9fcffffffffffe7c70f9f3f1e85c387a7cfdf3ffffdfdfff3e8c8a30f5ffff1f9fc20cefffffff8f5ea656b37278fffffff0fb0cae5f0fffffffefe7e3e9e9f3f3f3f7f7f7f7fffffffffffffffffdcc0fcfcfefffffffff8e5cb53273f3f",cols:"0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e"},
+  {id:95,w:4,h:4,cells:16,bmpAddr:"$F85E",colDesc:"solid $07",bmp:"00000000000006070101010100031f7f8080808000c0f8fe00000000000060e0020101030307f7f7ffc79ff7f7f7f3ffff8fe7bfbfbf9fff408080c0c0e0efef0703030101020706ffffdfcfe0ff7f1ffffff7e70ffffef8e0c0c0808040e06000000000000000000300010101010000c0008080808000000000000000000000",cols:"07070707070707070707070707070707"},
+  {id:96,w:10,h:3,cells:30,bmpAddr:"$F8DE",colDesc:"solid $0F",bmp:"0000000000000000000000000000000000000000000000000000000000000000000001061b1b6f6d000070b8ecfb7f9f00061b1b6fbffffe00f09090ece6f9be0000000040c0407000000000000000000000000000000000000000000001071f0000000106e6be9b0106679befffffffbdf7ffffffffffffe7fffffffdfdbdbffbfffffdfeffdf7fffffffffffffffff9090ece4e6d56a6e00000000008040b0071a5b6f7f1f0000fb6f9fefffff1c00effffeffffff1f00c739feffffff0000ffffffffffff0000ffefbbffffff7b1fbfffffffffffc100ffffffffffbff000bfeffbffffff1a079ce7f9f9f9e7a4f8",cols:"0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"}
+];
+
+// ── decode hex string ──────────────────────────────────────────────────────────
+function hx(s){
+  if(!s)return new Uint8Array(0);
+  const a=new Uint8Array(s.length>>1);
+  for(let i=0;i<a.length;i++)a[i]=parseInt(s.substr(i*2,2),16);
+  return a;
+}
+
+// ── compute scale: fits in 200px width and unconstrained height (min 2, max 8) ─
+function scaleFor(t){
+  return Math.min(8, Math.max(2,
+    Math.min(
+      Math.floor(200/(t.w*8)),
+      Math.floor(200/(t.h*8))
+    )
+  ));
+}
+
+// ── render one type onto a canvas ─────────────────────────────────────────────
+function renderType(canvas,t){
+  const bmp=hx(t.bmp), cols=hx(t.cols);
+  const s=scaleFor(t);
+  canvas.width =t.w*8*s;
+  canvas.height=t.h*8*s;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let cell=0;cell<t.w*t.h;cell++){
+    const cx=(cell%t.w)*8*s;
+    const cy=Math.floor(cell/t.w)*8*s;
+    const fg=C64[cols[cell]&0xf];
+    for(let row=0;row<8;row++){
+      const b=bmp[cell*8+row];
+      for(let col=0;col<8;col++){
+        if((b>>(7-col))&1){
+          ctx.fillStyle=fg;
+          ctx.fillRect(cx+col*s,cy+row*s,s,s);
+        }
+      }
+    }
+  }
+}
+
+// ── filter state ──────────────────────────────────────────────────────────────
+let activeStatus='all', activeMode='all';
+
+function applyFilter(){
+  let visible=0;
+  document.querySelectorAll('.card').forEach(card=>{
+    const mode=card.dataset.mode;
+    const named=card.dataset.named==='1';
+    const statusOk = activeStatus==='all'
+      || (activeStatus==='named'&&named)
+      || (activeStatus==='unnamed'&&!named);
+    const modeOk = activeMode==='all' || mode===activeMode;
+    const show=statusOk&&modeOk;
+    card.style.display=show?'':'none';
+    if(show)visible++;
+  });
+  document.getElementById('empty').style.display=visible?'none':'block';
+}
+
+function updateBadges(){
+  const total=TYPES.length;
+  let named=0;
+  document.querySelectorAll('.name-input').forEach(inp=>{
+    if(inp.value.trim())named++;
+  });
+  const unnamed=total-named;
+  document.getElementById('badge-all').textContent=total;
+  document.getElementById('badge-unnamed').textContent=unnamed;
+  document.getElementById('badge-named').textContent=named;
+  const ctr=document.getElementById('counter');
+  ctr.innerHTML=`<span class="n">${named}</span> / ${total} named`;
+}
+
+function updateCardNamed(card,inp){
+  const has=!!inp.value.trim();
+  card.dataset.named=has?'1':'0';
+  inp.classList.toggle('has-name',has);
+}
+
+// ── filter button clicks ───────────────────────────────────────────────────────
+document.getElementById('filters').addEventListener('click',e=>{
+  const btn=e.target.closest('.filt');
+  if(!btn)return;
+  const group=btn.closest('.filter-group');
+  group.querySelectorAll('.filt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(group.dataset.group==='status') activeStatus=btn.dataset.val;
+  else                                activeMode  =btn.dataset.val;
+  applyFilter();
+});
+
+// ── build grid ────────────────────────────────────────────────────────────────
+const grid=document.getElementById('grid');
+
+TYPES.forEach(t=>{
+  const isStream=t.colDesc.startsWith('stream');
+  const card=document.createElement('div');
+  card.className='card';
+  card.dataset.mode=isStream?'stream':'solid';
+  card.dataset.named='0';
+
+  const modeChip=isStream
+    ?`<span class="chip chip-stream">stream</span>`
+    :`<span class="chip chip-solid">solid</span>`;
+
+  card.innerHTML=`
+    <div class="card-head">
+      <span class="type-id">#${String(t.id).padStart(2,'0')}</span>
+      <div class="meta-right">
+        <span class="chip chip-dim">${t.w}×${t.h}</span>
+        ${modeChip}
+        <span class="addr-tag">${t.bmpAddr}</span>
+      </div>
+    </div>
+    <div class="cv-wrap">
+      <canvas></canvas>
+    </div>
+    <input class="name-input" type="text" placeholder="identify…"
+           autocomplete="off" spellcheck="false">
+  `;
+  grid.appendChild(card);
+
+  renderType(card.querySelector('canvas'),t);
+
+  const inp=card.querySelector('.name-input');
+  inp.addEventListener('input',()=>{
+    updateCardNamed(card,inp);
+    updateBadges();
+    applyFilter();
+  });
+});
+
+updateBadges();
+
+// ── copy names ─────────────────────────────────────────────────────────────────
+function copyNames(){
+  const lines=TYPES.map(t=>{
+    const nm=document.getElementById
+      ? (document.querySelectorAll('.name-input')[t.id]||{}).value||'' : '';
+    return `type ${String(t.id).padStart(2)}: ${t.bmpAddr}  ${t.w}x${t.h}  ${nm.trim()||'(unnamed)'}`;
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+    const el=document.getElementById('toast');
+    el.textContent='Names copied';
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),1800);
+  });
+}
+</script>

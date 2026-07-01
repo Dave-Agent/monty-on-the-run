@@ -1,0 +1,139 @@
+<title>freedom_kit_sprites · Monty on the Run FK Items</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c12;--card:#0d1620;--border:#1b2d44;--input-bg:#080f1c;
+  --px:#40d8f0;--id:#3a8ccc;--text:#b8ccd8;--muted:#3a5060;--addr:#2a6040;
+}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',Courier,monospace;font-size:12px;padding:18px 20px;line-height:1.4}
+
+header{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:14px}
+h1{font-size:13px;font-weight:bold;color:var(--text);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.sub{color:var(--muted);font-size:10px;flex:1;min-width:0}
+.sub code{color:var(--id);letter-spacing:.02em}
+#copy-btn{background:var(--border);color:var(--text);border:1px solid #253d56;padding:4px 10px;font-family:inherit;font-size:10px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+#copy-btn:hover{background:#1c3050}
+#copy-btn:focus-visible{outline:1px solid var(--id);outline-offset:2px}
+
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:640px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:420px){.grid{grid-template-columns:repeat(2,1fr)}}
+
+.card{background:var(--card);border:1px solid var(--border);padding:9px;display:flex;flex-direction:column;gap:7px}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px}
+.idx{color:var(--id);font-size:11px;letter-spacing:.12em;font-weight:bold}
+.addr{color:var(--addr);font-size:9px;letter-spacing:.06em}
+
+.canvas-wrap{align-self:center;line-height:0}
+canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 0 3px rgba(64,216,240,.25))}
+
+.name-input{background:var(--input-bg);border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:inherit;font-size:11px;padding:5px 3px;width:100%;outline:none}
+.name-input::placeholder{color:var(--muted)}
+.name-input:focus{border-bottom-color:var(--id)}
+
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(6px);background:#132038;color:var(--text);padding:7px 16px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;border:1px solid #253d56}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<header>
+  <h1>FK Item Icons</h1>
+  <span class="sub">
+    <code>freedom_kit_sprites</code> · $CC72 · 22 items · 16×16px · 32 bytes each ·
+    fill names then copy
+  </span>
+  <button id="copy-btn" onclick="copyNames()">Copy names</button>
+</header>
+<div class="grid" id="grid"></div>
+<div id="toast">Names copied to clipboard</div>
+
+<script>
+// 22 FK item icons deinterleaved from freedom_kit_sprites ($CC72).
+// Each entry: 48 hex bytes = 16 rows × 3 bytes (byte2 always 0; sprite is 16px wide).
+// item index N → source address $CC72 + N*32.
+const SPRITES = [
+  "07e0001c3800318c006666004ff200df9b009e1900ac3500ad35009a7900d9fb004ff200666600318c001c380007e000", // 0: $CC72  compass_spr
+  "601800902400b02c00b7ac00b7ac00b6ac00b7ac00b5ac00b6ac00b3ac00f02c00f03c00000000601800000000000000", // 1: $CC92  jet_pack_spr
+  "0740000fe0000fe0000f8000003a00bfe600800700dfcf00ddcf00c00f00641e00741c00327a0038e3001dc7000d1f00", // 2: $CCB2  disguise_spr
+  "01fc000732000b60001b70003900003e0000181c0007e6001f360033b4003ba000181c0043e6003d3600edb4002da000", // 3: $CCD2  rope_spr
+  "010000028000348c00485200681a00300c0000000023c4002664002524001cb800724e00cdb300b66d00981900ffff00", // 4: $CCF2  generator_spr
+  "0000000000000000000000000000007e0100f1060087f900bf0700de0100408000408000d30000d80000c80000e80000", // 5: $CD12  laser_gun_spr
+  "07e6001c3b00318d0067e6004fd200dfbb009f7900bdfd00bcbd009fd900dffb004ff20067e600318c001c380007e000", // 6: $CD32  watch_spr
+  "b81600b81600b81600b81600b7d600afd6008016009fd600801600b81600b81600b81600b7d600afd6008016009fd600", // 7: $CD52  ladder_spr
+  "3f80003fc00000f0003e70003f38007f98006ed800eed800221800ffd800ee9000eeb0002220007f800061e0001f8000", // 8: $CD72  hand_grenade_spr
+  "000000000000000000c00000400300d7bf00b8bf0077800068b800678000702000bea0008bc000980000c80000f80000", // 9: $CD92  gun_spr
+  "ffff00fe7f00fe7f00fe7f00fe7f00ffff00fe7f00ec3f00fc3f00fe7f00ffff007fff007fc300ffc300ffc300ffff00", // 10: $CDB2  floppy_disk_spr
+  "329800cd6600f39e00fffe00fff200feca00fed200fed600fece00fefa00fef200fede00fefe00fefe003ef8000fe000", // 11: $CDD2  passport_spr
+  "1ff8003ffc00718e0061860061860047e2007ffe00781e0073ce002424002954002a94000950000a900004200003c000", // 12: $CDF2  gas_mask_spr
+  "100000280000740000fa00007c000039000012800007400003a00001c000009000003800001c00000900000200000400", // 13: $CE12  telescope_spr
+  "0000000000007f0000f95f00fd40007f000000f800fffe00000000ffff00caab006556003ffc00000000000000000000", // 14: $CE32  fk_tank_spr
+  "0760001818001188006db6004db2008db100adb5002db500adb400adb5008db1004db2006db60011880018180006e000", // 15: $CE52  barrel_of_rum_spr
+  "00000000400000a00001500000ac00015f0003be00073e000e1c001c1000380000700000a00000400000000000000000", // 16: $CE72  axe_spr
+  "0fc0001ff0003fc8001f9600207a003ff2003ff20037f2000ff2007fe2007fe6007e2400ffd400ffd400ffdc007f8000", // 17: $CE92  kit_bag_spr
+  "0ffe001ff9003ff3003ff3000fe6002fe0007e40007f8000ffc000ffc000ffc000ffc0001fc8006fec007fe4003ff800", // 18: $CEB2  map_spr
+  "00000003e00003e00003e00003e00003e00003e00001c00001c00001c00001c000000100c1c3009b2e00dbac00c0c000", // 19: $CED2  hammer_spr
+  "0000000400000400001400003400007a0000f500000e800003400001a00002d000036800013400001a00000e00000400", // 20: $CEF2  torch_spr
+  "ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00", // 21: $CF12  fk_carousel_mask_spr
+];
+
+const SCALE = 4;
+const W = 16 * SCALE, H = 16 * SCALE;  // 16×16 px icon at 4×
+const PX = '#40d8f0', BG = '#060a10';
+
+function parseSprite(hex) {
+  const b = new Uint8Array(48);
+  for (let i = 0; i < 48; i++) b[i] = parseInt(hex.substr(i*2, 2), 16);
+  return b;
+}
+
+function drawSprite(ctx, bytes) {
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = PX;
+  for (let row = 0; row < 16; row++) {
+    const b0 = bytes[row*3], b1 = bytes[row*3+1];
+    for (let col = 0; col < 16; col++) {
+      const bit = col < 8 ? (b0 >> (7-col)) & 1 : (b1 >> (15-col)) & 1;
+      if (bit) ctx.fillRect(col*SCALE, row*SCALE, SCALE, SCALE);
+    }
+  }
+}
+
+const grid = document.getElementById('grid');
+
+SPRITES.forEach((hex, idx) => {
+  const bytes = parseSprite(hex);
+  const addr = 0xCC72 + idx * 32;
+  const addrStr = '$' + addr.toString(16).toUpperCase().padStart(4, '0');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-head">
+      <span class="idx">#${String(idx).padStart(2,'0')}</span>
+      <span class="addr">${addrStr}</span>
+    </div>
+    <div class="canvas-wrap">
+      <canvas width="${W}" height="${H}"></canvas>
+    </div>
+    <input class="name-input" id="name-${idx}" type="text" placeholder="identify…" autocomplete="off" spellcheck="false">
+  `;
+  grid.appendChild(card);
+
+  const ctx = card.querySelector('canvas').getContext('2d');
+  drawSprite(ctx, bytes);
+});
+
+function copyNames() {
+  const lines = SPRITES.map((_, idx) => {
+    const name = document.getElementById('name-'+idx).value.trim();
+    const addr = '$' + (0xCC72 + idx*32).toString(16).toUpperCase().padStart(4,'0');
+    return `item ${String(idx).padStart(2)}: ${addr}  ${name || '(unnamed)'}`;
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  });
+}
+</script>
