@@ -1588,7 +1588,7 @@ GenerateRandomNumber:
   asl                                 // [105D:0a       ASL A]
   rol zp_prng_state+3                 // [105E:26 45    ROL $0045]
   rol zp_prng_state+2                 // [1060:26 44    ROL $0044]
-  rol zp_prng_state+1                 // [1062:26 43    ROL $0043]
+  rol zp_kbd_col_save                 // [1062:26 43    ROL $0043]
   rol zp_prng_state                   // [1064:26 42    ROL $0042]
   // add $29 to each of the four state bytes; ZP wraparound: zp_room_id ($46) + X=$FC-$FF → $42-$45
   clc                                 // [1066:18       CLC]
@@ -1601,7 +1601,7 @@ GenerateRandomNumber:
   sta zp_room_id,x                    // [1070:95 46    STA $46,X]
   inx                                 // [1072:e8       INX]
   bne !-                              // [1073:d0 f6    BNE $106b]
-  lda zp_prng_state+1                 // [1075:a5 43    LDA $0043]
+  lda zp_kbd_col_save                 // [1075:a5 43    LDA $0043]
   and #$03                            // [1077:29 03    AND #$3]          low 2 bits pick which state byte to return
   tax                                 // [1079:aa       TAX]
   lda zp_prng_state,x                 // [107A:b5 42    LDA $42,X]
@@ -2334,11 +2334,11 @@ ProcessEnemySlot_sprite:
   lda enemy_state_tbl+1,x             // [139E:bd 01 02 LDA $201,X]       Y-pos → sprite Y shadow
   sta zp_sprite4_y_buffer,y           // [13A1:99 1c 00 STA $1c,Y]
   lda enemy_state_tbl+2,x             // [13A4:bd 02 02 LDA $202,X]       sprite colour → $31+Y shadow
-  sta $31,y                           // [13A7:99 31 00 STA $31,Y]
+  sta zp_sprite4_colour,y             // [13A7:99 31 00 STA $31,Y]
   lda enemy_sprite_base_tbl,y         // [13AA:b9 51 14 LDA $1451,Y]      sprite pointer base ($30/$38/$40/$48)
   clc                                 // [13AD:18       CLC]
   adc zp_enemy_dir_offset             // [13AE:65 72    ADC $0072]        + anim frame → sprite pointer
-  sta $29,y                           // [13B0:99 29 00 STA $29,Y]        sprite pointer shadow ($29-$2C)
+  sta zp_sprite4_ptr,y                // [13B0:99 29 00 STA $29,Y]        sprite pointer shadow ($29-$2C)
   iny                                 // [13B3:c8       INY]              advance Y by 4 (next sprite slot)
   iny                                 // [13B4:c8       INY]
   iny                                 // [13B5:c8       INY]
@@ -13342,6 +13342,15 @@ rm_33_tilemap:
   .byte $10,$f1,$d1,$f0,$f0,$f0,$f0,$f0,$f0,$f0,$f0,$10,$81,$32,$71,$12  // [ad1b]
   .byte $61,$f0,$f0,$f0,$f0,$f0,$f0,$f0,$f0,$f1,$f1,$f0,$f0,$ff,$ff,$ff  // [ad2b]
 
+//==============================================================================
+// SECTION: tile_library
+// RANGE:   $AD3B-$B102
+// STATUS:  understood
+// SUMMARY: 121 tile definitions (8 bytes each). Tile indices 0–7 are
+//          room-customised via room_tile_chr_tbl; indices 8–120 are the
+//          shared global tileset. Referenced via room_tileset_ptr.
+//==============================================================================
+
 tile_library:                                                            // 121 tiles × 8 bytes; indexed by tile char code
   .byte $30,$ff,$03,$ff,$30,$ff,$03,$ff // [ad3b] tile   0: row0=$30 row1=$ff row2=$03 row3=$ff row4=$30 row5=$ff row6=$03 row7=$ff
   .byte $00,$fe,$fe,$fe,$00,$ef,$ef,$ef // [ad43] tile   1
@@ -13464,6 +13473,18 @@ tile_library:                                                            // 121 
   .byte $36,$00,$7b,$7b,$7b,$36,$36,$36 // [b0eb] tile 118
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff // [b0f3] tile 119
   .byte $91,$55,$31,$1f,$09,$05,$03,$01 // [b0fb] tile 120
+
+//==============================================================================
+// SECTION: enemy_sprites
+// RANGE:   $B103-$C202
+// STATUS:  understood
+// SUMMARY: 24 enemy sprite gfx banks; each bank is 64 bytes × N VIC sprite frames.
+//          8-frame: boot, lamp, knight, big_nose, king, kettle, hand, tank, medusa, fish
+//          4-frame: skate, ufo, queen_liz, clock, rubik, sad_mug, pi_pie, wasp,
+//                   bubble, sad_ghost, alien, smiley, cone, jelly_fish
+//          Accessed via enemy_spr_ptrs: ptr[type_id-8] → base of gfx bank.
+//          Loaded into enemy_sprite_ram at runtime by LoadEnemySpriteBank.
+//==============================================================================
 
 boot_spr:                                          // 8-frame animation
   .byte $03,$03,$03,$03,$03,$01,$3e,$67,$f9,$f9,$f9,$fb,$fb                                                      // [b103]
@@ -14245,6 +14266,14 @@ attract_chr_src:                      // attract-screen charset source; blitted 
   .byte $ff,$ff,$0f,$0f,$0f,$0f,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff // [cc60] ................
   .byte $ff,$ff // [cc70]
 
+//==============================================================================
+// SECTION: freedom_kit_sprites
+// RANGE:   $CC72-$CFFF
+// STATUS:  understood
+// SUMMARY: 22 FK item sprites (32 bytes each, indexed by slot×32 from fk_sprite_src_base).
+//          carousel_mask (item 21) is the carousel overlay mask, not a real FK item.
+//          item_tbl: flat 3-byte records (room_id, col, row) for every FK item; $FF=end.
+//==============================================================================
 freedom_kit_sprites:                          // FK item icon sprite data; indexed by (idx_char * 8) via fk_sprite_src_base
 
 compass_spr:
@@ -14424,8 +14453,26 @@ entity_master_tbl:                    // flat 3-byte records (room_id, col, row)
   .byte $2e,$08,$0c              // [cfef] room=$2e col=$08 row=$0c
   .byte $ff,$ff,$ff              // [cff2] terminator
   .byte $00,$ff,$ff,$00,$00,$ef,$ff,$00,$00,$ef,$00              // [cff5] padding
+
+//==============================================================================
+// SECTION: chip_io_space
+// RANGE:   $D000-$DFFF
+// STATUS:  understood
+// SUMMARY: VIC/SID/CIA chip I/O — not readable RAM; filled $00 at capture.
+//==============================================================================
   .fill $1000, $00                      // [$D000-$DFFF] VIC/SID/CIA chip space RAM — uninitialised at capture; filled $00
-  
+
+//==============================================================================
+// SECTION: decor_data
+// RANGE:   $E000-$FF72
+// STATUS:  understood
+// SUMMARY: Decoration system data. Three sub-regions:
+//          $E000-$F9CD  decor_rom_hdr — 4-byte header (props_tbl ptr, room_list ptr)
+//                       + 97×4-byte per-type records (chr_lo,chr_hi,col_lo,col_hi)
+//                       + 97 chr/col binary blobs
+//          $F9CE-$FB55  decor_props_tbl — 97×4-byte records (w, h, w*h, first_char_state)
+//          $FB56-$FF72  decor_room_list — 4-byte records (room_id,x,y,type_id); $FF=end
+//==============================================================================
 decor_rom_hdr:                      // [E000] ptr table: [0-3]=global hdr, then 97×4-byte records (chr_lo,chr_hi,col_lo,col_hi)
   .byte <decor_props_tbl,>decor_props_tbl,<decor_room_list,>decor_room_list  // [e000] global: props_tbl=$f9ce room_list=$fb56
   .byte <street_lamp_base_chr,>street_lamp_base_chr,$0c,$00// [e004] type  0 street_lamp_base: bmp=street_lamp_base_chr col=colour_idx=$0c

@@ -1,0 +1,485 @@
+<title>VIC Bank 1 Memory Map — Monty on the Run</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #111;
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 24px;
+}
+
+h1 { font-size: 14px; color: #eee; margin-bottom: 4px; }
+.meta { color: #777; font-size: 11px; margin-bottom: 6px; }
+.meta code { color: #aaa; }
+.note { color: #555; font-size: 10px; margin-bottom: 18px; }
+.note code { color: #666; }
+
+.wrap { overflow-x: auto; }
+
+table {
+  border-collapse: separate;
+  border-spacing: 0 2px;
+  font-variant-numeric: tabular-nums;
+  min-width: 920px;
+  width: 100%;
+}
+
+thead th {
+  font-size: 9px;
+  color: #444;
+  font-weight: normal;
+  text-align: left;
+  padding: 0 8px 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid #1e1e1e;
+}
+thead th.r { text-align: right; }
+
+/* Group header rows */
+tr.grp td {
+  background: #161616;
+  color: #505050;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 8px 8px 3px;
+  border-top: 1px solid #1e1e1e;
+}
+tr.grp:first-of-type td { border-top: none; }
+
+/* Data rows */
+tr.row td {
+  padding: 4px 8px;
+  vertical-align: middle;
+  font-size: 11px;
+  white-space: nowrap;
+  background: #131313;
+}
+tr.row:hover td { background: #181818; }
+tr.row td:first-child { border-left: 2px solid transparent; }
+
+/* Row accent stripe by section */
+tr.row.t-charset td:first-child  { border-left-color: #4a8830; }
+tr.row.t-screen td:first-child   { border-left-color: #a09030; }
+tr.row.t-enemy td:first-child    { border-left-color: #b06020; }
+tr.row.t-monty td:first-child    { border-left-color: #2878b8; }
+tr.row.t-dissolve td:first-child { border-left-color: #7050a8; }
+tr.row.t-hiscore td:first-child  { border-left-color: #2a9888; }
+tr.row.t-banner td:first-child   { border-left-color: #9040c0; }
+tr.row.t-fk td:first-child       { border-left-color: #b08020; }
+tr.row.t-sprbuf td:first-child   { border-left-color: #307898; }
+tr.row.t-unknown td:first-child  { border-left-color: #383838; }
+tr.row.t-free td:first-child     { border-left-color: #222; }
+tr.row.t-sptrs td:first-child    { border-left-color: #808020; }
+
+/* Columns */
+td.addr {
+  color: #666;
+  font-size: 10px;
+  width: 54px;
+  letter-spacing: 0.02em;
+}
+td.size {
+  text-align: right;
+  color: #555;
+  font-size: 10px;
+  width: 48px;
+  padding-right: 10px;
+}
+td.bar-cell {
+  width: 180px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+td.label {
+  color: #dde;
+  font-size: 11px;
+  min-width: 240px;
+}
+td.label .sub {
+  color: #446;
+  font-size: 10px;
+  display: block;
+  padding-left: 14px;
+}
+td.module { width: 90px; }
+td.status { width: 80px; }
+td.desc {
+  color: #777;
+  font-size: 10px;
+  min-width: 220px;
+}
+td.desc code { color: #666; }
+
+/* Bar */
+.bar-track {
+  width: 160px;
+  height: 6px;
+  background: #1c1c1c;
+}
+.bar-fill { height: 100%; min-width: 3px; }
+.bf-charset  { background: #3a7028; }
+.bf-screen   { background: #887820; }
+.bf-sptrs    { background: #706010; }
+.bf-enemy    { background: #884810; }
+.bf-monty    { background: #1c64a8; }
+.bf-dissolve { background: #583888; }
+.bf-hiscore  { background: #187868; }
+.bf-banner   { background: #6830a0; }
+.bf-fk       { background: #806010; }
+.bf-sprbuf   { background: #184868; }
+.bf-unknown  { background: #303030; }
+.bf-free     { background: #1a1a1a; border: 1px solid #252525; }
+
+/* Module badges */
+.mod {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+.mod-main    { color: #508840; }
+.mod-monty   { color: #3878b0; }
+.mod-label   { color: #706040; }
+.mod-none    { color: #383838; }
+.mod-hiscore { color: #2a9888; }
+.mod-enemies { color: #b06020; }
+.mod-fk      { color: #a08020; }
+
+/* Status badges */
+.stat {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+.stat-prg     { color: #389858; }
+.stat-runtime { color: #988030; }
+.stat-partial { color: #7858a8; }
+.stat-unknown { color: #606090; }
+.stat-free    { color: #383838; }
+.stat-zeros   { color: #303030; }
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin-bottom: 16px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  color: #555;
+}
+.sw { width: 24px; height: 6px; }
+</style>
+
+<h1>VIC Bank 1 Memory Map</h1>
+<div class="meta">
+  <code>$4000–$7FFF</code> &nbsp;·&nbsp; 16 384 bytes &nbsp;·&nbsp;
+  Phase 2 layout &nbsp;·&nbsp;
+  <code>$D018</code> bank select = 1 &nbsp;·&nbsp;
+  charset at <code>$4000</code>, screen RAM at <code>$4800</code>
+</div>
+<div class="note">
+  VIC sprite pointer formula: <code>(sprite_addr − $4000) / 64</code> &nbsp;·&nbsp;
+  All <em>Runtime</em> ranges are overwritten at load; no PRG bytes live there in phase 2.
+  Flying banner sprites moved to <code>enemies.asm</code> (RoomData block, above $7FFF) in phase 2 — not in this bank.
+  Update this map when adding or moving sections.
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="sw" style="background:#3a7028"></div>Character set</div>
+  <div class="legend-item"><div class="sw" style="background:#887820"></div>Screen RAM</div>
+  <div class="legend-item"><div class="sw" style="background:#884810"></div>Enemy sprites (runtime)</div>
+  <div class="legend-item"><div class="sw" style="background:#1c64a8"></div>Monty sprites (monty.asm)</div>
+  <div class="legend-item"><div class="sw" style="background:#583888"></div>Dissolve / effects</div>
+  <div class="legend-item"><div class="sw" style="background:#187868"></div>High score</div>
+  <div class="legend-item"><div class="sw" style="background:#806010"></div>Freedom Kit sprites</div>
+  <div class="legend-item"><div class="sw" style="background:#184868"></div>Sprite buffers (runtime)</div>
+  <div class="legend-item"><div class="sw" style="background:#303030"></div>Unknown / partial</div>
+</div>
+
+<div class="wrap">
+<table>
+<thead>
+  <tr>
+    <th>Start</th>
+    <th>End</th>
+    <th class="r">Bytes</th>
+    <th>Map (16 KB scale)</th>
+    <th>Label</th>
+    <th>Module</th>
+    <th>Status</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+
+<!-- CHARACTER SET -->
+<tr class="grp"><td colspan="8">Character Set</td></tr>
+<tr class="row t-charset">
+  <td class="addr">$4000</td><td class="addr">$47FF</td>
+  <td class="size">2048</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-charset" style="width:20px"></div></div></td>
+  <td class="label">chr_charset</td>
+  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">256-char custom character set, 8 bytes per char. VIC <code>$D018</code> charset field points here.</td>
+</tr>
+
+<!-- SCREEN RAM -->
+<tr class="grp"><td colspan="8">Screen RAM</td></tr>
+<tr class="row t-screen">
+  <td class="addr">$4800</td><td class="addr">$4BF7</td>
+  <td class="size">1016</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-screen" style="width:10px"></div></div></td>
+  <td class="label">CHR_Screen</td>
+  <td class="module"><span class="mod mod-label">label</span></td>
+  <td class="status"><span class="stat stat-runtime">Runtime</span></td>
+  <td class="desc">40×25 screen RAM. Label constant only; written at runtime by draw/scroll routines.</td>
+</tr>
+<tr class="row t-sptrs">
+  <td class="addr">$4BF8</td><td class="addr">$4BFF</td>
+  <td class="size">8</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-sptrs" style="width:3px"></div></div></td>
+  <td class="label">—</td>
+  <td class="module"><span class="mod mod-none">—</span></td>
+  <td class="status"><span class="stat stat-runtime">Runtime</span></td>
+  <td class="desc">VIC sprite pointer table (tail of screen RAM page). 8 bytes: one per sprite slot. <code>ptr = (spr_addr − $4000) / 64</code>.</td>
+</tr>
+
+<!-- ENEMY SPRITES -->
+<tr class="grp"><td colspan="8">Enemy Sprites — runtime loaded by LoadEnemySpriteBank</td></tr>
+<tr class="row t-enemy">
+  <td class="addr">$4C00</td><td class="addr">$53FF</td>
+  <td class="size">2048</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-enemy" style="width:20px"></div></div></td>
+  <td class="label">enemy_sprite_ram</td>
+  <td class="module"><span class="mod mod-label">label</span></td>
+  <td class="status"><span class="stat stat-runtime">Runtime</span></td>
+  <td class="desc">4 enemy sprite slots × 512 bytes. Loader copies the current room's enemy sprites here. Label constant — no PRG bytes emitted in phase 2.</td>
+</tr>
+
+<!-- MONTY SPRITES -->
+<tr class="grp"><td colspan="8">Monty Sprites — monty.asm · namespace Monty.sprites · .pc = $5400</td></tr>
+<tr class="row t-monty">
+  <td class="addr">$5400</td><td class="addr">$54FF</td>
+  <td class="size">256</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:3px"></div></div></td>
+  <td class="label">Monty.sprites.walk_l_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Walk-left animation, 4 frames. VIC ptrs $50–$53.</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5500</td><td class="addr">$55FF</td>
+  <td class="size">256</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:3px"></div></div></td>
+  <td class="label">Monty.sprites.walk_r_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Walk-right animation, 4 frames. VIC ptrs $54–$57.</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5600</td><td class="addr">$56FF</td>
+  <td class="size">256</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:3px"></div></div></td>
+  <td class="label">Monty.sprites.climb_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Climb animation, 4 frames. VIC ptrs $58–$5B.</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5700</td><td class="addr">$59FF</td>
+  <td class="size">768</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:8px"></div></div></td>
+  <td class="label">Monty.sprites.sault_l_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Somersault-left animation, 12 frames. VIC ptrs $5C–$67.</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5A00</td><td class="addr">$5CFF</td>
+  <td class="size">768</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:8px"></div></div></td>
+  <td class="label">Monty.sprites.sault_r_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Somersault-right animation, 12 frames. VIC ptrs $68–$73.</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5D00</td><td class="addr">$5D7F</td>
+  <td class="size">128</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:3px"></div></div></td>
+  <td class="label">Monty.sprites.lift_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Lift animation, 2 frames. VIC ptrs $74–$75.</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5D80</td><td class="addr">$5DFF</td>
+  <td class="size">128</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:3px"></div></div></td>
+  <td class="label">Monty.sprites.jetpack_l_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Jetpack facing-left, 2 frames. VIC ptrs $76–$77. Sub-label <code>thruster_chr_a</code> at $5DEA (18 B, exhaust flame gfx A embedded within frame data).</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5E00</td><td class="addr">$5E7F</td>
+  <td class="size">128</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:3px"></div></div></td>
+  <td class="label">Monty.sprites.jetpack_r_spr</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Jetpack facing-right, 2 frames. VIC ptrs $78–$79. Sub-label <code>thruster_chr_b</code> at $5E6A (18 B, exhaust flame gfx B embedded within frame data).</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5E80</td><td class="addr">$5F7F</td>
+  <td class="size">256</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:3px"></div></div></td>
+  <td class="label">Monty.sprites.bubble_spr_ram</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Bubble sprite, 3 frames + padding. VIC ptrs $7A–$7C.</td>
+</tr>
+<tr class="row t-monty">
+  <td class="addr">$5F80</td><td class="addr">$66FF</td>
+  <td class="size">1920</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:19px"></div></div></td>
+  <td class="label">Monty.sprites.piledriver_death_spr + …</td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-partial">Partial</span></td>
+  <td class="desc">Piledriver death animation starts at $5F80. Continuation $6380–$66FF under analysis — identity of remaining sprite frames not yet confirmed.</td>
+</tr>
+
+<!-- DISSOLVE / EFFECTS -->
+<tr class="grp"><td colspan="8">Dissolve / Screen Effects — main.asm</td></tr>
+<tr class="row t-dissolve">
+  <td class="addr">$6700</td><td class="addr">$673F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-dissolve" style="width:3px"></div></div></td>
+  <td class="label">dissolve_pixel_buf</td>
+  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Live dissolve pixel data; updated each frame during screen-wipe effect.</td>
+</tr>
+<tr class="row t-dissolve">
+  <td class="addr">$6740</td><td class="addr">$677F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-dissolve" style="width:3px"></div></div></td>
+  <td class="label">dissolve_mask_buf</td>
+  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Dissolve shape mask; determines which pixel positions are affected per step.</td>
+</tr>
+<tr class="row t-unknown">
+  <td class="addr">$6780</td><td class="addr">$6FFF</td>
+  <td class="size">2176</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-unknown" style="width:21px"></div></div></td>
+  <td class="label">—</td>
+  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="status"><span class="stat stat-unknown">Unknown</span></td>
+  <td class="desc">Under analysis. Sits between the two dissolve buffer pairs; purpose not yet determined.</td>
+</tr>
+<tr class="row t-dissolve">
+  <td class="addr">$7000</td><td class="addr">$703F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-dissolve" style="width:3px"></div></div></td>
+  <td class="label">dissolve_ref_buf</td>
+  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Dissolve reference copy; baseline snapshot compared against the live pixel buffer each frame.</td>
+</tr>
+
+<!-- RESERVED / PADDING -->
+<tr class="grp"><td colspan="8">Reserved / Padding</td></tr>
+<tr class="row t-free">
+  <td class="addr">$7040</td><td class="addr">$70FF</td>
+  <td class="size">192</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-free" style="width:3px"></div></div></td>
+  <td class="label">—</td>
+  <td class="module"><span class="mod mod-none">—</span></td>
+  <td class="status"><span class="stat stat-zeros">Zeros</span></td>
+  <td class="desc">Unallocated VIC sprite frames $C1–$C3 in phase 1 PRG (zero-filled, no code references). Not emitted in phase 2.</td>
+</tr>
+<tr class="row t-free">
+  <td class="addr">$7100</td><td class="addr">$72FF</td>
+  <td class="size">512</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-free" style="width:5px"></div></div></td>
+  <td class="label">—</td>
+  <td class="module"><span class="mod mod-none">—</span></td>
+  <td class="status"><span class="stat stat-free">Free</span></td>
+  <td class="desc">Phase 1: <code>anti_hack_screen</code> display data. Removed in phase 2; this range is available as free RAM.</td>
+</tr>
+
+<!-- HIGH SCORE -->
+<tr class="grp"><td colspan="8">High Score — hiscore.asm · namespace HiScore</td></tr>
+<tr class="row t-hiscore">
+  <td class="addr">$7300</td><td class="addr">$771E</td>
+  <td class="size">1311</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-hiscore" style="width:13px"></div></div></td>
+  <td class="label">HiScore.top_scores</td>
+  <td class="module"><span class="mod mod-hiscore">hiscore.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">50×5 PETSCII score digits, 5-byte BCD overflow sentinel, and 50×16 PETSCII name display entries. Extracted to hiscore.asm (namespace HiScore).</td>
+</tr>
+<tr class="row t-hiscore">
+  <td class="addr">$771F</td><td class="addr">$772B</td>
+  <td class="size">13</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-hiscore" style="width:3px"></div></div></td>
+  <td class="label">HiScore.name_input_buf</td>
+  <td class="module"><span class="mod mod-hiscore">hiscore.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">13-byte name-entry scratchpad. Default "HELLO WALLIES". Extracted to hiscore.asm.</td>
+</tr>
+<tr class="row t-sprbuf">
+  <td class="addr">$772C</td><td class="addr">$77FF</td>
+  <td class="size">212</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-sprbuf" style="width:3px"></div></div></td>
+  <td class="label">sprite_buf_a</td>
+  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="status"><span class="stat stat-runtime">Runtime</span></td>
+  <td class="desc">Sprite multiplexer shadow buffer A. Written each frame by the sprite engine with position and frame data for the current scene.</td>
+</tr>
+
+<!-- FREEDOM KIT SPRITES -->
+<tr class="grp"><td colspan="8">Freedom Kit Sprites — freedom_kit.asm · namespace FreedomKit.sprites · .pc = $7800</td></tr>
+<tr class="row t-fk">
+  <td class="addr">$7800</td><td class="addr">$7ABF</td>
+  <td class="size">704</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-fk" style="width:7px"></div></div></td>
+  <td class="label">FreedomKit.sprites.base</td>
+  <td class="module"><span class="mod mod-fk">freedom_kit.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">22 Freedom Kit item sprites, 32 bytes each. Pinned here in P2 to stay below $D000 — game sets $0001=$05 (CHAREN=1) at startup, permanently mapping $D000–$DFFF to I/O. In P1 these were at $CC72. VIC ptrs $30–$45 (loaded into chr_charset slots by <code>BuildFKSprite</code>). Sprites: compass, jet_pack, disguise, rope, generator, laser_gun, watch, ladder, hand_grenade, gun, floppy_disk, passport, gas_mask, telescope, tank, barrel_of_rum, axe, kit_bag, map, hammer, torch, carousel_mask.</td>
+</tr>
+<tr class="row t-free">
+  <td class="addr">$7AC0</td><td class="addr">$7AFF</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-free" style="width:3px"></div></div></td>
+  <td class="label">—</td>
+  <td class="module"><span class="mod mod-none">—</span></td>
+  <td class="status"><span class="stat stat-free">Free</span></td>
+  <td class="desc">Unused gap between FreedomKit_sprites and sprite_buf_b.</td>
+</tr>
+<tr class="row t-sprbuf">
+  <td class="addr">$7B00</td><td class="addr">$7FFC</td>
+  <td class="size">1277</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-sprbuf" style="width:12px"></div></div></td>
+  <td class="label">sprite_buf_b</td>
+  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="status"><span class="stat stat-runtime">Runtime</span></td>
+  <td class="desc">Sprite multiplexer shadow buffer B. Written each frame by the sprite engine.</td>
+</tr>
+
+</tbody>
+</table>
+</div>

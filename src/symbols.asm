@@ -43,11 +43,13 @@
 .label zp_sprite1_ptr = $0026                      // sprite 1 frame pointer
 .label zp_sprite2_ptr = $0027                      // sprite 2 frame pointer (jetpack); also FK carousel slot 0
 .label zp_current_frame_index = $0028
+.label zp_sprite4_ptr = $0029                      // sprite 4 frame pointer
 .label zp_sprite7_ptr = $002C                      // sprite 7 frame pointer; last slot in $0025+x block
 .label zp_sprite0_colour = $002D                   // sprite 0 colour shadow; ProcessSprites copies $002D+x → D027+x for sprites 0-7
 .label zp_sprite1_colour = $002E                   // sprite 1 colour shadow
 .label zp_sprite2_colour = $002F                   // sprite 2 colour shadow
 .label zp_sprite3_colour = $0030                   // sprite 3 colour shadow
+.label zp_sprite4_colour = $0031                   // sprite 4 colour shadow
 .label zp_sprite5_colour = $0032               // sprite 5 colour shadow — middle of 5 FK carousel sprites; ProcessSprites copies $002D+x → $D027+x for sprites 0-7
 .label zp_monty_sprite_x2 = $0035
 .label zp_monty_sprite_y2 = $0036
