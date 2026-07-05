@@ -70,6 +70,7 @@ tr.row.t-dissolve td:first-child { border-left-color: #7050a8; }
 tr.row.t-hiscore td:first-child  { border-left-color: #2a9888; }
 tr.row.t-banner td:first-child   { border-left-color: #9040c0; }
 tr.row.t-fk td:first-child       { border-left-color: #b08020; }
+tr.row.t-si td:first-child        { border-left-color: #7a8820; }
 tr.row.t-sprbuf td:first-child   { border-left-color: #307898; }
 tr.row.t-unknown td:first-child  { border-left-color: #383838; }
 tr.row.t-free td:first-child     { border-left-color: #222; }
@@ -130,6 +131,7 @@ td.desc code { color: #666; }
 .bf-hiscore  { background: #187868; }
 .bf-banner   { background: #6830a0; }
 .bf-fk       { background: #806010; }
+.bf-si        { background: #586010; }
 .bf-sprbuf   { background: #184868; }
 .bf-unknown  { background: #303030; }
 .bf-free     { background: #1a1a1a; border: 1px solid #252525; }
@@ -148,6 +150,7 @@ td.desc code { color: #666; }
 .mod-hiscore { color: #2a9888; }
 .mod-enemies { color: #b06020; }
 .mod-fk      { color: #a08020; }
+.mod-si       { color: #8a9830; }
 
 /* Status badges */
 .stat {
@@ -199,6 +202,7 @@ td.desc code { color: #666; }
   <div class="legend-item"><div class="sw" style="background:#887820"></div>Screen RAM</div>
   <div class="legend-item"><div class="sw" style="background:#884810"></div>Enemy sprites (runtime)</div>
   <div class="legend-item"><div class="sw" style="background:#1c64a8"></div>Monty sprites (monty.asm)</div>
+  <div class="legend-item"><div class="sw" style="background:#586010"></div>Special Item sprites (si_sprites.asm)</div>
   <div class="legend-item"><div class="sw" style="background:#583888"></div>Dissolve / effects</div>
   <div class="legend-item"><div class="sw" style="background:#187868"></div>High score</div>
   <div class="legend-item"><div class="sw" style="background:#806010"></div>Freedom Kit sprites</div>
@@ -351,64 +355,157 @@ td.desc code { color: #666; }
   <td class="desc">Bubble sprite, 3 frames + padding. VIC ptrs $7A–$7C.</td>
 </tr>
 <tr class="row t-monty">
-  <td class="addr">$5F80</td><td class="addr">$66FF</td>
-  <td class="size">1920</td>
-  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:19px"></div></div></td>
-  <td class="label">Monty.sprites.piledriver_death_spr + …</td>
+  <td class="addr">$5F80</td><td class="addr">$637F</td>
+  <td class="size">2048</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:20px"></div></div></td>
+  <td class="label">Monty.sprites.piledriver_death_spr<span class="sub">VIC ptrs $7E–$8D · 16 frames</span></td>
   <td class="module"><span class="mod mod-monty">monty.asm</span></td>
-  <td class="status"><span class="stat stat-partial">Partial</span></td>
-  <td class="desc">Piledriver death animation starts at $5F80. Continuation $6380–$66FF under analysis — identity of remaining sprite frames not yet confirmed.</td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Piledriver death animation, 16 sprite frames (2048 B). Final block of the MontySprites segment; continues from <code>bubble_spr_ram</code>.</td>
 </tr>
 
-<!-- DISSOLVE / EFFECTS -->
-<tr class="grp"><td colspan="8">Dissolve / Screen Effects — main.asm</td></tr>
-<tr class="row t-dissolve">
-  <td class="addr">$6700</td><td class="addr">$673F</td>
+<!-- SI SPRITES -->
+<tr class="grp"><td colspan="8">Special Item Sprites — si_sprites.asm · namespace SpecialItems · .pc = $6380</td></tr>
+<tr class="row t-si">
+  <td class="addr">$6380</td><td class="addr">$63BF</td>
   <td class="size">64</td>
-  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-dissolve" style="width:3px"></div></div></td>
-  <td class="label">dissolve_pixel_buf</td>
-  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.first_aid_kit_spr<span class="sub">VIC ptr $8E</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
   <td class="status"><span class="stat stat-prg">PRG</span></td>
-  <td class="desc">Live dissolve pixel data; updated each frame during screen-wipe effect.</td>
+  <td class="desc">First aid kit (1 frame).</td>
 </tr>
-<tr class="row t-dissolve">
-  <td class="addr">$6740</td><td class="addr">$677F</td>
+<tr class="row t-si">
+  <td class="addr">$63C0</td><td class="addr">$63FF</td>
   <td class="size">64</td>
-  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-dissolve" style="width:3px"></div></div></td>
-  <td class="label">dissolve_mask_buf</td>
-  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.milk_jug_spr<span class="sub">VIC ptr $8F</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
   <td class="status"><span class="stat stat-prg">PRG</span></td>
-  <td class="desc">Dissolve shape mask; determines which pixel positions are affected per step.</td>
+  <td class="desc">Milk jug (1 frame).</td>
 </tr>
-<tr class="row t-unknown">
-  <td class="addr">$6780</td><td class="addr">$6FFF</td>
-  <td class="size">2176</td>
-  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-unknown" style="width:21px"></div></div></td>
-  <td class="label">—</td>
-  <td class="module"><span class="mod mod-main">main.asm</span></td>
-  <td class="status"><span class="stat stat-unknown">Unknown</span></td>
-  <td class="desc">Under analysis. Sits between the two dissolve buffer pairs; purpose not yet determined.</td>
-</tr>
-<tr class="row t-dissolve">
-  <td class="addr">$7000</td><td class="addr">$703F</td>
+<tr class="row t-si">
+  <td class="addr">$6400</td><td class="addr">$643F</td>
   <td class="size">64</td>
-  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-dissolve" style="width:3px"></div></div></td>
-  <td class="label">dissolve_ref_buf</td>
-  <td class="module"><span class="mod mod-main">main.asm</span></td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.teddy_bear_spr<span class="sub">VIC ptr $90</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
   <td class="status"><span class="stat stat-prg">PRG</span></td>
-  <td class="desc">Dissolve reference copy; baseline snapshot compared against the live pixel buffer each frame.</td>
+  <td class="desc">Teddy bear (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6440</td><td class="addr">$647F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.cupcake_spr<span class="sub">VIC ptr $91</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Cupcake (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6480</td><td class="addr">$64BF</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.smoke_stack_spr<span class="sub">VIC ptr $92</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Smoke stack (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$64C0</td><td class="addr">$64FF</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.vase_spr<span class="sub">VIC ptr $93</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Vase (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6500</td><td class="addr">$653F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.fly_spray_spr<span class="sub">VIC ptr $94</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Fly spray (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6540</td><td class="addr">$657F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.joystick_spr<span class="sub">VIC ptr $95</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Joystick (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6580</td><td class="addr">$65BF</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.jerry_can_spr<span class="sub">VIC ptr $96</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Jerry can (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$65C0</td><td class="addr">$65FF</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.key_spr<span class="sub">VIC ptr $97</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Key (1 frame).</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6600</td><td class="addr">$663F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.cloud_spr_1<span class="sub">VIC ptr $98</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Rising cloud frame 1 of 3.</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6640</td><td class="addr">$667F</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.cloud_spr_2<span class="sub">VIC ptr $99</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Rising cloud frame 2 of 3.</td>
+</tr>
+<tr class="row t-si">
+  <td class="addr">$6680</td><td class="addr">$66BF</td>
+  <td class="size">64</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-si" style="width:3px"></div></div></td>
+  <td class="label">SpecialItems.cloud_spr_3<span class="sub">VIC ptr $9A</span></td>
+  <td class="module"><span class="mod mod-si">si_sprites.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Rising cloud frame 3 of 3.</td>
+</tr>
+
+<!-- MONTY SPRITES CONT -->
+<tr class="grp"><td colspan="8">Monty Sprites (cont.) — monty.asm · .pc = $66C0</td></tr>
+<tr class="row t-monty">
+  <td class="addr">$66C0</td><td class="addr">$7064</td>
+  <td class="size">2469</td>
+  <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-monty" style="width:24px"></div></div></td>
+  <td class="label">Monty.sprites (continuation)<span class="sub">VIC ptrs $9B–$C1 · dissolve overlays at $6700/$6740/$7000</span></td>
+  <td class="module"><span class="mod mod-monty">monty.asm</span></td>
+  <td class="status"><span class="stat stat-prg">PRG</span></td>
+  <td class="desc">Continuation of Monty sprite data (raw <code>.byte</code> blocks, no sub-labels, VIC ptrs $9B–$C1). Three slots carry dual use: <code>dissolve_pixel_buf</code> ($6700, ptr $9C), <code>dissolve_mask_buf</code> ($6740, ptr $9D), and <code>dissolve_ref_buf</code> ($7000, ptr $C0) are overwritten at runtime by the screen-wipe effect; PRG bytes at those addresses are initial sprite-frame content.</td>
 </tr>
 
 <!-- RESERVED / PADDING -->
 <tr class="grp"><td colspan="8">Reserved / Padding</td></tr>
 <tr class="row t-free">
-  <td class="addr">$7040</td><td class="addr">$70FF</td>
-  <td class="size">192</td>
+  <td class="addr">$7065</td><td class="addr">$70FF</td>
+  <td class="size">155</td>
   <td class="bar-cell"><div class="bar-track"><div class="bar-fill bf-free" style="width:3px"></div></div></td>
   <td class="label">—</td>
   <td class="module"><span class="mod mod-none">—</span></td>
-  <td class="status"><span class="stat stat-zeros">Zeros</span></td>
-  <td class="desc">Unallocated VIC sprite frames $C1–$C3 in phase 1 PRG (zero-filled, no code references). Not emitted in phase 2.</td>
+  <td class="status"><span class="stat stat-free">Free</span></td>
+  <td class="desc">Free gap after MontySprites_cont ($7064). Phase 1 had zero-filled VIC sprite frames $C2–$C3 here; unallocated in phase 2.</td>
 </tr>
 <tr class="row t-free">
   <td class="addr">$7100</td><td class="addr">$72FF</td>

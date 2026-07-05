@@ -41,6 +41,12 @@ src/motr.asm      Single-file assembly source. Every instruction carries its
 src/symbols.asm   Address map for memory outside the PRG: zero-page variables,
                   hardware registers, KERNAL entry points.
 
+src/libs/         Hardware register definitions imported by motr.asm.
+  vic.asm           VIC-II registers ($D000–$D3FF)
+  sid.asm           SID registers ($D400–$D7FF)
+  cia.asm           CIA1/CIA2 registers ($DC00–$DDFF)
+  cpu.asm           6510/6502 CPU-level constants (stack, vectors, flags)
+
 docs/             Standalone HTML viewers — open in any browser, no server needed.
                   sprite_viewer.html    All VIC bank 1 sprites, filterable by category
                   enemy_sprites.html    Enemy sprite sheet with type IDs
