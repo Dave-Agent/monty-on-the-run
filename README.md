@@ -67,9 +67,105 @@ over the original code:
 - **Smoke test tooling** — `SMOKE_TEST=true` enables Q/W keyboard room
   navigation and pre-fills the correct Freedom Kit items, making it easy to
   step through specific sequences during development
+- **Designed to be edited** — every address is a label; moving or modifying
+  a routine won't silently break cross-references. The build succeeds cleanly
+  on any substantive change.
 
 The output is functionally identical to the original; byte-identity is not a
 goal here.
+
+### Naming in practice
+
+The same 22 lines of machine code — the per-frame game loop — read three ways:
+
+<table>
+<tr>
+<th align="left">refactored</th>
+<th align="left">byte-perfect</th>
+<th align="left">machine code</th>
+</tr>
+<tr valign="top">
+<td><pre>
+GameFrameUpdate:
+  inc zp.frame_toggle
+  lda zp.frame_toggle
+  and #$01
+  sta zp.frame_toggle
+  jsr Music.Play
+  jsr Controls.ReadPlayerInput
+  jsr Sprites.ProcessSprites
+  lda zp.freeze_flag
+  bne !+
+  jsr Monty.Draw
+  jsr Mechanisms.Piledriver.Animate
+  jsr Mechanisms.Lift.SpriteUpdate
+  jsr Mechanisms.Lift.MovementUpdate
+  jsr Mechanisms.Lift.CheckContact
+  jsr Mechanisms.Piledriver.UpdateRide
+  jsr SpecialItems.UpdateRisingCloud
+  jsr SpecialItems.HandleSICollision
+  jsr Utils.ComputeMontyTilePointer
+  jsr Mechanisms.Piledriver.CheckTiles
+  jsr Enemies.PlaceQueen
+  jsr Controls.PauseGameOnP
+  jsr Mechanisms.Piledriver.CheckContact
+</pre></td>
+<td><pre>
+MainGameLoop:
+  inc zp_frame_toggle       // [0DA4]
+  lda zp_frame_toggle       // [0DA6]
+  and #$01                  // [0DA8]
+  sta zp_frame_toggle       // [0DAA]
+  jsr MusicPlay             // [0DAC]
+  jsr ReadPlayerInput       // [0DAF]
+  jsr ProcessSprites        // [0DB2]
+  lda zp_freeze_flag        // [0DB5]
+  bne !+                    // [0DB7]
+  jsr DrawMonty             // [0DB9]
+  jsr ActivatePileDrivers   // [0DBC]
+  jsr LiftSpriteUpdate      // [0DBF]
+  jsr LiftMovementUpdate    // [0DC2]
+  jsr LiftMontyCollision    // [0DC5]
+  jsr UpdatePiledriverRide  // [0DC8]
+  jsr UpdateRisingCloud     // [0DCB]
+  jsr HandleSICollision     // [0DCE]
+  jsr ComputeMontyTilePointer // [0DD1]
+  jsr CheckPiledriverTiles  // [0DD4]
+  jsr DisplayFreedomRoom    // [0DD7]
+  jsr PauseGameOnP          // [0DDA]
+  jsr CheckPiledriverContact // [0DDD]
+</pre></td>
+<td><pre>
+$0DA4  e6 40     INC $40
+$0DA6  a5 40     LDA $40
+$0DA8  29 01     AND #$01
+$0DAA  85 40     STA $40
+$0DAC  20 12 80  JSR $8012
+$0DAF  20 84 0b  JSR $0b84
+$0DB2  20 07 0c  JSR $0c07
+$0DB5  a5 0f     LDA $0f
+$0DB7  d0 27     BNE +$27
+$0DB9  20 b4 17  JSR $17b4
+$0DBC  20 01 1c  JSR $1c01
+$0DBF  20 b2 1f  JSR $1fb2
+$0DC2  20 f6 1f  JSR $1ff6
+$0DC5  20 56 20  JSR $2056
+$0DC8  20 48 22  JSR $2248
+$0DCB  20 ed 27  JSR $27ed
+$0DCE  20 84 26  JSR $2684
+$0DD1  20 9c 14  JSR $149c
+$0DD4  20 8c 25  JSR $258c
+$0DD7  20 80 29  JSR $2980
+$0DDA  20 62 22  JSR $2262
+$0DDD  20 fe 21  JSR $21fe
+</pre></td>
+</tr>
+</table>
+
+`JSR $2980` was named `DisplayFreedomRoom` in the monolith — a wrong early
+guess. Static analysis later confirmed it positions the Queen enemy regardless
+of which room is loaded. The refactored name `Enemies.PlaceQueen` captures both
+what the routine does and which subsystem owns it.
 
 ### Build
 
@@ -79,9 +175,22 @@ java -jar /path/to/KickAss.jar refactored/src/main.asm -o motr.prg
 
 ### Run in VICE
 
+The refactored version has no fixed entry address — `StartUp` shifts as
+subsystems are rearranged. Assemble with the `-vicesymbols` flag so
+KickAssembler emits a symbol file, then look up the address:
+
 ```bash
-x64sc -keybuf "sys 2064\x0d" motr.prg
+java -jar KickAss.jar refactored/src/main.asm -o motr.prg -vicesymbols
+
+# Find the entry (printed as hex, e.g. "al C:26B0 .StartUp"):
+grep StartUp main.vs
+
+# Convert hex to decimal (0x26B0 = 9904) and run with the symbol file:
+x64sc -moncommands main.vs -keybuf "sys 9904\x0d" motr.prg
 ```
+
+The exact decimal value changes each time subsystems are added or reordered;
+always derive it from the current symbol file rather than hardcoding it.
 
 ### Layout
 
