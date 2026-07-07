@@ -172,22 +172,13 @@ java -jar /path/to/KickAss.jar refactored/src/main.asm -o motr.prg
 
 ### Run in VICE
 
-The refactored version has no fixed entry address — `StartUp` shifts as
-subsystems are rearranged. Assemble with the `-vicesymbols` flag so
-KickAssembler emits a symbol file, then look up the address:
+The PRG includes a BASIC upstart stub, so `RUN` works directly:
 
 ```bash
-java -jar KickAss.jar refactored/src/main.asm -o motr.prg -vicesymbols
-
-# Find the entry (printed as hex, e.g. "al C:26B0 .StartUp"):
-grep StartUp main.vs
-
-# Convert hex to decimal (0x26B0 = 9904) and run with the symbol file:
-x64sc -moncommands main.vs -keybuf "sys 9904\x0d" motr.prg
+x64sc -autostart motr.prg
 ```
 
-The exact decimal value changes each time subsystems are added or reordered;
-always derive it from the current symbol file rather than hardcoding it.
+On Windows, drag-and-drop the PRG onto the VICE executable.
 
 ### Layout
 

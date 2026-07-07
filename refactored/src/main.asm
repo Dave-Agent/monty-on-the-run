@@ -34,6 +34,14 @@
 // .pc = * "Name"      — floating: continues from current PC
 // .errorif guards below enforce the region boundaries defined in platform_c64.asm.
 
+// ─── BASIC upstart stub ──────────────────────────────────────────────────────
+// Generates a one-line BASIC program: "10 SYS <StartUp-address>"
+// Allows RUN from BASIC prompt and VICE -autostart / drag-drop launch.
+// Fits in $0801-$080D (13 bytes max); code segment starts at $080E.
+
+.pc = PC_BASIC_START "Basic"
+:BasicUpstart2(StartUp)
+
 // ─── Code ────────────────────────────────────────────────────────────────────
 
 .pc = PC_CODE_START "Core_main"

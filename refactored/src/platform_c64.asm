@@ -22,7 +22,8 @@
 //        data $C000-$FFFF  |  I/O $2000-$401F  |  no aux region
 // ZX Spectrum: code $8000+  |  gfx $4000-$57FF (VRAM)  |  data above code
 // -----------------------------------------------------------------------------
-.label PC_CODE_START = $080E    // C64: PRG entry after BASIC SYS loader
+.label PC_BASIC_START = $0801   // C64: standard BASIC program area — BASIC upstart stub lives here
+.label PC_CODE_START = $080E    // C64: machine code entry — $0801 + 13-byte stub lands exactly here
 .label CODE_END      = $3FFF
 
 .label PC_GFX_START  = $4000    // C64: VIC bank 1  |  NES: PPU bus (not here)
