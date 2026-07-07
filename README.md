@@ -2,9 +2,9 @@
 
 A fully-annotated 6502 assembly reconstruction of the 1985 Commodore 64 game
 *Monty on the Run* by Gremlin Graphics. Every function, data block, and memory
-address is identified and named. Two buildable versions are provided: one that
-assembles byte-for-byte identically to the original tape release, and one
-refactored into idiomatic multi-file KickAssembler source.
+address is identified and named. Two buildable versions are provided: a
+refactored multi-file source that is the end goal of this project, and a
+byte-perfect monolith that assembles identically to the original tape release.
 
 ```
             ██                                  
@@ -30,8 +30,8 @@ refactored into idiomatic multi-file KickAssembler source.
 
 | Directory | Description |
 |-----------|-------------|
+| [`refactored/`](#refactored) | Multi-file, namespace-structured source. SMC removed. Dead code and data excised. The end goal. |
 | [`byte-perfect/`](#byte-perfect) | Single-file monolith. Assembled output is bit-for-bit identical to the original PRG. |
-| [`refactored/`](#refactored) | Multi-file, namespace-structured source. SMC removed. Idiomatic KickAssembler. Not byte-identical. |
 
 Both versions share the same hardware register libraries. Neither includes the
 original binary — you will need a legal copy of the tape release if you want to
@@ -50,57 +50,23 @@ To run assembled output you need **VICE** ([vice-emu.sourceforge.io](https://vic
 
 ---
 
-## byte-perfect
-
-`byte-perfect/src/motr.asm` is the entire game in a single ~9,000-line file.
-Every instruction carries its original C64 address and opcode bytes in the
-end-of-line comment — these are the ground truth from the original disassembly
-and are never removed. Every function has a section banner with status and
-summary; every data block has a label.
-
-### Build
-
-```bash
-java -jar /path/to/KickAss.jar byte-perfect/src/motr.asm -o motr.prg
-```
-
-The assembled `motr.prg` is byte-identical to the original tape release. No
-patches, cracks, or modifications.
-
-### Run in VICE
-
-The game has no BASIC stub, so `RUN` won't work. Pass the `SYS` command
-directly via the keyboard buffer:
-
-```bash
-x64sc -keybuf "sys 2064\x0d" motr.prg
-```
-
-### Layout
-
-```
-byte-perfect/src/
-  motr.asm        Complete game source. EOL comments carry original address and
-                  opcode bytes. Section banners delimit every subsystem.
-
-  symbols.asm     Address map for memory outside the PRG: zero-page variables,
-                  hardware registers, KERNAL entry points.
-
-  libs/
-    vic.asm       VIC-II registers ($D000–$D3FF)
-    sid.asm       SID registers ($D400–$D7FF)
-    cia.asm       CIA1/CIA2 registers ($DC00–$DDFF)
-    cpu.asm       6510/6502 CPU-level constants (stack, vectors, flags)
-```
-
----
-
 ## refactored
 
-The refactored version splits the monolith into per-subsystem files using
-KickAssembler namespaces. Self-modifying code (SMC) is eliminated — every
-address the original game patched at runtime is now named by its operand label,
-and runtime dispatch uses pointer tables instead of patched branch displacements.
+This is the primary version and the end goal of the project. The monolith is
+split into per-subsystem files using KickAssembler namespaces. Key improvements
+over the original code:
+
+- **SMC removed** — every address the original game patched at runtime is now
+  named by its operand label (KickAssembler's `label:operand` syntax); runtime
+  dispatch uses pointer tables instead of patched branch displacements
+- **Dead code and data excised** — PRG bytes that were never read at runtime
+  (sprite-buffer slots the game always overwrites before use) are gone
+- **Idiomatic naming** — namespace-qualified call sites (`Monty.Dispatch`,
+  `Enemies.PlaceQueen`, `Completion.Begin`) that read cold without looking up
+  the implementation
+- **Smoke test tooling** — `SMOKE_TEST=true` enables Q/W keyboard room
+  navigation and pre-fills the correct Freedom Kit items, making it easy to
+  step through specific sequences during development
 
 The output is functionally identical to the original; byte-identity is not a
 goal here.
@@ -150,6 +116,51 @@ refactored/src/
     music_sfx.asm       Rob Hubbard player integration
     utils.asm           Shared arithmetic and utility routines
     ... (and data companions for each)
+```
+
+---
+
+## byte-perfect
+
+`byte-perfect/src/motr.asm` is the entire game in a single ~9,000-line file.
+Every instruction carries its original C64 address and opcode bytes in the
+end-of-line comment — these are the ground truth from the original disassembly
+and are never removed. Every function has a section banner with status and
+summary; every data block has a label.
+
+### Build
+
+```bash
+java -jar /path/to/KickAss.jar byte-perfect/src/motr.asm -o motr.prg
+```
+
+The assembled `motr.prg` is byte-identical to the original tape release. No
+patches, cracks, or modifications.
+
+### Run in VICE
+
+The game has no BASIC stub, so `RUN` won't work. Pass the `SYS` command
+directly via the keyboard buffer:
+
+```bash
+x64sc -keybuf "sys 2064\x0d" motr.prg
+```
+
+### Layout
+
+```
+byte-perfect/src/
+  motr.asm        Complete game source. EOL comments carry original address and
+                  opcode bytes. Section banners delimit every subsystem.
+
+  symbols.asm     Address map for memory outside the PRG: zero-page variables,
+                  hardware registers, KERNAL entry points.
+
+  libs/
+    vic.asm       VIC-II registers ($D000–$D3FF)
+    sid.asm       SID registers ($D400–$D7FF)
+    cia.asm       CIA1/CIA2 registers ($DC00–$DDFF)
+    cpu.asm       6510/6502 CPU-level constants (stack, vectors, flags)
 ```
 
 ---
