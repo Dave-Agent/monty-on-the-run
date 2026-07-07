@@ -106,7 +106,6 @@ GameFrameUpdate:
   jsr SpecialItems.HandleSICollision
   jsr Utils.ComputeMontyTilePointer
   jsr Mechanisms.Piledriver.CheckTiles
-  jsr Enemies.PlaceQueen
   jsr Controls.PauseGameOnP
   jsr Mechanisms.Piledriver.CheckContact
 </pre></td>
@@ -131,7 +130,6 @@ MainGameLoop:
   jsr HandleSICollision     // [0DCE]
   jsr ComputeMontyTilePointer // [0DD1]
   jsr CheckPiledriverTiles  // [0DD4]
-  jsr DisplayFreedomRoom    // [0DD7]
   jsr PauseGameOnP          // [0DDA]
   jsr CheckPiledriverContact // [0DDD]
 </pre></td>
@@ -155,17 +153,16 @@ $0DCB  20 ed 27  JSR $27ed
 $0DCE  20 84 26  JSR $2684
 $0DD1  20 9c 14  JSR $149c
 $0DD4  20 8c 25  JSR $258c
-$0DD7  20 80 29  JSR $2980
 $0DDA  20 62 22  JSR $2262
 $0DDD  20 fe 21  JSR $21fe
 </pre></td>
 </tr>
 </table>
 
-`JSR $2980` was named `DisplayFreedomRoom` in the monolith — a wrong early
-guess. Static analysis later confirmed it positions the Queen enemy regardless
-of which room is loaded. The refactored name `Enemies.PlaceQueen` captures both
-what the routine does and which subsystem owns it.
+Every `JSR` in the refactored column names the subsystem and the action:
+`Music.Play`, `Controls.ReadPlayerInput`, `Mechanisms.Lift.SpriteUpdate`. In
+the monolith these were flat names like `MusicPlay` and `LiftSpriteUpdate` —
+findable by grep but giving no hint of ownership or structure.
 
 ### Build
 
