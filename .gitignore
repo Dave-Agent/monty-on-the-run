@@ -2,6 +2,5 @@
 *.swp
 *~
 
-# KickAssembler working copy — regenerated on every build run
-src/libs/.source.txt
-src/.source.txt
+# KickAssembler / Ghidra source records — never published
+**/.source.txt
