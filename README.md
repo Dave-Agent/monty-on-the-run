@@ -2,74 +2,63 @@
 
 A fully-annotated 6502 assembly reconstruction of the 1985 Commodore 64 game
 *Monty on the Run* by Gremlin Graphics. Every function, data block, and memory
-address is identified and named. Two buildable versions are provided: a
-refactored multi-file source that is the end goal of this project, and a
-byte-perfect monolith that assembles identically to the original tape release.
-
-```
-            ██                                  
-      ██████  ██████                            
-  ██████████  ██████                            
-  ████████████████  ██                          
-      ████████    ██████                        
-    ██        ████  ██████                      
-  ██████  ████  ██  ██████                      
-  ██████  ████      ██  ████                    
-  ████  ██████████████  ████                    
-      ██████████  ████  ████                    
-      ████████████    ████                      
-        ██████████  ████████                    
-  ████  ████████  ██████████                    
-    ██████████      ██████                      
-      ██████    ████████                        
-```
-
----
-
-## The two versions
+address is identified, named, and commented. Two buildable versions are provided:
 
 | Directory | Description |
 |-----------|-------------|
-| [`refactored/`](#refactored) | Multi-file, namespace-structured source. SMC removed. Dead code and data excised. The end goal. |
+| [`refactored/`](#refactored) | Multi-file, namespace-structured. SMC removed. Dead code excised. |
 | [`byte-perfect/`](#byte-perfect) | Single-file monolith. Assembled output is bit-for-bit identical to the original PRG. |
 
-Both versions share the same hardware register libraries. Neither includes the
-original binary — you will need a legal copy of the tape release if you want to
-verify byte-identity.
+Both share the same hardware register libraries. Neither includes the original
+binary — you need a legal copy of the tape release to verify byte-identity.
 
 ---
 
 ## Requirements
 
-Both versions use:
-
-- **Java** (any modern JDK — [Adoptium](https://adoptium.net) works well)
+- **Java 17 or later**
 - **KickAssembler** — [theweb.dk/KickAssembler](https://theweb.dk/KickAssembler/)
+- **VICE** ([vice-emu.sourceforge.io](https://vice-emu.sourceforge.io)) or a real C64 to run the output
 
-To run assembled output you need **VICE** ([vice-emu.sourceforge.io](https://vice-emu.sourceforge.io)) or a real C64.
+---
+
+## Which version?
+
+**Start with `refactored/`** if you want to read or modify the code.
+Namespace-qualified call sites (`Music.Play`, `Mechanisms.Lift.CheckContact`)
+tell you what a routine does and which subsystem owns it without grepping. Each
+subsystem is its own file. Self-modifying code has been replaced with named
+operand labels so you can safely move or edit routines.
+
+**Start with `byte-perfect/`** if you are studying the original binary, diffing
+against another release, or working with Ghidra or a disassembler alongside the
+source. Every instruction carries its original address and opcode bytes in the
+end-of-line comment — ground truth from the original disassembly, never removed.
+The assembled output is provably identical to the tape release.
+
+The two versions stay in sync: understanding gained in one is back-ported to the
+other.
 
 ---
 
 ## refactored
 
-This is the primary version and the end goal of the project. The monolith is
-split into per-subsystem files using KickAssembler namespaces. Key improvements
-over the original code:
+The monolith is split into per-subsystem files using KickAssembler namespaces.
+Key improvements over the original code:
 
 - **SMC removed** — every address the original game patched at runtime is now
   named by its operand label (KickAssembler's `label:operand` syntax); runtime
   dispatch uses pointer tables instead of patched branch displacements
 - **Dead code and data excised** — PRG bytes that were never read at runtime
-  (sprite-buffer slots the game always overwrites before use) are gone
+  are gone
 - **Idiomatic naming** — namespace-qualified call sites (`Monty.Dispatch`,
-  `Enemies.PlaceQueen`, `Completion.Begin`) that read cold without looking up
-  the implementation
+  `Mechanisms.Piledriver.CheckContact`, `Completion.Begin`) that read cold
+  without looking up the implementation
 - **Smoke test tooling** — `SMOKE_TEST=true` enables Q/W keyboard room
   navigation and pre-fills the correct Freedom Kit items, making it easy to
   step through specific sequences during development
 - **Designed to be edited** — every address is a label; moving or modifying
-  a routine won't silently break cross-references. The build succeeds cleanly
-  on any substantive change.
+  a routine won't silently break cross-references
 
 The output is functionally identical to the original; byte-identity is not a
 goal here.
@@ -185,34 +174,33 @@ On Windows, drag-and-drop the PRG onto the VICE executable.
 ```
 refactored/src/
   main.asm            Top-level entry point and segment layout.
-  symbols.asm         Same role as byte-perfect/src/symbols.asm.
+  symbols.asm         Address map for memory outside the PRG.
   zero_page.asm       All zero-page variable allocations in one place.
   platform_c64.asm    Platform-level constants (load address, entry point).
 
-  libs/               Same 4 hardware register files as byte-perfect.
+  libs/               Hardware register definitions (VIC, SID, CIA, CPU).
 
-  subsystems/         One file per game subsystem:
+  subsystems/         One file per game subsystem, each with a paired _data.asm:
     irq.asm             IRQ handler, raster timing
-    monty.asm           Player movement, collision, death events, dispatch
+    monty.asm           Player movement, collision, death, dispatch
     enemy.asm           Enemy spawn, movement, collision, Queen placement
     sprites.asm         Sprite engine, multiplexer, per-frame VIC updates
     room.asm            Room loading, scrolling, tile placement
     tiles.asm           Tile rendering and attribute tables
     decor.asm           Room decoration objects
-    mechanisms.asm      Lifts, piledrivers, hazards
+    mechanisms.asm      Lifts, piledrivers, rising bollard, teleporters
     jetpack.asm         Jetpack physics and fuel
     hud.asm             Score display, lives, status bar
     controls.asm        Joystick and keyboard input
     special_items.asm   Collectible items and inventory
     freedom_kit.asm     Freedom Kit carousel, C5 vehicle
-    completion.asm      Game completion sequence (boat to France)
+    completion.asm      Game completion sequence
     game_over.asm       Game over, arrest, and continue screens
     attract.asm         Attract mode and title screen
     scroller.asm        Bottom text scroller
     hiscore.asm         High score table entry and display
     music_sfx.asm       Rob Hubbard player integration
     utils.asm           Shared arithmetic and utility routines
-    ... (and data companions for each)
 ```
 
 ---
