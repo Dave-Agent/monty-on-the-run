@@ -4976,7 +4976,16 @@ DecrementScore:
   bpl !--                             // [21E5:10 ea    BPL $21d1]        borrow into next digit
   rts                                 // [21E7:60       RTS]              Y=$FF: all digits exhausted
 
-// Part of: LoadRoom — room $0C: clear piledriver ride state and plant head tile ($62)
+//==============================================================================
+// SECTION: InitPiledriverState
+// RANGE:   $21E8-$21FD
+// STATUS:  understood
+// SUMMARY: Clears zp_piledriver_ride_active on every room load. Room $0C only:
+//          plants rising bollard tile $62 at row 15, col 27 (white). This is
+//          the sole setup for the room $0C bollard — no mechanisms_data entry.
+//          Dual use: room $13 = standard downward piledriver (mechanisms_data);
+//          room $0C = rising bollard (static tile, same ride code lifts Monty up).
+//==============================================================================
                                       // XREF[1]: 0e8c(c)
 InitPiledriverState:
   lda #$00                            // [21E8:a9 00    LDA #$0]
@@ -4999,6 +5008,8 @@ InitPiledriverState:
 // STATUS:  understood
 // SUMMARY: Detects when Monty steps on a piledriver tile at his feet position
 //          (tile $62 = head: fires ride; tile $63 = base: sets speed counter).
+//          Shared by both room $13 (piledriver, Monty rides down) and room $0C
+//          (rising bollard, Monty rides up) — same code path, different room context.
 //==============================================================================
 CheckPiledriverContact:
   ldy #$29                            // [21FE:a0 29    LDY #$29]
@@ -6491,12 +6502,13 @@ DissolveFrameLoop:
   .byte $14,$28,$cc,$33               // [297c] dead bytes — no valid 6502 decode; likely alignment pad after PlayDeathDissolve RTS at $297B
 
 //==============================================================================
-// SECTION: freedom_room
+// SECTION: DisplayEndGoalRoom
 // RANGE:   $2980-$29A0
 // STATUS:  understood
-// SUMMARY: In room $2F only: when si_collected_tbl+8 ($0310) is set, positions
-//          the Queen sprite (pointer $9B) at ($40,$9A) and enables sprite 0.
-//          The Queen guards "Freedom" — the colour-cycling 2×2 end-goal object.
+// SUMMARY: Game-complete sequence entry point. Room $2F only: when the escape
+//          bag (si_collected_tbl+8, $0310) is set, positions the Queen sprite
+//          (pointer $9B) at ($40,$9A) and enables sprite 0. The Queen's face
+//          guards the colour-cycling 2×2 treasure object — the game's end state.
 //==============================================================================
                                       // XREF[1]: 0dd7(c)
 DisplayFreedomRoom:
@@ -10970,20 +10982,18 @@ hiscore_score_table:                                 // XREF[4]: 1190(r), 36c9(r
 //==============================================================================
 // SECTION: hiscore_and_sprite_data
 // RANGE:   $771F-$7FFF
-// STATUS:  partial
-// SUMMARY: hiscore_name_input_buf (sentinel byte at $771F), runtime sprite destination buffers
-//          ($772C-$77FF = 3 frames; $7B00-$7FFF = 20 frames), and flying banner sprites
-//          ($7800-$7AFF, 3 × 4 frames pre-initialised in PRG).
-//          PRG content of the runtime buffers is pre-init garbage; frames are populated at
-//          runtime (same pattern as enemy_sprite_ram at $4C00). Identity of sprites unknown.
+// STATUS:  understood
+// SUMMARY: hiscore_name_input_buf ($771F), dead PRG data at $772C-$77FF and $7B00-$7FFF,
+//          and flying banner sprites ($7800-$7AFF, 3 × 4 frames pre-initialised in PRG).
+//          The dead_data blocks occupy VIC bank-1 sprite-frame slots but are never read
+//          at runtime; the game overwrites those slots before use (confirmed dead data).
 //==============================================================================
 hiscore_name_input_buf:                   // [771F] XREF[2]: 3c54(W), 3ce6(W)  player name buffer during hi-score entry; '*' ($2A) = empty sentinel
   .encoding "ascii"
   .text "HELLO WALLIES"                   // [771F] pre-loaded default; overwritten by player during entry
 
-// runtime sprite destination buffer A: 3 frames (VIC bank 1 frames $DD-$DF, $7740-$77FF)
-// PRG content is pre-init; sprite identity unknown — populated at runtime
-unkSpr_772C:
+// Dead PRG data: VIC bank-1 sprite-frame slots $DD-$DF ($7740-$77FF). Never read at runtime.
+dead_data_772C:
   .byte $00,$00,$11,$fc,$00,$00,$ff       // [772C]
   .byte $ff,$01,$00,$ff,$ff,$00,$00,$ff,$ff,$81,$00,$11,$ff,$88,$00,$ff // [7733] ................
   .byte $ff,$00,$08,$ff,$ff,$00,$40,$ff,$ff,$01,$01,$fe,$ff,$00,$00,$ff // [7743] ......@.........
@@ -11056,9 +11066,8 @@ flying_banner_3_spr:                                          // 4-frame data (p
   .byte $e1,$a1,$f7,$bf,$fc,$00,$00,$e0,$10,$08,$fd,$fa,$1d,$7b,$33,$07 // [7ae3] ..............3.
   .byte $0f,$00,$00,$00,$00,$ec,$d8,$80,$00,$00,$00,$00,$00,$ef,$41,$bd // [7af3] ..............A.
 
-// runtime sprite destination buffer B: 20 frames (VIC bank 1 frames $EC-$FF, $7B00-$7FFF)
-// PRG content is pre-init; sprite identity unknown — populated at runtime
-unkSpr_7B00:
+// Dead PRG data: VIC bank-1 sprite-frame slots $EC-$FF ($7B00-$7FFF). Never read at runtime.
+dead_data_7B00:
   .byte $ff,$01,$00,$ff,$ff,$00,$00,$ff,$ff,$00,$00,$ff,$ff,$14,$00,$ff // [7b03] ................
   .byte $fd,$00,$00,$ff,$ff,$11,$00,$ff,$ff,$00,$00,$ff,$fe,$42,$00,$ff // [7b13] .............B..
   .byte $ff,$29,$00,$ff,$ff,$00,$00,$ff,$ff,$00,$00,$11,$fc,$00,$00,$ff // [7b23] .)..............
@@ -11222,10 +11231,10 @@ music_off:
                                       // XREF[2]: 801f(j), 803a(j)
 music_contplay:
   ldx #$02                            // [8052:a2 02    LDX #$2]
-  dec music_speed                     // [8054:ce eb 84 DEC $84eb]
+  dec music_tick_ctr                  // [8054:ce eb 84 DEC $84eb]
   bpl music_main_loop                 // [8057:10 06    BPL $805f]
-  lda music_reset_speed               // [8059:ad ec 84 LDA $84ec]
-  sta music_speed                     // [805C:8d eb 84 STA $84eb]
+  lda music_tick_rate                 // [8059:ad ec 84 LDA $84ec]
+  sta music_tick_ctr                  // [805C:8d eb 84 STA $84eb]
 
 // Part of: MusicPlay — per-voice per-frame loop; iterates X=0,2,4 across 3 SID voices
                                       // XREF[2]: 8057(j), 837a(j)
@@ -11233,8 +11242,8 @@ music_main_loop:
   lda music_regofst_tbl,x             // [805F:bd c0 84 LDA $84c0,X]
   sta music_tmpregofst                // [8062:8d c3 84 STA $84c3]
   tay                                 // [8065:a8       TAY]
-  lda music_speed                     // [8066:ad eb 84 LDA $84eb]
-  cmp music_reset_speed               // [8069:cd ec 84 CMP $84ec]
+  lda music_tick_ctr                  // [8066:ad eb 84 LDA $84eb]
+  cmp music_tick_rate                 // [8069:cd ec 84 CMP $84ec]
   bne !+                              // [806C:d0 15    BNE $8083]
   lda music_currtrkhi,x               // [806E:bd 66 85 LDA $8566,X]
   sta zp_music_trkptr_lo              // [8071:85 02    STA $0002]
@@ -11893,8 +11902,8 @@ music_regofst_tbl:                                   // Rob Hubbard player varia
 .label music_pulstimer_tbl = music_regofst_tbl + $25
 .label music_pulsedir_tbl  = music_regofst_tbl + $28
 .label music_pulsedir      = music_regofst_tbl + $2A
-.label music_speed         = music_regofst_tbl + $2B
-.label music_reset_speed   = music_regofst_tbl + $2C
+.label music_tick_ctr         = music_regofst_tbl + $2B
+.label music_tick_rate   = music_regofst_tbl + $2C
 .label music_instnumby8    = music_regofst_tbl + $2D
 .label music_status        = music_regofst_tbl + $2E
 .label music_freqhi_tbl    = music_regofst_tbl + $2F

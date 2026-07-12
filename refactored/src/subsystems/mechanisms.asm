@@ -15,6 +15,10 @@
 // STATUS:  understood
 // SUMMARY: Vertically animated shaft that kills Monty if he rides it to the
 //          bottom. Multiple per-room instances; supports up to 2 drivers.
+//          Dual use: room $13 = standard downward piledriver; room $0C =
+//          rising bollard (static tile, same ride code lifts Monty upward).
+//          InitState special-cases room $0C to plant the bollard tile on load;
+//          mechanisms_data has no entry for $0C — it is entirely self-contained.
 //==============================================================================
 .namespace Piledriver {
 
@@ -392,7 +396,9 @@ SeedGlyphs:
 // RANGE:   $21FE-$2247
 // STATUS:  understood
 // SUMMARY: Detects when Monty steps on a piledriver tile (tile $62=head: fires
-//          ride; tile $63=base: sets speed counter).
+//          ride; tile $63=base: sets speed counter). Shared by both room $13
+//          (piledriver, Monty rides down) and room $0C (rising bollard, Monty
+//          rides up) — same code path, different room context.
 //==============================================================================
                                       // XREF[1]: 0ddd(c)
 CheckContact:
@@ -547,8 +553,9 @@ CheckTiles:
 // P1_ROUTINE_NAME: InitPiledriverState (was in utils.asm)
 // RANGE:   $21E8-$21FD
 // STATUS:  understood
-// SUMMARY: Clears zp.piledriver_ride_active; in room $0C places piledriver tile
-//          $62 on screen and sets colour to white. Called at LoadRoom.
+// SUMMARY: Clears zp.piledriver_ride_active on every room load. Room $0C only:
+//          plants the rising bollard tile $62 at row 15, col 27 (white). This
+//          is the sole setup for room $0C's bollard — no mechanisms_data entry.
 //==============================================================================
                                       // XREF[1]: 0e8c(c)
 InitState:

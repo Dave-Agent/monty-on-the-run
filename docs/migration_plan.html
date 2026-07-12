@@ -1,0 +1,583 @@
+<title>Phase 2 Migration Plan</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d1218;
+    color: #dde3f5;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 28px 20px 60px;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .page-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #dde3f5;
+    margin-bottom: 4px;
+  }
+  .page-title span {
+    font-family: 'Courier New', Courier, monospace;
+    color: #6b84cc;
+  }
+  .page-sub {
+    font-size: 11px;
+    color: #7a8aaa;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  /* ── Progress bar ── */
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-label {
+    font-size: 11px;
+    color: #7a8aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    gap: 1px;
+    margin-bottom: 10px;
+  }
+  .progress-bar .seg { height: 100%; }
+  .seg-done   { background: #3a6040; width: 28%; }
+  .seg-new    { background: #c07a30; width: 20%; }
+  .seg-extend { background: #4a90d0; width: 38%; }
+  .seg-unsure { background: #7b4fc4; width: 2%;  }
+  .seg-stays  { background: #3f9965; width: 12%; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #7a8aaa;
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .legend-item strong { color: #dde3f5; font-weight: 600; }
+
+  /* ── Section group headers ── */
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 32px 0 14px;
+  }
+  .group-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pill-new    { background: rgba(192,122,48,0.18); color: #c07a30; border-left: 3px solid #c07a30; }
+  .pill-extend { background: rgba(74,144,208,0.15); color: #4a90d0; border-left: 3px solid #4a90d0; }
+  .pill-unsure { background: rgba(123,79,196,0.15); color: #9b76df; border-left: 3px solid #7b4fc4; }
+  .pill-stays  { background: rgba(63,153,101,0.15); color: #3f9965; border-left: 3px solid #3f9965; }
+
+  .group-note {
+    font-size: 11px;
+    color: #7a8aaa;
+    font-style: italic;
+  }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .card-grid.single { grid-template-columns: 1fr; }
+
+  @media (max-width: 600px) {
+    .card-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: #151c2c;
+    border: 1px solid #232d45;
+    border-radius: 5px;
+    padding: 14px 16px;
+  }
+
+  /* ── Done card treatment ── */
+  .card.done-card {
+    background: #0f1710;
+    border-color: #1e3a2a;
+  }
+  .card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 0;
+  }
+  .done-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3f9965;
+    background: rgba(63,153,101,0.12);
+    border: 1px solid rgba(63,153,101,0.25);
+    border-radius: 3px;
+    padding: 2px 7px;
+    margin-top: 1px;
+  }
+  .done-card .card-title { color: #8aab98; }
+  .done-card .card-desc  { color: #4a5f52; }
+  .done-card td.sec-name { color: #526862; }
+  .done-card td.sec-lines { color: #3e5248; }
+  .done-card tr.total-row td { color: #6a9980; border-top-color: #1e3a2a; }
+  .done-card tr.total-row td.sec-lines { color: #6a9980; }
+  td.sec-redirect {
+    font-size: 11px;
+    color: #3a5c4a;
+    padding-left: 12px;
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  .card-title {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #dde3f5;
+    margin-bottom: 2px;
+  }
+  .card-desc {
+    font-size: 11px;
+    color: #7a8aaa;
+    margin-bottom: 12px;
+  }
+  .card-note {
+    font-size: 11px;
+    color: #7a8aaa;
+    font-style: italic;
+    margin-bottom: 8px;
+    padding: 5px 8px;
+    background: rgba(107,132,204,0.07);
+    border-left: 2px solid #6b84cc;
+    border-radius: 2px;
+  }
+  .card-note-done {
+    font-size: 11px;
+    color: #4a7a5a;
+    font-style: italic;
+    margin-bottom: 8px;
+    padding: 5px 8px;
+    background: rgba(63,153,101,0.06);
+    border-left: 2px solid rgba(63,153,101,0.3);
+    border-radius: 2px;
+  }
+
+  /* ── Section tables ── */
+  .overflow-x { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  td {
+    padding: 3px 0;
+    vertical-align: top;
+  }
+  td.sec-name {
+    font-family: 'Courier New', Courier, monospace;
+    color: #b0bdd8;
+    padding-right: 16px;
+  }
+  td.sec-lines {
+    font-family: 'Courier New', Courier, monospace;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: #7a8aaa;
+    white-space: nowrap;
+  }
+  td.sec-note {
+    font-size: 11px;
+    color: #7a8aaa;
+    padding-left: 16px;
+    white-space: nowrap;
+  }
+  tr.total-row td {
+    border-top: 1px solid #232d45;
+    padding-top: 6px;
+    margin-top: 4px;
+    font-weight: 700;
+    color: #dde3f5;
+  }
+  tr.total-row td.sec-lines { color: #dde3f5; }
+
+  /* ── Uncertain table spans 3 cols ── */
+  .uncertain-table td.sec-name { width: 40%; }
+  .uncertain-table td.sec-lines { width: 10%; }
+  .uncertain-table td.sec-note { width: 50%; color: #9b76df; }
+
+  /* ── Namespace sub-headers inside a card ── */
+  .ns-row td {
+    padding-top: 10px;
+  }
+  .ns-header {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    color: #6b84cc;
+    background: rgba(107,132,204,0.09);
+    padding: 3px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.04em;
+  }
+  tr.ns-row:first-child td { padding-top: 0; }
+  tr.subtotal-row td {
+    padding-top: 4px;
+    padding-bottom: 6px;
+    color: #5a6a8a;
+    border-bottom: 1px solid #1e2840;
+  }
+  tr.subtotal-row td.sec-lines { color: #5a6a8a; }
+
+  /* card spanning full grid width */
+  .card.span-full { grid-column: 1 / -1; }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #1a2236;
+    font-size: 11px;
+    color: #4a5570;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+  .footer span {
+    display: inline-block;
+    margin: 0 6px;
+    color: #6b84cc;
+  }
+</style>
+
+<div class="page">
+
+  <h1 class="page-title">Phase 2 Migration Plan — <span>main.asm</span></h1>
+  <p class="page-sub">4,085 lines remaining in main.asm &nbsp;·&nbsp; 2 of 3 new files done &nbsp;·&nbsp; 5 extensions pending</p>
+
+  <!-- Progress bar -->
+  <div class="progress-wrap">
+    <div class="progress-label">Lines by disposition</div>
+    <div class="progress-bar">
+      <div class="seg seg-done"></div>
+      <div class="seg seg-new"></div>
+      <div class="seg seg-extend"></div>
+      <div class="seg seg-unsure"></div>
+      <div class="seg seg-stays"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#3a6040"></div><strong>1,621</strong>&nbsp;lines extracted (28%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c07a30"></div><strong>1,157</strong>&nbsp;lines → new subsystems (20%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a90d0"></div><strong>2,162</strong>&nbsp;lines → extend existing (38%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7b4fc4"></div><strong>101</strong>&nbsp;lines uncertain (2%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3f9965"></div><strong>665</strong>&nbsp;lines stay in main (12%)</div>
+    </div>
+  </div>
+
+  <!-- ═══ A: New subsystems ═══ -->
+  <div class="group-header">
+    <span class="group-pill pill-new">A — New subsystem files</span>
+  </div>
+
+  <div class="card-grid">
+
+    <!-- DONE: room_engine.asm -->
+    <div class="card done-card">
+      <div class="card-header-row">
+        <div>
+          <div class="card-title">room_engine.asm</div>
+          <div class="card-desc">room loading, setup and rendering</div>
+        </div>
+        <div class="done-badge">&#10003; done</div>
+      </div>
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">load_room</td><td class="sec-lines">100</td></tr>
+          <tr><td class="sec-name">create_playfield_border</td><td class="sec-lines">47</td></tr>
+          <tr><td class="sec-name">populate_colour_ram</td><td class="sec-lines">74</td></tr>
+          <tr><td class="sec-name">draw_room_playfield</td><td class="sec-lines">134</td></tr>
+          <tr><td class="sec-name">setup_tile_graphics</td><td class="sec-lines">68</td></tr>
+          <tr><td class="sec-name">setup_room</td><td class="sec-lines">177</td></tr>
+          <tr><td class="sec-name">RoomEntitiesInit</td><td class="sec-lines">111</td></tr>
+          <tr><td class="sec-name">ResetGameState</td><td class="sec-lines">35</td></tr>
+          <tr><td class="sec-name">room_nav_tables</td><td class="sec-lines">74</td></tr>
+          <tr><td class="sec-name">DisplaySectorName</td><td class="sec-lines">84</td></tr>
+          <tr><td class="sec-name">sector_name_strings</td><td class="sec-lines">65</td></tr>
+          <tr><td class="sec-name">InitRoom1FEntities</td><td class="sec-lines">49</td></tr>
+          <tr><td class="sec-name">init_room_death_flag</td><td class="sec-lines">69</td></tr>
+          <tr class="total-row"><td class="sec-name">Total</td><td class="sec-lines">1,087</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- DONE: sprites.asm -->
+    <div class="card done-card">
+      <div class="card-header-row">
+        <div>
+          <div class="card-title">sprites.asm</div>
+          <div class="card-desc">sprite multiplexer and animation engine</div>
+        </div>
+        <div class="done-badge">&#10003; done</div>
+      </div>
+      <div class="card-note-done">UpdateChrs (was UpdateAttractScreenChrs) redirected → attract.asm</div>
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">ProcessSprites</td><td class="sec-lines">204</td></tr>
+          <tr><td class="sec-name">SeparateSpritePair</td><td class="sec-lines">35</td></tr>
+          <tr><td class="sec-name">DeinterleaveSpriteRow</td><td class="sec-lines">52</td></tr>
+          <tr><td class="sec-name">level_sprite_cycle</td><td class="sec-lines">19</td></tr>
+          <tr><td class="sec-name">WalkSprite7ToTarget</td><td class="sec-lines">144</td></tr>
+          <tr><td class="sec-name">UpdateSprite23MSBit</td><td class="sec-lines">18</td></tr>
+          <tr><td class="sec-name" style="color:#3a5c4a;font-style:italic">UpdateChrs &#8594; attract.asm</td><td class="sec-lines" style="color:#3a5c4a">62</td></tr>
+          <tr class="total-row"><td class="sec-name">Total</td><td class="sec-lines">534</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- TODO: interactive_objects.asm -->
+    <div class="card span-full">
+      <div class="card-title">interactive_objects.asm</div>
+      <div class="card-desc">piledriver, lift &amp; teleporter — three discrete namespaces</div>
+      <div class="overflow-x">
+        <table>
+          <tr class="ns-row"><td colspan="2"><span class="ns-header">.namespace Piledriver</span></td></tr>
+          <tr><td class="sec-name">piledriver_init</td><td class="sec-lines">77</td></tr>
+          <tr><td class="sec-name">PiledriverDrawShaft</td><td class="sec-lines">62</td></tr>
+          <tr><td class="sec-name">piledriver_config_data</td><td class="sec-lines">19</td></tr>
+          <tr><td class="sec-name">piledriver_animation</td><td class="sec-lines">179</td></tr>
+          <tr><td class="sec-name">PiledriverClearBuffers</td><td class="sec-lines">23</td></tr>
+          <tr><td class="sec-name">PiledriverInitFrame</td><td class="sec-lines">37</td></tr>
+          <tr><td class="sec-name">piledriver_contact</td><td class="sec-lines">51</td></tr>
+          <tr><td class="sec-name">piledriver_ride</td><td class="sec-lines">30</td></tr>
+          <tr><td class="sec-name">piledriver_tile_check</td><td class="sec-lines">72</td></tr>
+          <tr class="subtotal-row"><td class="sec-name">subtotal</td><td class="sec-lines">550</td></tr>
+
+          <tr class="ns-row"><td colspan="2"><span class="ns-header">.namespace Lift</span></td></tr>
+          <tr><td class="sec-name">DisplayLift</td><td class="sec-lines">49</td></tr>
+          <tr><td class="sec-name">lift_subsystem</td><td class="sec-lines">216</td></tr>
+          <tr class="subtotal-row"><td class="sec-name">subtotal</td><td class="sec-lines">265</td></tr>
+
+          <tr class="ns-row"><td colspan="2"><span class="ns-header">.namespace Teleporter</span></td></tr>
+          <tr><td class="sec-name">DisplayTeleporters</td><td class="sec-lines">36</td></tr>
+          <tr><td class="sec-name">ClearTeleporterChars</td><td class="sec-lines">107</td></tr>
+          <tr><td class="sec-name">TeleporterDisplayAndPulse</td><td class="sec-lines">65</td></tr>
+          <tr><td class="sec-name">TeleporterCycleColours</td><td class="sec-lines">75</td></tr>
+          <tr><td class="sec-name">teleporter_contact</td><td class="sec-lines">59</td></tr>
+          <tr class="subtotal-row"><td class="sec-name">subtotal</td><td class="sec-lines">342</td></tr>
+
+          <tr class="total-row"><td class="sec-name">Total</td><td class="sec-lines">1,157</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /card-grid A -->
+
+  <!-- ═══ B: Extend existing ═══ -->
+  <div class="group-header">
+    <span class="group-pill pill-extend">B — Extend existing subsystem files</span>
+  </div>
+
+  <div class="card-grid">
+
+    <div class="card">
+      <div class="card-title">monty.asm</div>
+      <div class="card-desc">+13 sections, +1,171 lines</div>
+      <div class="card-note">currently contains only monty_sprite_data</div>
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">monty_movement</td><td class="sec-lines">272</td></tr>
+          <tr><td class="sec-name">draw_monty</td><td class="sec-lines">162</td></tr>
+          <tr><td class="sec-name">CharacterAnimation</td><td class="sec-lines">48</td></tr>
+          <tr><td class="sec-name">tile_lookup</td><td class="sec-lines">27</td></tr>
+          <tr><td class="sec-name">StepJumpArc</td><td class="sec-lines">50</td></tr>
+          <tr><td class="sec-name">monty_tile_flags_update</td><td class="sec-lines">53</td></tr>
+          <tr><td class="sec-name">set_tile_property</td><td class="sec-lines">39</td></tr>
+          <tr><td class="sec-name">char_anim</td><td class="sec-lines">35</td></tr>
+          <tr><td class="sec-name">monty_death_dispatch</td><td class="sec-lines">279</td></tr>
+          <tr><td class="sec-name">MontyLifeLost</td><td class="sec-lines">30</td></tr>
+          <tr><td class="sec-name">dissolve_animation</td><td class="sec-lines">68</td></tr>
+          <tr><td class="sec-name">MontyDeathDissolve</td><td class="sec-lines">57</td></tr>
+          <tr><td class="sec-name">PlayDeathDissolve</td><td class="sec-lines">51</td></tr>
+          <tr class="total-row"><td class="sec-name">Total added</td><td class="sec-lines">+1,171</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">enemies.asm</div>
+      <div class="card-desc">+1 section, +255 lines</div>
+      <div class="card-note">enemy_tick not in original plan — was implicitly in stays bucket</div>
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">enemy_tick</td><td class="sec-lines">255</td></tr>
+          <tr class="total-row"><td class="sec-name">Total added</td><td class="sec-lines">+255</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">attract.asm</div>
+      <div class="card-desc">+4 sections, +265 lines</div>
+      <div class="card-note-done">UpdateChrs already extracted (was UpdateAttractScreenChrs in sprites plan)</div>
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">AttractScreenLoop</td><td class="sec-lines">65</td></tr>
+          <tr><td class="sec-name">AttractFrameUpdate</td><td class="sec-lines">46</td></tr>
+          <tr><td class="sec-name">GameOverAnimation</td><td class="sec-lines">105</td></tr>
+          <tr><td class="sec-name">arrested_ending</td><td class="sec-lines">49</td></tr>
+          <tr class="total-row"><td class="sec-name">Total added</td><td class="sec-lines">+265</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">decorations.asm</div>
+      <div class="card-desc">+1 section, +294 lines</div>
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">room_decorations</td><td class="sec-lines">294</td></tr>
+          <tr class="total-row"><td class="sec-name">Total added</td><td class="sec-lines">+294</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">utils.asm</div>
+      <div class="card-desc">+6 sections, +178 lines</div>
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">system_utils</td><td class="sec-lines">75</td></tr>
+          <tr><td class="sec-name">InitialiseZeroPage</td><td class="sec-lines">19</td></tr>
+          <tr><td class="sec-name">WaitForVSync</td><td class="sec-lines">22</td></tr>
+          <tr><td class="sec-name">GetRoomID</td><td class="sec-lines">18</td></tr>
+          <tr><td class="sec-name">ToggleParity</td><td class="sec-lines">16</td></tr>
+          <tr><td class="sec-name">shift_charset_chars</td><td class="sec-lines">28</td></tr>
+          <tr class="total-row"><td class="sec-name">Total added</td><td class="sec-lines">+178</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /card-grid B -->
+
+  <!-- ═══ C: Uncertain ═══ -->
+  <div class="group-header">
+    <span class="group-pill pill-unsure">C — Uncertain placement</span>
+    <span class="group-note">needs a read to confirm home — options listed</span>
+  </div>
+
+  <div class="card-grid single">
+    <div class="card">
+      <div class="overflow-x">
+        <table class="uncertain-table">
+          <tr>
+            <td class="sec-name">UpdateThrusterGfx</td>
+            <td class="sec-lines">37</td>
+            <td class="sec-note">special_items.asm or freedom_kit.asm</td>
+          </tr>
+          <tr>
+            <td class="sec-name">thruster_mask_tables</td>
+            <td class="sec-lines">14</td>
+            <td class="sec-note">same</td>
+          </tr>
+          <tr>
+            <td class="sec-name">cycle_colours</td>
+            <td class="sec-lines">20</td>
+            <td class="sec-note">utils.asm or decorations.asm</td>
+          </tr>
+          <tr>
+            <td class="sec-name">InitialiseGraphicsMode</td>
+            <td class="sec-lines">30</td>
+            <td class="sec-note">utils.asm or stays in main.asm</td>
+          </tr>
+          <tr class="total-row">
+            <td class="sec-name">Total</td>
+            <td class="sec-lines">101</td>
+            <td class="sec-note"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ D: Stays ═══ -->
+  <div class="group-header">
+    <span class="group-pill pill-stays">D — Stays in main.asm</span>
+    <span class="group-note">bootstrap, IRQ handlers, top-level game loop — the skeleton · cbm80_header &amp; anti_hack_screen already removed (P2_DIVERGES)</span>
+  </div>
+
+  <div class="card-grid single">
+    <div class="card">
+      <div class="overflow-x">
+        <table>
+          <tr><td class="sec-name">platform_config</td><td class="sec-lines">51</td></tr>
+          <tr><td class="sec-name">irq_nmi_main_loop</td><td class="sec-lines">101</td></tr>
+          <tr><td class="sec-name">IrqExit</td><td class="sec-lines">21</td></tr>
+          <tr><td class="sec-name">NmiHandler</td><td class="sec-lines">26</td></tr>
+          <tr><td class="sec-name">MainGameLoop</td><td class="sec-lines">88</td></tr>
+          <tr><td class="sec-name">startGame</td><td class="sec-lines">102</td></tr>
+          <tr><td class="sec-name">hud</td><td class="sec-lines">67</td></tr>
+          <tr><td class="sec-name">UpdateScreenHeader</td><td class="sec-lines">34</td></tr>
+          <tr><td class="sec-name">character</td><td class="sec-lines">16</td></tr>
+          <tr><td class="sec-name">hiscore_and_sprite_data</td><td class="sec-lines">117</td></tr>
+          <tr class="total-row"><td class="sec-name">Total stays</td><td class="sec-lines">~623</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <code>verify-phase2</code> must stay green after each extraction
+    <span>·</span>
+    <code>build-phase2</code> is the gate
+  </div>
+
+  <!-- ═══ E: Late-stage cleanup ═══ -->
+  <div class="group-header">
+    <span class="group-pill" style="background:#555;color:#eee">E — Late-stage cleanup</span>
+    <span class="group-note">housekeeping after all extractions are done</span>
+  </div>
+
+  <div class="card-grid single">
+    <div class="card">
+      <div class="overflow-x">
+        <table>
+          <tr>
+            <td class="sec-name">Review all <code>.pc</code> pins for necessity</td>
+            <td class="sec-lines">—</td>
+          </tr>
+        </table>
+      </div>
+      <div class="card-note">Only VIC-bank-dependent segments (chrset, screen RAM, sprite data) truly need a fixed address. Everything else that is currently pinned may be able to float — increasing relocatability. Audit each <code>.pc</code> in phase2/src, check whether the pin is load-bearing (VIC bank, hardware register page, external hardcoded reference) or a phase-1 hold-over.</div>
+    </div>
+  </div>
+
+</div>
