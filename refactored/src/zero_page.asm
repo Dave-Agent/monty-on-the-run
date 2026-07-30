@@ -141,11 +141,11 @@ piledriver_index:        .byte $00
 piledriver_position:     .byte $00
 pd_travel_limit:         .fill 2, 0   // 2-element array indexed by driver (0 or 1)
 pd_sprite_y:             .fill 2, 0   // 2-element array indexed by driver (0 or 1)
-lift_var4:               .byte $00
-lift_var5:               .byte $00
+lift_x:                  .byte $00
+lift_y:                  .byte $00
 lift_type:               .byte $00
-lift_var2:               .byte $00
-lift_var3:               .byte $00
+lift_speed_dir:          .byte $00
+lift_contains_monty:     .byte $00
 lift_speed:              .byte $00
 s_tmp_ptr:               .byte $00    // temp ptr lo (many indirect ops: (zp.s_tmp_ptr),y)
 s_tmp_ptr_hi:            .byte $00    // temp ptr hi
