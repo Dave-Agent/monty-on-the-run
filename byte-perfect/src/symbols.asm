@@ -132,11 +132,11 @@
 .label piledriver_position = $0090
 .label zp_pd_travel_limit = $0091
 .label zp_pd_sprite_y = $0093
-.label lift_var4 = $0095
-.label lift_var5 = $0096
+.label lift_x = $0095
+.label lift_y = $0096
 .label zp_lift_type = $0097
-.label lift_var2 = $0098
-.label lift_var3 = $0099
+.label lift_speed_dir = $0098
+.label lift_contains_monty = $0099
 .label zp_lift_speed = $009A
 .label zps_tmp_ptr = $009B                         // temp pointer lo (many indirect ops: ($9B),y for tile copy, scroll text, room data); also plain scratch
 .label zps_tmp_ptr_hi = $009C                      // temp pointer hi (pair with zps_tmp_ptr); also ROL shift buffer in scroll text render

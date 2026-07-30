@@ -4471,19 +4471,19 @@ DisplayLift:
   //   Board → descends to Y=$B0, stops (game_mode cleared, no death).
   lda #$00                            // [1F79:a9 00    LDA #$0]
   sta zp_lift_type                    // [1F7B:85 97    STA $0097]
-  sta lift_var2                       // [1F7D:85 98    STA $0098]
-  sta lift_var3                       // [1F7F:85 99    STA $0099]
+  sta lift_speed_dir                  // [1F7D:85 98    STA $0098]
+  sta lift_contains_monty             // [1F7F:85 99    STA $0099]
   lda zp_room_id                      // [1F81:a5 46    LDA $0046]
   cmp #$05                            // [1F83:c9 05    CMP #$5]
   bne !+                              // [1F85:d0 16    BNE $1f9d]
   lda #$48                            // [1F87:a9 48    LDA #$48]
-  sta lift_var4                       // [1F89:85 95    STA $0095]
+  sta lift_x                          // [1F89:85 95    STA $0095]
   lda #$5b                            // [1F8B:a9 5b    LDA #$5b]
-  sta lift_var5                       // [1F8D:85 96    STA $0096]
+  sta lift_y                          // [1F8D:85 96    STA $0096]
   lda #$01                            // [1F8F:a9 01    LDA #$1]
   sta zp_lift_type                    // [1F91:85 97    STA $0097]
   lda #$82                            // [1F93:a9 82    LDA #$82]
-  sta lift_var2                       // [1F95:85 98    STA $0098]
+  sta lift_speed_dir                  // [1F95:85 98    STA $0098]
   lda #$05                            // [1F97:a9 05    LDA #$5]
   jsr MusicPlaySFX                    // [1F99:20 91 95 JSR $9591]
   rts                                 // [1F9C:60       RTS]
@@ -4491,13 +4491,13 @@ DisplayLift:
   cmp #$0d                            // [1F9D:c9 0d    CMP #$d]
   bne !+                              // [1F9F:d0 10    BNE $1fb1]
   lda #$80                            // [1FA1:a9 80    LDA #$80]
-  sta lift_var4                       // [1FA3:85 95    STA $0095]
+  sta lift_x                          // [1FA3:85 95    STA $0095]
   lda #$53                            // [1FA5:a9 53    LDA #$53]
-  sta lift_var5                       // [1FA7:85 96    STA $0096]
+  sta lift_y                          // [1FA7:85 96    STA $0096]
   lda #$02                            // [1FA9:a9 02    LDA #$2]
   sta zp_lift_type                    // [1FAB:85 97    STA $0097]
   lda #$80                            // [1FAD:a9 80    LDA #$80]
-  sta lift_var2                       // [1FAF:85 98    STA $0098]
+  sta lift_speed_dir                  // [1FAF:85 98    STA $0098]
 !:
   rts                                 // [1FB1:60       RTS]
 
@@ -4507,10 +4507,10 @@ DisplayLift:
 // STATUS:  understood
 // SUMMARY: Two-room lift subsystem. Sprites 1/2 (frames $74/$75, multicolor) show
 //          the platform; LiftSpriteUpdate positions them and cycles colours.
-//          State: lift_var4/5 ($95/$96) = X/Y; zp_lift_type ($97) = type (0=off,
-//          1=squash-hazard, 2=transport); lift_var2 ($98) = speed+direction byte
+//          State: lift_x/5 ($95/$96) = X/Y; zp_lift_type ($97) = type (0=off,
+//          1=squash-hazard, 2=transport); lift_speed_dir ($98) = speed+direction byte
 //          (bits 0-3 = speed, bit 7 = descending; $88 = return-trip code);
-//          lift_var3 ($99) = Monty-riding flag.
+//          lift_contains_monty ($99) = Monty-riding flag.
 //          Room $05 (type 1): starts descending at speed 2. Board → ascending (speed 2,
 //          SFX $04) to Y=$62; reverses ($88, speed 8); returns to Y=$B0 → sets
 //          zp_action_counter=3 (MontyDeathLift squash, bypasses cheat mode).
@@ -4526,10 +4526,10 @@ LiftSpriteUpdate:
   bne !+                              // [1FB4:d0 01    BNE $1fb7]        no lift: exit
   rts                                 // [1FB6:60       RTS]
 !:
-  lda lift_var4                       // [1FB7:a5 95    LDA $0095]
+  lda lift_x                          // [1FB7:a5 95    LDA $0095]
   sta zp_sprite1_x_buffer             // [1FB9:85 11    STA $0011]
   sta zp_sprite2_x_buffer             // [1FBB:85 12    STA $0012]
-  lda lift_var5                       // [1FBD:a5 96    LDA $0096]
+  lda lift_y                          // [1FBD:a5 96    LDA $0096]
   sta zp_sprite1_y_buffer             // [1FBF:85 19    STA $0019]
   clc                                 // [1FC1:18       CLC]
   adc #$15                            // [1FC2:69 15    ADC #$15]
@@ -4551,9 +4551,9 @@ LiftSpriteUpdate:
   lda zp_vic_shadow_multicolor        // [1FE4:a5 23    LDA $0023]
   ora #$06                            // [1FE6:09 06    ORA #$6]
   sta zp_vic_shadow_multicolor        // [1FE8:85 23    STA $0023]
-  lda lift_var3                       // [1FEA:a5 99    LDA $0099]
+  lda lift_contains_monty             // [1FEA:a5 99    LDA $0099]
   beq !+                              // [1FEC:f0 07    BEQ $1ff5]        not riding lift: skip Y update
-  lda lift_var5                       // [1FEE:a5 96    LDA $0096]
+  lda lift_y                          // [1FEE:a5 96    LDA $0096]
   clc                                 // [1FF0:18       CLC]
   adc #$17                            // [1FF1:69 17    ADC #$17]        Monty sits $17 pixels above lift
   sta zp_monty_sprite_y2              // [1FF3:85 36    STA $0036]
@@ -4562,22 +4562,22 @@ LiftSpriteUpdate:
 
                                       // XREF[1]: 0dc2(c)
 LiftMovementUpdate:
-  lda lift_var2                       // [1FF6:a5 98    LDA $0098]
+  lda lift_speed_dir                  // [1FF6:a5 98    LDA $0098]
   and #$0f                            // [1FF8:29 0f    AND #$f]
   sta zp_lift_speed                   // [1FFA:85 9a    STA $009a]
   bne !+                              // [1FFC:d0 01    BNE $1fff]        speed zero: nothing to do
   rts                                 // [1FFE:60       RTS]
 !:
-  lda lift_var2                       // [1FFF:a5 98    LDA $0098]
+  lda lift_speed_dir                  // [1FFF:a5 98    LDA $0098]
   bpl LiftMovementUpdate_asc          // [2001:10 36    BPL $2039]        positive speed: ascending
-  lda lift_var5                       // [2003:a5 96    LDA $0096]
+  lda lift_y                          // [2003:a5 96    LDA $0096]
   cmp #$b0                            // [2005:c9 b0    CMP #$b0]
   bcc !+                              // [2007:90 1a    BCC $2023]        not at bottom: move down
-  lda lift_var2                       // [2009:a5 98    LDA $0098]
+  lda lift_speed_dir                  // [2009:a5 98    LDA $0098]
   cmp #$88                            // [200B:c9 88    CMP #$88]
   bne LiftMovementUpdate_stop         // [200D:d0 0b    BNE $201a]        not the final-stop code: just clear
   lda #$00                            // [200F:a9 00    LDA #$0]
-  sta lift_var3                       // [2011:85 99    STA $0099]
+  sta lift_contains_monty             // [2011:85 99    STA $0099]
   sta game_mode                       // [2013:85 39    STA $0039]
   lda #$03                            // [2015:a9 03    LDA #$3]
   sta zp_action_counter               // [2017:85 b7    STA $00b7]
@@ -4586,15 +4586,15 @@ LiftMovementUpdate:
 // Part of: LiftMovementUpdate — stop at travel boundary, clear speed/rider/game mode
 LiftMovementUpdate_stop:
   lda #$00                            // [201A:a9 00    LDA #$0]
-  sta lift_var2                       // [201C:85 98    STA $0098]
-  sta lift_var3                       // [201E:85 99    STA $0099]
+  sta lift_speed_dir                  // [201C:85 98    STA $0098]
+  sta lift_contains_monty             // [201E:85 99    STA $0099]
   sta game_mode                       // [2020:85 39    STA $0039]
   rts                                 // [2022:60       RTS]
 !:
-  lda lift_var5                       // [2023:a5 96    LDA $0096]        descend: add speed delta
+  lda lift_y                          // [2023:a5 96    LDA $0096]        descend: add speed delta
   clc                                 // [2025:18       CLC]
   adc zp_lift_speed                   // [2026:65 9a    ADC $009a]
-  sta lift_var5                       // [2028:85 96    STA $0096]
+  sta lift_y                          // [2028:85 96    STA $0096]
   ldy #$3c                            // [202A:a0 3c    LDY #$3c]
   lda zp_lift_speed                   // [202C:a5 9a    LDA $009a]
   cmp #$08                            // [202E:c9 08    CMP #$8]
@@ -4607,19 +4607,19 @@ LiftMovementUpdate_stop:
 
 // Part of: LiftMovementUpdate — ascending movement path
 LiftMovementUpdate_asc:
-  lda lift_var5                       // [2039:a5 96    LDA $0096]        ascend: subtract speed delta
+  lda lift_y                          // [2039:a5 96    LDA $0096]        ascend: subtract speed delta
   cmp #$62                            // [203B:c9 62    CMP #$62]
   bcs !+                              // [203D:b0 0a    BCS $2049]        not at top: move up
   lda #$05                            // [203F:a9 05    LDA #$5]
   jsr MusicPlaySFX                    // [2041:20 91 95 JSR $9591]
   lda #$88                            // [2044:a9 88    LDA #$88]
-  sta lift_var2                       // [2046:85 98    STA $0098]
+  sta lift_speed_dir                  // [2046:85 98    STA $0098]
   rts                                 // [2048:60       RTS]
 !:
-  lda lift_var5                       // [2049:a5 96    LDA $0096]
+  lda lift_y                          // [2049:a5 96    LDA $0096]
   sec                                 // [204B:38       SEC]
   sbc zp_lift_speed                   // [204C:e5 9a    SBC $009a]
-  sta lift_var5                       // [204E:85 96    STA $0096]
+  sta lift_y                          // [204E:85 96    STA $0096]
   lda #$00                            // [2050:a9 00    LDA #$0]
   jsr LiftUpdateBgTile                // [2052:20 a8 20 JSR $20a8]
   rts                                 // [2055:60       RTS]
@@ -4628,19 +4628,19 @@ LiftMovementUpdate_asc:
 LiftMontyCollision:
   lda zp_lift_type                    // [2056:a5 97    LDA $0097]
   beq !++++                           // [2058:f0 4d    BEQ $20a7]
-  lda lift_var3                       // [205A:a5 99    LDA $0099]
+  lda lift_contains_monty             // [205A:a5 99    LDA $0099]
   bne !++++                           // [205C:d0 49    BNE $20a7]
   lda zp_lift_type                    // [205E:a5 97    LDA $0097]
   cmp #$02                            // [2060:c9 02    CMP #$2]
   bne !+                              // [2062:d0 07    BNE $206b]
-  lda lift_var5                       // [2064:a5 96    LDA $0096]
+  lda lift_y                          // [2064:a5 96    LDA $0096]
   cmp #$b0                            // [2066:c9 b0    CMP #$b0]
   bcc !+                              // [2068:90 01    BCC $206b]
   rts                                 // [206A:60       RTS]
 
                                       // XREF[2]: 2062(j), 2068(j)
 !:
-  lda lift_var5                       // [206B:a5 96    LDA $0096]
+  lda lift_y                          // [206B:a5 96    LDA $0096]
   clc                                 // [206D:18       CLC]
   adc #$1a                            // [206E:69 1a    ADC #$1a]
   tay                                 // [2070:a8       TAY]
@@ -4654,25 +4654,25 @@ LiftMontyCollision:
   cmp zp_monty_sprite_y2              // [207B:c5 36    CMP $0036]        one pixel tolerance
   bne !+++                            // [207D:d0 28    BNE $20a7]
 !:
-  lda lift_var4                       // [207F:a5 95    LDA $0095]        check X alignment
+  lda lift_x                          // [207F:a5 95    LDA $0095]        check X alignment
   clc                                 // [2081:18       CLC]
   adc #$02                            // [2082:69 02    ADC #$2]
   cmp zp_monty_sprite_x2              // [2084:c5 35    CMP $0035]
   bne !++                             // [2086:d0 1f    BNE $20a7]        X mismatch: not on lift
   lda #$01                            // [2088:a9 01    LDA #$1]
-  sta lift_var3                       // [208A:85 99    STA $0099]        flag Monty as riding lift
+  sta lift_contains_monty             // [208A:85 99    STA $0099]        flag Monty as riding lift
   sta game_mode                       // [208C:85 39    STA $0039]
   lda zp_lift_type                    // [208E:a5 97    LDA $0097]
   cmp #$01                            // [2090:c9 01    CMP #$1]
   beq !+                              // [2092:f0 0a    BEQ $209e]        type 1: different boarding sfx
   lda #$82                            // [2094:a9 82    LDA #$82]
-  sta lift_var2                       // [2096:85 98    STA $0098]
+  sta lift_speed_dir                  // [2096:85 98    STA $0098]
   lda #$05                            // [2098:a9 05    LDA #$5]
   jsr MusicPlaySFX                    // [209A:20 91 95 JSR $9591]
   rts                                 // [209D:60       RTS]
 !:
   lda #$02                            // [209E:a9 02    LDA #$2]
-  sta lift_var2                       // [20A0:85 98    STA $0098]
+  sta lift_speed_dir                  // [20A0:85 98    STA $0098]
   lda #$04                            // [20A2:a9 04    LDA #$4]
   jsr MusicPlaySFX                    // [20A4:20 91 95 JSR $9591]
 !:
@@ -4681,7 +4681,7 @@ LiftMontyCollision:
 // Part of: LiftMovementUpdate — write background tile at lift position
                                       // XREF[2]: 2035(c), 2052(c)
 LiftUpdateBgTile:
-  ldy lift_var5                       // [20A8:a4 96    LDY $0096]
+  ldy lift_y                          // [20A8:a4 96    LDY $0096]
   sta zp_lift_speed                   // [20AA:85 9a    STA $009a]
   cmp #$00                            // [20AC:c9 00    CMP #$0]
   bne !+                              // [20AE:d0 05    BNE $20b5]        non-zero direction: skip Y adjust
@@ -4697,7 +4697,7 @@ LiftUpdateBgTile:
   lsr                                 // [20BA:4a       LSR A]
   lsr                                 // [20BB:4a       LSR A]
   jsr GetScreenRowAddress             // [20BC:20 55 14 JSR $1455]
-  lda lift_var4                       // [20BF:a5 95    LDA $0095]
+  lda lift_x                          // [20BF:a5 95    LDA $0095]
   sec                                 // [20C1:38       SEC]
   sbc #$0c                            // [20C2:e9 0c    SBC #$c]
   lsr                                 // [20C4:4a       LSR A]
