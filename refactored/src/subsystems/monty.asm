@@ -8,10 +8,7 @@
 //   Monty.SetTileProperty   — classify char code Y → store flag at zp.tile_property_tbl[X]
 //   Monty.UpdateTileFlags   — scan 2×3 footprint for solid surface; update tile_state
 //   Monty.StepJumpArc       — advance one step of the jump arc
-//   Monty.AnimateCharacters — colour-cycle in-room collectibles
-//   Monty.RotateChar        — rotate 3-row charset bitmap 1 bit right (LSB wrap)
-//   Monty.RotateCharOddFrame — same, odd frames only
-//   Monty.Death.Dispatch    — event dispatcher: decode zp.action_counter → death handler
+// //   Monty.Death.Dispatch    — event dispatcher: decode zp.action_counter → death handler
 //   Monty.Death.LifeLost    — decrement lives, reload room or GameOverAnimation
 //   Monty.Death.Dissolve    — one-shot dissolve setup (copy sprite → pixel/mask/ref bufs)
 //   Monty.Death.PlayDissolve — full dissolve animation driver (10-frame loop)
@@ -517,50 +514,6 @@ StepJumpArc:
   sta zp.input_fire                   // [1B17:85 0a    STA $000a]
   rts                                 // [1B19:60       RTS]
 
-//==============================================================================
-// SECTION: CharacterAnimation
-// RANGE:   $1DA2-$1DD3
-// STATUS:  understood
-// SUMMARY: Cycles the colour of all in-room collectibles (coins and FK items).
-//          RoomEntitiesInit places char $34 at each item position and stores
-//          colour-RAM pointer triplets (lo, hi, frame counter) in room_entity_buf.
-//          Increments each frame counter mod 11, indexes patterns[] to get the
-//          next C64 colour index, and writes it to colour RAM.
-//==============================================================================
-                                      // XREF[1]: 0e08(c)
-AnimateCharacters:
-  ldx #$00                            // [1DA2:a2 00    LDX #$0]
-!:
-  lda room_entity_buf+1,x             // [1DA4:bd e7 02 LDA $2e7,X]       hi-byte; $FF = end of table
-  cmp #$ff                            // [1DA7:c9 ff    CMP #$ff]
-  beq !++                             // [1DA9:f0 28    BEQ $1dd3]
-  sta zp.s_tmp_ptr_hi                 // [1DAB:85 9c    STA $009c]
-  lda room_entity_buf,x               // [1DAD:bd e6 02 LDA $2e6,X]       lo-byte
-  sta zp.s_tmp_ptr                    // [1DB0:85 9b    STA $009b]
-  txa                                 // [1DB2:8a       TXA]
-  pha                                 // [1DB3:48       PHA]
-  inc room_entity_buf+2,x             // [1DB4:fe e8 02 INC $2e8,X]       advance frame counter
-  lda room_entity_buf+2,x             // [1DB7:bd e8 02 LDA $2e8,X]
-  cmp #$0b                            // [1DBA:c9 0b    CMP #$b]
-  bne !+                              // [1DBC:d0 05    BNE $1dc3]
-  lda #$00                            // [1DBE:a9 00    LDA #$0]
-  sta room_entity_buf+2,x             // [1DC0:9d e8 02 STA $2e8,X]
-!:
-  tax                                 // [1DC3:aa       TAX]
-  lda patterns,x                      // [1DC4:bd d4 1d LDA $1dd4,X]
-  ldy #$00                            // [1DC7:a0 00    LDY #$0]
-  sta (zp.s_tmp_ptr),y                // [1DC9:91 9b    STA ($9b),Y]
-  pla                                 // [1DCB:68       PLA]
-  tax                                 // [1DCC:aa       TAX]
-  inx                                 // [1DCD:e8       INX]
-  inx                                 // [1DCE:e8       INX]
-  inx                                 // [1DCF:e8       INX]
-  jmp !--                             // [1DD0:4c a4 1d JMP $1da4]
-!:
-  rts                                 // [1DD3:60       RTS]
-
-patterns:                             // 11-step warm-jewel colour cycle (C64 colour indices): red,purple,purple,lt-red,yellow,white,white,yellow,lt-red,purple,purple
-  .byte $02,$04,$04,$0a,$07,$01,$01,$07,$0a,$04,$04 // [1dd4] ...........
 
 //==============================================================================
 // SECTION: monty_tile_flags_update
@@ -1121,40 +1074,6 @@ FrameLoop:
   .byte $14,$28,$cc,$33               // [297c] dead bytes — alignment pad after PlayDissolve RTS
 
 } // .namespace Death
-
-//==============================================================================
-// SECTION: char_anim
-// RANGE:   $2A2A-$2A49
-// STATUS:  understood
-// SUMMARY: Animates the 3-row character-RAM graphic at $4328-$4347 (chars $65-$67)
-//          by rotating all 8 columns 1 bit right per odd frame, with LSB wrap.
-//          Called in the level-complete path.
-//==============================================================================
-RotateCharOddFrame:
-  lda zp.frame_toggle                 // [2A2A:a5 40    LDA $0040]
-  and #$01                            // [2A2C:29 01    AND #$1]
-  bne RotateChar                      // [2A2E:d0 01    BNE $2a31]
-  rts                                 // [2A30:60       RTS]
-
-                                      // XREF[2]: 0e05(c), 2a2e(j)
-RotateChar:
-  ldx #$07                            // [2A31:a2 07    LDX #$7]
-
-                                      // XREF[1]: 2a47(j)
-!:
-  lsr chrset.base + $65*8,x           // [2A33:5e 28 43 LSR $4328,X]
-  ror chrset.base + $66*8,x           // [2A36:7e 30 43 ROR $4330,X]
-  ror chrset.base + $67*8,x           // [2A39:7e 38 43 ROR $4338,X]
-  bcc !+                              // [2A3C:90 08    BCC $2a46]
-  lda chrset.base + $65*8,x           // [2A3E:bd 28 43 LDA $4328,X]
-  ora #$80                            // [2A41:09 80    ORA #$80]
-  sta chrset.base + $65*8,x           // [2A43:9d 28 43 STA $4328,X]
-
-                                      // XREF[1]: 2a3c(j)
-!:
-  dex                                 // [2A46:ca       DEX]
-  bpl !--                             // [2A47:10 ea    BPL $2a33]
-  rts                                 // [2A49:60       RTS]
 
 
 //==============================================================================

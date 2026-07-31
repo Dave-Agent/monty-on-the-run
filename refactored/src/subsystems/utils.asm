@@ -532,6 +532,42 @@ RotateBufferLeft8:
   rts                                 // [211E:60       RTS]
 
 //==============================================================================
+// SECTION: char_anim
+// RANGE:   $2A2A-$2A49
+// STATUS:  understood
+// SUMMARY: Animates the 3-row character-RAM graphic at $4328-$4347 (chars $65-$67)
+//          by rotating all 8 columns 1 bit right per frame, with LSB wrap.
+//          Used for animated tile graphics — prize area tiles in room $30 and
+//          animated tiles during normal gameplay.
+//==============================================================================
+                                      // XREF[1]: 0e12(c)
+RotateCharOddFrame:
+  lda zp.frame_toggle                 // [2A2A:a5 40    LDA $0040]
+  and #$01                            // [2A2C:29 01    AND #$1]
+  bne RotateChar                      // [2A2E:d0 01    BNE $2a31]
+  rts                                 // [2A30:60       RTS]
+
+                                      // XREF[2]: 0e05(c), 2a2e(j)
+RotateChar:
+  ldx #$07                            // [2A31:a2 07    LDX #$7]
+
+                                      // XREF[1]: 2a47(j)
+!:
+  lsr chrset.base + $65*8,x           // [2A33:5e 28 43 LSR $4328,X]
+  ror chrset.base + $66*8,x           // [2A36:7e 30 43 ROR $4330,X]
+  ror chrset.base + $67*8,x           // [2A39:7e 38 43 ROR $4338,X]
+  bcc !+                              // [2A3C:90 08    BCC $2a46]
+  lda chrset.base + $65*8,x           // [2A3E:bd 28 43 LDA $4328,X]
+  ora #$80                            // [2A41:09 80    ORA #$80]
+  sta chrset.base + $65*8,x           // [2A43:9d 28 43 STA $4328,X]
+
+                                      // XREF[1]: 2a3c(j)
+!:
+  dex                                 // [2A46:ca       DEX]
+  bpl !--                             // [2A47:10 ea    BPL $2a33]
+  rts                                 // [2A49:60       RTS]
+
+//==============================================================================
 // SECTION: RotateBufferRight8
 // RANGE:   $211F-$2133
 // STATUS:  understood

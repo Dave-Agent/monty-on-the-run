@@ -489,4 +489,49 @@ UpdateRisingCloud:                    // only active in room $01; cloud rises fo
 
                                       // XREF[1]: 0df6(c)
 
+//==============================================================================
+// SECTION: CharacterAnimation
+// RANGE:   $1DA2-$1DD3
+// STATUS:  understood
+// SUMMARY: Cycles the colour of all in-room collectibles (coins and FK items).
+//          RoomEntitiesInit places char $34 at each item position and stores
+//          colour-RAM pointer triplets (lo, hi, frame counter) in room_entity_buf.
+//          Increments each frame counter mod 11, indexes patterns[] to get the
+//          next C64 colour index, and writes it to colour RAM.
+//==============================================================================
+                                      // XREF[1]: 0e08(c)
+AnimateCharacters:
+  ldx #$00                            // [1DA2:a2 00    LDX #$0]
+!:
+  lda room_entity_buf+1,x             // [1DA4:bd e7 02 LDA $2e7,X]       hi-byte; $FF = end of table
+  cmp #$ff                            // [1DA7:c9 ff    CMP #$ff]
+  beq !++                             // [1DA9:f0 28    BEQ $1dd3]
+  sta zp.s_tmp_ptr_hi                 // [1DAB:85 9c    STA $009c]
+  lda room_entity_buf,x               // [1DAD:bd e6 02 LDA $2e6,X]       lo-byte
+  sta zp.s_tmp_ptr                    // [1DB0:85 9b    STA $009b]
+  txa                                 // [1DB2:8a       TXA]
+  pha                                 // [1DB3:48       PHA]
+  inc room_entity_buf+2,x             // [1DB4:fe e8 02 INC $2e8,X]       advance frame counter
+  lda room_entity_buf+2,x             // [1DB7:bd e8 02 LDA $2e8,X]
+  cmp #$0b                            // [1DBA:c9 0b    CMP #$b]
+  bne !+                              // [1DBC:d0 05    BNE $1dc3]
+  lda #$00                            // [1DBE:a9 00    LDA #$0]
+  sta room_entity_buf+2,x             // [1DC0:9d e8 02 STA $2e8,X]
+!:
+  tax                                 // [1DC3:aa       TAX]
+  lda patterns,x                      // [1DC4:bd d4 1d LDA $1dd4,X]
+  ldy #$00                            // [1DC7:a0 00    LDY #$0]
+  sta (zp.s_tmp_ptr),y                // [1DC9:91 9b    STA ($9b),Y]
+  pla                                 // [1DCB:68       PLA]
+  tax                                 // [1DCC:aa       TAX]
+  inx                                 // [1DCD:e8       INX]
+  inx                                 // [1DCE:e8       INX]
+  inx                                 // [1DCF:e8       INX]
+  jmp !--                             // [1DD0:4c a4 1d JMP $1da4]
+!:
+  rts                                 // [1DD3:60       RTS]
+
+patterns:                             // 11-step colour cycle (C64 colour indices): red,purple,purple,lt-red,yellow,white,white,yellow,lt-red,purple,purple
+  .byte $02,$04,$04,$0a,$07,$01,$01,$07,$0a,$04,$04 // [1dd4] ...........
+
 } // SpecialItems

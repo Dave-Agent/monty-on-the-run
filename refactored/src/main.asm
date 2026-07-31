@@ -20,7 +20,7 @@
 
 // Game parameters — platform-neutral
 .label STARTING_LIVES = 5           // lives at game start; loaded at startGame ($10BC)
-.var   SMOKE_TEST     = false       // true: Q/W room nav + correct FK items; false: production build
+.var   SMOKE_TEST     = true        // true: Q/W room nav + correct FK items; false: production build
 
 // Freedom Kit item selection: SMOKE_TEST=1 uses the five correct items to escape;
 // SMOKE_TEST=0 reverts to the original ROM's wrong default items.
@@ -349,18 +349,18 @@ GameFrameUpdate:
 !:                                    // zp.game_over_active active: run palette cycle instead of normal enemy path
   jsr Utils.PulseGreyscale            // [0DFF:20 4f 2c JSR $2c4f]
   sta VIC.SPRITE.MULTICOLOR_1         // [0E02:8d 25 d0 STA $d025]
-  jsr Monty.RotateChar                // [0E05:20 31 2a JSR $2a31]
+  jsr Utils.RotateChar                // [0E05:20 31 2a JSR $2a31]
 
                                       // XREF[1]: 0dfc(j)
 !:
-  jsr Monty.AnimateCharacters         // [0E08:20 a2 1d JSR $1da2]
+  jsr SpecialItems.AnimateCharacters  // [0E08:20 a2 1d JSR $1da2]
   jsr Utils.AnimateThemeChar          // [0E0B:20 ee 20 JSR $20ee]
 
                                       // XREF[2]: 0de6(j), 0dea(j)
 !:
   lda zp.level_active_flag            // [0E0E:a5 bb    LDA $00bb]
   beq !+                              // [0E10:f0 09    BEQ $0e1b]
-  jsr Monty.RotateCharOddFrame        // [0E12:20 2a 2a JSR $2a2a]
+  jsr Utils.RotateCharOddFrame        // [0E12:20 2a 2a JSR $2a2a]
   jsr Enemies.Tick                    // [0E15:20 4a 13 JSR $134a]
   jsr Sprites.CycleLevelSprite        // [0E18:20 4a 2a JSR $2a4a]
 
