@@ -289,8 +289,10 @@ just open in a browser):
 
 ## Original game
 
-*Monty on the Run* was written by **Peter Harrap** and published by
-**Gremlin Graphics** in 1985. Music by **Rob Hubbard**.
+- *Monty on the Run* was created by **Peter Harrap** 
+- C64 version coded by **Jason Perkins**
+- Published by **Gremlin Graphics** in 1985. 
+- Music by **Rob Hubbard**.
 
 This repository contains only reconstructed source code. The original binary is
 not included and is not required to build either version.
