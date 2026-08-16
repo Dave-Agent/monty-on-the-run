@@ -8903,7 +8903,18 @@ LoadNextScore:                        // XREF[2]: 3241(c), 373e(c)
   bpl !-                              // [371B:10 f1    BPL $370e]
   rts                                 // [371D:60       RTS]
 
-hiscore_attract_row_tpl:              // 27-byte row template: [1-2]=rank, [5-9]=BCD score, [$B-$1A]=16-byte name
+hiscore_attract_row_tpl:              // 27-byte .text, but LoadNextScore's stamping loop reads 28 bytes: [1-2]=rank, [5-9]=BCD score, [$B-$1A]=16-byte name, [$1B]=trailing pad column
+  // NB: DrawBorder's display box is 28 columns wide but this row's actual
+  // content is only 27 chars, so LoadNextScore's final loop (ldx #$1b) reads
+  // one byte past this .text to fill the last column. That byte is $3739 —
+  // the opcode of DisplayHiScores' first instruction, `jsr ScrollHiScoreDisplay`.
+  // JSR's opcode is $20, which is also PETSCII space, so the overrun reads a
+  // blank pad character rather than garbage. Likely a deliberate byte-squeeze
+  // (reusing an opcode byte the CPU needs anyway as free display data) rather
+  // than a bug: the content is exactly 27 chars, $20 is exactly the padding
+  // value wanted, and a wrong glyph here would be hard to miss in a screen
+  // shown throughout attract mode. Kept as-is for byte-identity; phase 2
+  // declares this pad byte explicitly instead of relying on the adjacency.
   .encoding "ascii"
   .text " 00) 12345 GREMLIN GRAPHICS"   // [371e]
 

@@ -20,7 +20,7 @@
 
 // Game parameters — platform-neutral
 .label STARTING_LIVES = 5           // lives at game start; loaded at startGame ($10BC)
-.var   SMOKE_TEST     = true        // true: Q/W room nav + correct FK items; false: production build
+.var   SMOKE_TEST     = false        // true: Q/W room nav + correct FK items; false: production build
 
 // Freedom Kit item selection: SMOKE_TEST=1 uses the five correct items to escape;
 // SMOKE_TEST=0 reverts to the original ROM's wrong default items.
@@ -428,6 +428,10 @@ CHR_Screen:                                              // VIC bank 1 screen RA
 #import "subsystems/freedom_kit_data.asm"
 
 #import "subsystems/music_sfx_data.asm"
+
+// hiscore_data.asm's own floating slot (before the fixed FreedomKit_sprites pin
+// at $7800) has no room for these two tables; they float here instead.
+#import "subsystems/hiscore_data_substitutions.asm"
 
 .errorif * > DATA_END, "GUARD: data region overflow into I/O space — ends at $" + toHexString(*)
 

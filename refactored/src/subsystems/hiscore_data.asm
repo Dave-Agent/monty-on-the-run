@@ -40,6 +40,61 @@ entry_row_offsets:                    // byte offsets into string_entry; 6 rows 
   .byte $8c                           // [3e22] row 5: "     >                <     "
 
 //==============================================================================
+// SECTION: load_next_score_row_tpl
+// P1_ROUTINE_NAME: attract_row_tpl
+// RANGE:   $371E-$3739
+// STATUS:  understood
+// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
+//              Byte 27 (trailing space) made an explicit part of the array. In
+//              P1 this byte is not part of the .text at all; it's borrowed
+//              from the $3739 opcode byte, which only produces the same
+//              result while that byte stays a JSR. Declaring it here removes
+//              that address-adjacency dependency for phase 2.
+// SUMMARY: 28-byte scratch row built per-frame by LoadNextScore: [1-2]=rank,
+//          [5-9]=BCD score, [$B-$1A]=16-byte name, [$1B]=trailing pad byte.
+//          Row content is only 27 chars, but DrawBorder's display box is 28
+//          columns wide, so LoadNextScore's final stamping loop reads one byte
+//          past the declared template to fill that last column. In the P1
+//          source this row template sits immediately before DisplayScores,
+//          whose first instruction is `jsr ScrollScoresUp` — opcode $20. That
+//          opcode byte is also PETSCII space, so the "overrun" silently reads
+//          a blank padding character rather than garbage. This is almost
+//          certainly a deliberate byte-squeezing trick (JSR's opcode doubling
+//          as free padding data) rather than an off-by-one bug: the row's
+//          natural content is exactly 27 chars, $20 is exactly the padding
+//          value you'd want, and a visibly wrong glyph here would have been
+//          impossible to miss in a shipped, attract-mode-visible screen.
+//          Made explicit here so relocating this template doesn't change
+//          what that last column displays.
+//==============================================================================
+attract_row_tpl:
+  .encoding "ascii"
+  .text " 00) 12345 GREMLIN GRAPHICS " // [371e] trailing space at [3739] is the pad column; see SUMMARY — P1 borrows this from the next routine's JSR opcode
+
+//==============================================================================
+// SECTION: border_tile_data
+// RANGE:   $37C0-$37D3
+// STATUS:  understood
+// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
+// SUMMARY: Colour values for the DrawBorder decorative band, rows 6-7
+//          (20 entries, cols 10-29).
+//==============================================================================
+border_tile_data:
+  .byte $0c,$0c,$0a,$07,$07,$07,$07,$07,$07,$07,$08,$08,$08,$08,$08,$08 // [37c0] ................
+  .byte $08,$0a,$0c,$0c               // [37d0] ....
+
+//==============================================================================
+// SECTION: scores_row_tbl
+// RANGE:   $3821-$3827
+// STATUS:  understood
+// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
+// SUMMARY: Row offsets 0-6 (×40 bytes/row) used by ScrollScoresUp to shift
+//          the score display rows up one line.
+//==============================================================================
+scores_row_tbl:
+  .byte $00,$28,$50,$78,$a0,$c8,$f0   // [3821] row offsets 0-6 (×40 bytes per row)
+
+//==============================================================================
 // SECTION: hiscore_data
 // RANGE:   $7300-$772B
 // STATUS:  understood

@@ -11,10 +11,15 @@
 //   HiScore.CheckAndInsert     scan table; insert current score if it qualifies
 //   HiScore.ScrollScoresUp     scroll score display rows up one line (VSync-locked)
 //   HiScore.LoadNextScore      load one rank's row into the display template
-//   HiScore.HiScore.Data.top_scores         50 × 5 PETSCII digit chars (pinned at $7300)
-//   HiScore.score_overflow     5-byte BCD overflow buffer ($73FA)
-//   HiScore.HiScore.Data.name_table         50 × 16-byte name entries ($73FF)
-//   HiScore.HiScore.Data.name_input_buf     13-byte scratchpad during name entry ($771F)
+//   HiScore.Data.top_scores         50 × 5 PETSCII digit chars (pinned at $7300)
+//   HiScore.Data.score_overflow     5-byte BCD overflow buffer ($73FA)
+//   HiScore.Data.name_table         50 × 16-byte name entries ($73FF)
+//   HiScore.Data.name_input_buf     13-byte scratchpad during name entry ($771F)
+//   HiScore.Data.triggers           name-trigger word list ($08BB)
+//   HiScore.Data.replacements       trigger replacement text table ($0974)
+//   HiScore.Data.attract_row_tpl    28-byte attract-row scratch template ($371E)
+//   HiScore.Data.border_tile_data   border decorative-band colour table ($37C0)
+//   HiScore.Data.scores_row_tbl     scroll row-offset table ($3821)
 
 .namespace HiScore {
 
@@ -25,11 +30,11 @@
 // STATUS:  understood
 // SUMMARY: Easter-egg name filter called after the player submits their hi-score
 //          name (via zp.s_ptr ptr to the 16-char screen-code name buffer).
-//          Scans triggers — a null-delimited, $FF-terminated word list.
+//          Scans Data.triggers — a null-delimited, $FF-terminated word list.
 //          Triggers 0-9 (bad words): replaces chars 2-3 of the matched word
 //            with '"' ($6A on screen, $22 in name buffer) — censorship.
 //          Triggers 10-25 (celebrity/easter-egg words): overwrites the entire
-//            16-char name with the matching entry from replacements
+//            16-char name with the matching entry from Data.replacements
 //            (yellow, converted to screen code via AND#$3F/OR#$40).
 //          Trigger 22 "I WANT TO CHEAT": also writes $01 → zp.cheat_mode ($080E)
 //            and flashes the border/background dark grey.
@@ -46,7 +51,7 @@ ProcessName:
 
 ProcessName_outer_loop:               // XREF[1]: 087a(j)
   ldx zp.s_tmp_a                      // [0819:a6 54    LDX $0054]
-  lda triggers,x                      // [081B:bd bb 08 LDA $8bb,X]
+  lda Data.triggers,x                 // [081B:bd bb 08 LDA $8bb,X]
   cmp #$ff                            // [081E:c9 ff    CMP #$ff]
   beq ProcessName_done                // [0820:f0 5b    BEQ $087d]  end of trigger list
   ldy #$00                            // [0822:a0 00    LDY #$0]
@@ -56,7 +61,7 @@ ProcessName_scan_pos:                 // XREF[1]: 0867(j)  try matching trigger 
   ldx zp.s_tmp_a                      // [0826:a6 54    LDX $0054]
 
 ProcessName_match_char:               // XREF[2]: 0837(j), 083e(j)
-  lda triggers,x                      // [0828:bd bb 08 LDA $8bb,X]
+  lda Data.triggers,x                 // [0828:bd bb 08 LDA $8bb,X]
   and #$3f                            // [082B:29 3f    AND #$3f]   PETSCII → screen code for comparison
   beq ProcessName_match_ok            // [082D:f0 11    BEQ $0840]  null = end of trigger = full match
   cmp (zp.s_ptr),y                    // [082F:d1 52    CMP ($52),Y]  compare with name[Y]
@@ -75,7 +80,7 @@ ProcessName_match_ok:                 // XREF[1]: 082d(j)
   cmp #$0a                            // [0842:c9 0a    CMP #$a]
   bcc ProcessName_censor              // [0844:90 06    BCC $084c]  0-9: rude word censorship
   sec                                 // [0846:38       SEC]
-  sbc #$0a                            // [0847:e9 0a    SBC #$a]    10+: compute index into replacements
+  sbc #$0a                            // [0847:e9 0a    SBC #$a]    10+: compute index into Data.replacements
   jmp ProcessName_substitute          // [0849:4c 7e 08 JMP $087e]
 
 ProcessName_censor:                   // XREF[1]: 0844(j)
@@ -102,7 +107,7 @@ ProcessName_advance_y:                // XREF[1]: 0831(j)
 // Part of: ProcessName — advance past current trigger word to next entry
 ProcessName_next_trigger:             // XREF[1]: 0876(j)  advance zp.s_tmp_a past current trigger word
   ldx zp.s_tmp_a                      // [0869:a6 54    LDX $0054]
-  lda triggers,x                      // [086B:bd bb 08 LDA $8bb,X]
+  lda Data.triggers,x                 // [086B:bd bb 08 LDA $8bb,X]
   cmp #$ff                            // [086E:c9 ff    CMP #$ff]
   beq ProcessName_done                // [0870:f0 0b    BEQ $087d]
   inc zp.s_tmp_a                      // [0872:e6 54    INC $0054]
@@ -117,7 +122,7 @@ ProcessName_done:                     // XREF[2]: 0820(j), 0870(j)
 
 // Part of: ProcessName — expand trigger code into 16-char replacement block
 ProcessName_substitute:               // XREF[1]: 0849(j)
-  // A = trigger_number - 10 = index into replacements (16 bytes/entry)
+  // A = trigger_number - 10 = index into Data.replacements (16 bytes/entry)
   sta zp.s_trigger_idx                // [087E:85 56    STA $0056]  save substitution index
   cmp #$09                            // [0880:c9 09    CMP #$9]    index 9 = 16-spaces trigger: randomise
   bne !+                              // [0882:d0 05    BNE $0889]
@@ -132,7 +137,7 @@ ProcessName_substitute:               // XREF[1]: 0849(j)
   tax                                 // [088D:aa       TAX]
   ldy #$00                            // [088E:a0 00    LDY #$0]
 !:
-  lda replacements,x                  // [0890:bd 74 09 LDA $974,X]   read PETSCII replacement char
+  lda Data.replacements,x             // [0890:bd 74 09 LDA $974,X]   read PETSCII replacement char
   sta (zp.s_ptr),y                    // [0893:91 52    STA ($52),Y]   write to name buffer
   and #$3f                            // [0895:29 3f    AND #$3f]      convert PETSCII → screen code
   ora #$40                            // [0897:09 40    ORA #$40]
@@ -154,110 +159,6 @@ ProcessName_substitute:               // XREF[1]: 0849(j)
   sta VIC.BACKGROUND_COLOR            // [08B7:8d 21 d0 STA $d021]
 !:
   rts                                 // [08BA:60       RTS]
-
-//==============================================================================
-// SECTION: triggers
-// P1_ROUTINE_NAME: hi_score_triggers
-// RANGE:   $08BB-$0973
-// STATUS:  understood
-// SUMMARY: Null-delimited ($00), $FF-terminated list of name trigger words
-//          scanned by ProcessName against the player's hi-score entry.
-//          Stored as PETSCII (ASCII); compared via AND #$3F → screen code.
-//          Triggers 0-9: rude words — chars 2-3 censored with '"'.
-//          Triggers 10-25: celebrity/easter-egg names — full name replaced
-//          from replacements. Trigger 22 also enables cheat mode.
-//==============================================================================
-.encoding "ascii"
-
-triggers:
-  // triggers 0-9: rude words — chars 2-3 replaced with '"'
-  .text "SHIT"     // [08bb]  0
-  .byte $00
-  .text "FUCK"     // [08c0]  1
-  .byte $00
-  .text "WANK"     // [08c5]  2
-  .byte $00
-  .text "CUNT"     // [08ca]  3
-  .byte $00
-  .text "PRICK"    // [08cf]  4
-  .byte $00
-  .text "FART"     // [08d5]  5
-  .byte $00
-  .text "SCREW"    // [08da]  6
-  .byte $00
-  .text "CRAP"     // [08e0]  7
-  .byte $00
-  .text "BOLLOCK"  // [08e5]  8
-  .byte $00
-  .text "ARSE"     // [08ed]  9
-  .byte $00
-  // triggers 10-25: name replaced with matching replacements entry
-  .text "CAR"      // [08f2] 10 → PEUGEOT 205 GTI!
-  .byte $00
-  .text "XR2"      // [08f6] 11 → XR2 - THE BEST!!
-  .byte $00
-  .text "CTW"      // [08fa] 12 → SCIALOM FOR GOD!
-  .byte $00
-  .text "PURPLE"   // [08fe] 13 → KNEBWORTH 22/6
-  .byte $00
-  .text "MUSIC"    // [0905] 14 → MAGNUM WKFM LP34
-  .byte $00
-  .text "DRUMS"    // [090b] 15 → PHILIP  HARRISON
-  .byte $00
-  .text "WINE"     // [0911] 16 → SCOTTS , OK YAH!
-  .byte $00
-  .text "FRANKIE"  // [0916] 17 → YUK,ERR,OH NO. !
-  .byte $00
-  .text "MINTER"   // [091e] 18 → THE HAIRY BEAST.
-  .byte $00
-  .text "                " // [0925] 19 → anonymous insult (zp.frame_toggle=0)
-  .byte $00
-  .text "                " // [0936] 20 → THE NAMELESS ONE (no randomise)
-  .byte $00
-  .text "SPECTRUM" // [0947] 21 → A LUMP OF JUNK !
-  .byte $00
-  .text "I WANT TO CHEAT" // [0950] 22 → YESSUM BOSS !! + cheat mode on
-  .byte $00
-  .text "GEZ"      // [0960] 23 → MR COOL !!
-  .byte $00
-  .text "MADONNA"  // [0964] 24 → PENTHOUSE 1/8/85
-  .byte $00
-  .text "II SHY"   // [096c] 25 → THANKS UNCLE A.
-  .byte $00
-  .byte $ff        // [0973] end of trigger list
-.encoding "screencode_mixed"
-
-//==============================================================================
-// SECTION: replacements
-// P1_ROUTINE_NAME: hi_score_replacements
-// RANGE:   $0974-$0A73
-// STATUS:  understood
-// SUMMARY: 16 entries × 16 bytes of PETSCII replacement text for substitution
-//          triggers 10-25. Written to the name display (screen row 15 col 12,
-//          colour yellow) via ProcessName_substitute.
-//          Entries 9-15 double as the anonymous-insult pool for the 16-spaces
-//          trigger (trigger 19): zp.frame_toggle+9 selects which entry to show.
-//==============================================================================
-.encoding "ascii"
-
-replacements:
-  .text "PEUGEOT 205 GTI!"            // [0974]  0: CAR
-  .text "XR2 - THE BEST!!"            // [0984]  1: XR2
-  .text "SCIALOM FOR GOD!"            // [0994]  2: CTW
-  .text "KNEBWORTH 22/6  "            // [09a4]  3: PURPLE
-  .text "MAGNUM WKFM LP34"            // [09b4]  4: MUSIC
-  .text "PHILIP  HARRISON"            // [09c4]  5: DRUMS
-  .text "SCOTTS , OK YAH!"            // [09d4]  6: WINE
-  .text "YUK,ERR,OH NO. !"            // [09e4]  7: FRANKIE
-  .text "THE HAIRY BEAST."            // [09f4]  8: MINTER
-  .text "  A.N.ONYMOUS ! "            // [0a04]  9: spaces (zp.frame_toggle=0)
-  .text "THE NAMELESS ONE"            // [0a14] 10: spaces (zp.frame_toggle=1) / trigger 20
-  .text "A LUMP OF JUNK !"            // [0a24] 11: SPECTRUM / spaces (zp.frame_toggle=2)
-  .text " YESSUM BOSS !! "            // [0a34] 12: I WANT TO CHEAT
-  .text "MR COOL !!      "            // [0a44] 13: GEZ
-  .text "PENTHOUSE 1/8/85"            // [0a54] 14: MADONNA
-  .text "THANKS UNCLE A. "            // [0a64] 15: II SHY
-.encoding "screencode_mixed"
 
 //==============================================================================
 // SECTION: score_management
@@ -453,7 +354,7 @@ NameInput_confirm:
 // STATUS:  understood
 // SUMMARY: LoadNextScore ($36A0) — called with a 0-based score index in A.
 //          If index ≥ 50, clears the 28-byte screen row at CHR_Screen + $F*$28+6 and returns.
-//          Otherwise builds a 28-byte row in attract_row_tpl: writes the
+//          Otherwise builds a 28-byte row in Data.attract_row_tpl: writes the
 //          1-based rank as PETSCII digits (positions 1-2), copies 5 BCD score
 //          bytes from HiScore.Data.top_scores (position 5), then reads 16 name bytes
 //          from HiScore.Data.name_table (position 11), substituting '"' with '*'.
@@ -477,8 +378,8 @@ LoadNextScore:                        // XREF[2]: 3241(c), 373e(c)
   clc                                 // [36B3:18       CLC]
   adc #$01                            // [36B4:69 01    ADC #$1]
   jsr ConvertToDigits                 // [36B6:20 d4 37 JSR $37d4]
-  stx attract_row_tpl + 1             // [36B9:8e 1f 37 STX $371f]
-  sty attract_row_tpl + 2             // [36BC:8c 20 37 STY $3720]
+  stx Data.attract_row_tpl + 1        // [36B9:8e 1f 37 STX $371f]
+  sty Data.attract_row_tpl + 2        // [36BC:8c 20 37 STY $3720]
   lda zp.s_ptr                        // [36BF:a5 52    LDA $0052]
   asl                                 // [36C1:0a       ASL A]
   asl                                 // [36C2:0a       ASL A]
@@ -488,7 +389,7 @@ LoadNextScore:                        // XREF[2]: 3241(c), 373e(c)
   ldy #$00                            // [36C7:a0 00    LDY #$0]
 !:
   lda HiScore.Data.top_scores,x       // [36C9:bd 00 73 LDA $7300,X]
-  sta attract_row_tpl + 5,y           // [36CC:99 23 37 STA $3723,Y]
+  sta Data.attract_row_tpl + 5,y      // [36CC:99 23 37 STA $3723,Y]
   inx                                 // [36CF:e8       INX]
   iny                                 // [36D0:c8       INY]
   cpy #$05                            // [36D1:c0 05    CPY #$5]
@@ -518,17 +419,19 @@ LoadNextScore:                        // XREF[2]: 3241(c), 373e(c)
   bne !+                              // [36FA:d0 02    BNE $36fe]
   lda #$2a                            // [36FC:a9 2a    LDA #$2a]
 !:
-  sta attract_row_tpl + $B,y          // [36FE:99 29 37 STA $3729,Y]
+  sta Data.attract_row_tpl + $B,y     // [36FE:99 29 37 STA $3729,Y]
   dey                                 // [3701:88       DEY]
   bpl !--                             // [3702:10 f2    BPL $36f6]
+  // Pick one random colour (1-15) for the whole row; reject 0 (black) and retry
 !:
   jsr Utils.GenerateRandomNumber      // [3704:20 50 10 JSR $1050]
   and #$0f                            // [3707:29 0f    AND #$f]
   beq !-                              // [3709:f0 f9    BEQ $3704]
   tay                                 // [370B:a8       TAY]
   ldx #$1b                            // [370C:a2 1b    LDX #$1b]
+  // Stamp all 28 columns in reverse video, every column sharing that one colour
 !:
-  lda attract_row_tpl,x               // [370E:bd 1e 37 LDA $371e,X]
+  lda Data.attract_row_tpl,x          // [370E:bd 1e 37 LDA $371e,X]
   ora #$40                            // [3711:09 40    ORA #$40]
   sta CHR_Screen + $F*$28+6,x         // [3713:9d 5e 4a STA $4a5e,X]
   tya                                 // [3716:98       TYA]
@@ -536,11 +439,6 @@ LoadNextScore:                        // XREF[2]: 3241(c), 373e(c)
   dex                                 // [371A:ca       DEX]
   bpl !-                              // [371B:10 f1    BPL $370e]
   rts                                 // [371D:60       RTS]
-
-attract_row_tpl:                      // 27-byte row template: [1-2]=rank, [5-9]=BCD score, [$B-$1A]=16-byte name
-  .encoding "ascii"
-  .text " 00) 12345 GREMLIN GRAPHICS"   // [371e]
-.encoding "screencode_mixed"
 
 //==============================================================================
 // SECTION: display_hi_scores
@@ -573,8 +471,8 @@ DisplayScores:                        // XREF[1]: 3333(c)
 //          alternating $1A/$1B top, $1C/$1D bottom) at rows 9 and $10;
 //          vertical edges (alternating $1E/$1F left, $20/$21 right) via ZP ptr
 //          across 6 interior rows (10-15); and a 20-wide decorative band at
-//          rows 6-7 (cols 10-29) with colour from border_tile_data. Colour data
-//          is in border_tile_data ($37C0, 20 entries).
+//          rows 6-7 (cols 10-29) with colour from Data.border_tile_data. Colour data
+//          is in Data.border_tile_data ($37C0, 20 entries).
 // P2_DIVERGES: entry-point label DrawHighScoreBorder → DrawBorder (dot notation inside namespace)
 //==============================================================================
 DrawBorder:                           // XREF[1]: 3318(c)
@@ -636,16 +534,12 @@ DrawBorder:                           // XREF[1]: 3318(c)
   clc                                 // [37AD:18       CLC]
   adc #$14                            // [37AE:69 14    ADC #$14]
   sta CHR_Screen + 7*$28+$A,x         // [37B0:9d 22 49 STA $4922,X]
-  lda border_tile_data,x              // [37B3:bd c0 37 LDA $37c0,X]
+  lda Data.border_tile_data,x         // [37B3:bd c0 37 LDA $37c0,X]
   sta VIC.COLOR_RAM + 6*$28+$A,x      // [37B6:9d fa d8 STA $d8fa,X]
   sta VIC.COLOR_RAM + 7*$28+$A,x      // [37B9:9d 22 d9 STA $d922,X]
   dex                                 // [37BC:ca       DEX]
   bpl !-                              // [37BD:10 e7    BPL $37a6]
   rts                                 // [37BF:60       RTS]
-
-border_tile_data:                     // colour values for rows 6-7 decorative band (20 entries, cols 10-29)
-  .byte $0c,$0c,$0a,$07,$07,$07,$07,$07,$07,$07,$08,$08,$08,$08,$08,$08 // [37c0] ................
-  .byte $08,$0a,$0c,$0c               // [37d0] ....
 
 //==============================================================================
 // SECTION: convert_to_petscii_digits
@@ -677,8 +571,12 @@ ConvertToDigits:                      // XREF[2]: 36b6(c), 3d36(c)
 
 //==============================================================================
 // SECTION: scroll_scores_up
-// RANGE:   $37E9-$3827
+// RANGE:   $37E9-$3820
 // STATUS:  understood
+// P2_DIVERGES: scores_row_tbl (P1 $3821-$3827, physically trailing this routine)
+//              moved to HiScore.Data.scores_row_tbl in hiscore_data.asm — no
+//              room to stay adjacent to this routine. Causes an expected
+//              verify-phase2 line-count MISMATCH against this P1 section.
 // SUMMARY: Waits for VSync then scrolls the score display area up by one row,
 //          operating in parallel on screen RAM (zp.s_ptr/53, CHR_Screen+$196)
 //          and colour RAM (zp.s_tile_ptr_hi/56, VIC.COLOR_RAM+$196). Inner loop (X=0..4)
@@ -700,11 +598,11 @@ ScrollScoresUp:                       // XREF[5]: 3249(c), 3251(c), 3739(c), 3d2
 !:                                    // XREF[1]: 381e(j)
   ldx #$00                            // [37FF:a2 00    LDX #$0]
 !:                                    // XREF[1]: 3816(j)
-  ldy scores_row_tbl+1,x              // [3801:bc 22 38 LDY $3822,X]
+  ldy Data.scores_row_tbl+1,x         // [3801:bc 22 38 LDY $3822,X]
   lda (zp.s_tile_ptr_hi),y            // [3804:b1 55    LDA ($55),Y]
   sta zp.s_decor_ptr                  // [3806:85 57    STA $0057]
   lda (zp.s_ptr),y                    // [3808:b1 52    LDA ($52),Y]
-  ldy scores_row_tbl,x                // [380A:bc 21 38 LDY $3821,X]
+  ldy Data.scores_row_tbl,x           // [380A:bc 21 38 LDY $3821,X]
   sta (zp.s_ptr),y                    // [380D:91 52    STA ($52),Y]
   lda zp.s_decor_ptr                  // [380F:a5 57    LDA $0057]
   sta (zp.s_tile_ptr_hi),y            // [3811:91 55    STA ($55),Y]
@@ -716,9 +614,6 @@ ScrollScoresUp:                       // XREF[5]: 3249(c), 3251(c), 3739(c), 3d2
   dec zp.s_tmp_a                      // [381C:c6 54    DEC $0054]
   bpl !--                             // [381E:10 df    BPL $37ff]
   rts                                 // [3820:60       RTS]
-
-scores_row_tbl:
-  .byte $00,$28,$50,$78,$a0,$c8,$f0   // [3821] row offsets 0-6 (×40 bytes per row)
 
 //==============================================================================
 // SECTION: CheckAndInsert
