@@ -487,8 +487,7 @@ ConvertToDigits:                      // XREF[2]: 36b6(c), 3d36(c)
 // STATUS:  understood
 // P2_DIVERGES: scores_row_tbl (P1 $3821-$3827, physically trailing this routine)
 //              moved to HiScore.Data.scores_row_tbl in hiscore_data.asm — no
-//              room to stay adjacent to this routine. Causes an expected
-//              verify-phase2 line-count MISMATCH against this P1 section.
+//              room to stay adjacent to this routine.
 // SUMMARY: Waits for VSync then scrolls the score display area up by one row,
 //          operating in parallel on screen RAM (zp.s_ptr/53, CHR_Screen+$196)
 //          and colour RAM (zp.s_tile_ptr_hi/56, VIC.COLOR_RAM+$196). Inner loop (X=0..4)
