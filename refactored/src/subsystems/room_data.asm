@@ -30,6 +30,19 @@
 //   room_exit_dest_tbl[$2e + $14] = $01  → LoadRoom $01
 //
 // zp.exit_tile_col: $00 $01 $02 $03 $04 $05 $06 $07 $08 $09 $0a $0b $0c $0d $0e $0f $10 $11 $12 $13 $14 $15 $16
+//
+// The world map decoded (each cell = the room_id occupying that grid position;
+// its N/S/E/W neighbours are just its grid neighbours in this same table):
+//
+// row 0: .. .. .. .. .. .. .. .. .. .. 23 .. .. .. .. .. .. .. .. .. .. .. ..
+// row 1: .. 2f 2e .. .. .. .. .. .. .. 22 .. .. .. .. .. .. 06 07 08 09 .. ..
+// row 2: 2d 2c 27 26 33 32 31 25 24 20 21 .. .. .. .. .. 05 04 03 02 01 00 ..
+// row 3: 2b 2a 28 29 .. .. .. .. .. 1f .. .. 1b .. .. 0f 0c 0d 0e 0b 0a .. ..
+// row 4: .. .. .. .. .. .. .. .. .. 1e .. 1a 19 18 .. 10 11 .. .. .. .. .. ..
+// row 5: .. .. .. .. .. .. .. .. .. 1d 1c 17 16 15 14 12 13 .. .. .. .. .. ..
+//
+// row 2 col $04 is room_exit_dest_dyn (mutable, see below); room $30 does not
+// appear anywhere in this static grid — not yet confirmed how it's reached.
 room_exit_dest_tbl:
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$23,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff  // [187a] row 0
   .byte $ff,$2f,$2e,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$22,$ff,$ff,$ff,$ff,$ff,$ff,$06,$07,$08,$09,$ff,$ff  // [1891] row 1
