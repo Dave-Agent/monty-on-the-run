@@ -14,9 +14,6 @@ sprite_src_base:                   // 2-byte ptr to freedom_kit_sprites base; us
 // SECTION: room_metadata_block
 // RANGE:   $9600-$970F (phase 1 pointer slots within room_metadata_block)
 // STATUS:  understood
-// P2_DIVERGES: contents/item_tbl extracted from freedom_kit.asm into FreedomKit.Data namespace.
-//              room_entity_master_ptr/sprite_src_base remain root-scope so RoomEngine
-//              can reference them bare.
 // SUMMARY: 5-byte escape-item list; updated by swap_item. Defines which FK items are
 //          required to trigger the freedom sequence.
 //==============================================================================
@@ -32,10 +29,6 @@ contents:                 // 5 FK item indices the player must collect to escape
 // P1_ROUTINE_NAME: fk_carousel_data
 // RANGE:   $CEFA-$CFC7 (P2, re-evaluated after relocation)
 // STATUS:  understood
-// P2_DIVERGES: item_tbl relocated here; room_entity_master_ptr updated to point to
-//              FreedomKit.Data.item_tbl. In P1 item_tbl followed sprite graphics;
-//              separated in P2 because CHAREN=1 ($0001=$05, set once at startup)
-//              makes $D000-$DFFF I/O for the game's lifetime.
 // SUMMARY: Flat 3-byte records (room_id, col, row) for every FK collectible item; $FF=end.
 //==============================================================================
 
@@ -112,8 +105,6 @@ item_tbl:                    // flat 3-byte records (room_id, col, row) for ever
 // P1_ROUTINE_NAME: fk_carousel_data
 // RANGE:   $34D9-$3548
 // STATUS:  understood
-// P2_DIVERGES: moved here from freedom_kit.asm; item_flags renamed to
-//              FreedomKit.Data.item_flags throughout.
 // SUMMARY: Freedom Kit carousel data. sprite_layout_tbl (32 bytes): remaps source
 //          byte index → sprite data byte offset for BuildSprite. banner_text:
 //          "MONTY FREEDOM KIT." screen row. chr_top_idx / chr_bot_idx (14 bytes

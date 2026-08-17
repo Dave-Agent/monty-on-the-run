@@ -324,8 +324,6 @@ ScrollConsumeOperand:
 // SECTION: scroller_char_render
 // RANGE:   $3A00-$3A58
 // STATUS:  understood
-// P2_DIVERGES: extracted from main.asm; scroll_msg_text follows inline
-//              (was imported via #import "attract_scroller.asm" in phase 1).
 // SUMMARY: ScrollRenderSlice ($3A00) converts the current character (from
 //          zp.scroll_text_ptr) to a char-ROM address, then loops 8 pixel rows
 //          via ScrollRenderSlice_loop. Each row tests the left and right pixel
@@ -389,7 +387,6 @@ ScrollRenderSlice:                // XREF[3]: 3953(j), 3968(j), 39f6(j)
 // SECTION: scroller_pixel_writer
 // RANGE:   $3BDB-$3C1D
 // STATUS:  understood
-// P2_DIVERGES: extracted from main.asm to attract_scroller.asm
 // SUMMARY: ComputeScreenAddressForScroller ($3BDB) looks up the screen-row
 //          base address from the DAT_1468 table (indexed by Y>>1), adds the
 //          column offset (X>>1) and stores the result at zp.screen_ptr/+1.

@@ -60,8 +60,6 @@ GenerateRandomNumber:
 //          page copy duplicates the bank to the next page (for animation flipping?).
 //          DAT_1319 table ($1319): direction flags lookup used by SetupRoom.
 //          DAT_131e table ($131E): sprite colour lookup used by SetupRoom.
-// P2_DIVERGES: enemy_dir_flags_tbl, enemy_sprite_colour_tbl, enemy_copy_flag_tbl
-//              extracted to enemy_data.asm (9 lines)
 //==============================================================================
                                       // XREF[3]: 128f(c), 1295(c), 129b(c)
 UnpackSpriteGraphics:
@@ -571,7 +569,6 @@ RotateChar:
 // SECTION: RotateBufferRight8
 // RANGE:   $211F-$2133
 // STATUS:  understood
-// P2_DIVERGES: InitPiledriverState ($21E8) physically follows in P2 source, absorbed into this section
 // SUMMARY: Cycles all 8 rows of the 8-byte char bitmap at zp.rotate_ptr right
 //          by one row: saves [7], shifts [6..0] toward higher indices, wraps
 //          saved [7] into [0]. Companion to RotateBufferLeft8.
@@ -689,7 +686,6 @@ screen_row_ptrs:                  // 26 lo/hi pairs: screen RAM base address for
 // SECTION: cycle_colours
 // RANGE:   $2C4F-$2C62
 // STATUS:  understood
-// P2_DIVERGES: CycleColours → Utils.PulseGreyscale, colour_gradients → grey_pulse_tbl
 // SUMMARY: Advances zp.colour_cycle_store, divides by 2 (half-speed), masks to
 //          0–7, and indexes grey_pulse_tbl: black→dk-grey→med-grey→lt-grey→
 //          white→lt-grey→med-grey→dk-grey. Returns the next C64 colour value in A.

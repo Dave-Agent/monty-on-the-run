@@ -621,8 +621,6 @@ SetTileProperty_store:
 //          remain → restore saved position, set room_exit; last life → GameOverAnimation.
 //          P2: Dispatch promoted out of Death sub-namespace into Monty.
 //          P2: SMC BNE dispatch replaced by pointer-table + jmp(zp.s_tmp_ptr).
-// P2_DIVERGES: event*3+BNE SMC replaced by event_dispatch_lo/hi + jmp indirect;
-//              Dispatch now Monty.Dispatch (not Monty.Death.Dispatch).
 //==============================================================================
 event_sfx_tbl:
   .byte $09,$0a,$0e,$0c,$0d,$00,$0e   // [238d] SFX IDs indexed by post-dec event code (0-6)
@@ -1080,7 +1078,6 @@ FrameLoop:
 // SECTION: ToggleParity
 // RANGE:   $1099-$10A1
 // STATUS:  understood
-// P2_DIVERGES: ToggleParity → Monty.ToggleStepGate
 // SUMMARY: Increments zp.sprite_xmsb and masks to bit 0, producing a 0/1
 //          alternating flag. Returns result in A with Z flag set when even.
 //          Gates Monty's movement steps to every other frame.

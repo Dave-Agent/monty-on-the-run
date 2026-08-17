@@ -8,7 +8,6 @@
 // P1_ROUTINE_NAME: SeparateSpritePair (data portion) + ProcessSprites (data portion)
 // RANGE:   $0B78-$0D15
 // STATUS:  understood
-// P2_DIVERGES: extracted from sprites.asm into Sprites.Data namespace.
 // SUMMARY: sprite_pair_sep_steps: 4-byte vsync frame counts (50/60/70/80) for
 //            each GAME/OVER letter pair in the game-over fly-in.
 //          game_over_sprite_ptrs: 8-byte VIC sprite frame pointer table for

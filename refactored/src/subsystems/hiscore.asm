@@ -39,7 +39,6 @@
 //            rotating through entries 9-15 as a pool of anonymous insults.
 //          All trigger bytes use AND #$3F so PETSCII letter codes compare
 //          correctly against the screen-code name buffer.
-// P2_DIVERGES: entry-point label ProcessHiScoreName → ProcessName (dot notation inside namespace)
 //==============================================================================
 ProcessName:
   lda #$00                            // [0813:a9 00    LDA #$0]
@@ -162,8 +161,6 @@ ProcessName_substitute:               // XREF[1]: 0849(j)
 // P1_ROUTINE_NAME: ScrollHiScoreDisplay
 // RANGE:   $3239-$3250
 // STATUS:  understood
-// P2_DIVERGES: ShowRemapControlPrompt ($3251-$328E) physically followed in p1 source
-//              but belongs to keyboard remap subsystem; stays in main.asm.
 // SUMMARY: Scrolls 5 hi-score entries into the display area: loops 5 times,
 //          resetting zp.hiscore_scroll_idx to $33 each iteration, calling
 //          LoadNextScore then a short WaitDelay then ScrollScoresUp. Called
@@ -279,7 +276,6 @@ NameInput_confirm:
 //          from HiScore.Data.name_table (position 11), substituting '"' with '*'.
 //          Writes the row reversed-video with a random foreground colour to
 //          CHR_Screen + $F*$28+6 / VIC.COLOR_RAM + $F*$28+6.
-// P2_DIVERGES: call site updated — ConvertToTwoPETSCIIDigits → ConvertToDigits (renamed for dot notation)
 //==============================================================================
 LoadNextScore:                        // XREF[2]: 3241(c), 373e(c)
   sta zp.s_ptr                        // [36A0:85 52    STA $0052]
@@ -366,7 +362,6 @@ LoadNextScore:                        // XREF[2]: 3241(c), 373e(c)
 // SUMMARY: Per-frame attract-screen step: scrolls the display up one row,
 //          loads the next hi-score entry via zp.hiscore_scroll_idx, then advances
 //          the index; wraps at 56 (entries 0-49 loaded, 50-55 blank = pause).
-// P2_DIVERGES: entry-point label DisplayHiScores → DisplayScores (dot notation inside namespace)
 //==============================================================================
 DisplayScores:                        // XREF[1]: 3333(c)
   jsr ScrollScoresUp                  // [3739:20 e9 37 JSR $37e9]
@@ -392,7 +387,6 @@ DisplayScores:                        // XREF[1]: 3333(c)
 //          across 6 interior rows (10-15); and a 20-wide decorative band at
 //          rows 6-7 (cols 10-29) with colour from Data.border_tile_data. Colour data
 //          is in Data.border_tile_data ($37C0, 20 entries).
-// P2_DIVERGES: entry-point label DrawHighScoreBorder → DrawBorder (dot notation inside namespace)
 //==============================================================================
 DrawBorder:                           // XREF[1]: 3318(c)
   ldx #$16                            // [374D:a2 16    LDX #$16]
@@ -468,7 +462,6 @@ DrawBorder:                           // XREF[1]: 3318(c)
 //          Returns X = tens digit, Y = ones digit (both $30-$39). Repeatedly
 //          subtracts 10 and counts in X; Y holds the pre-subtraction value so
 //          when the borrow fires the ones digit is already sitting in Y.
-// P2_DIVERGES: entry-point label ConvertToTwoPETSCIIDigits → ConvertToDigits (dot notation inside namespace)
 //==============================================================================
 ConvertToDigits:                      // XREF[2]: 36b6(c), 3d36(c)
   ldx #$00                            // [37D4:a2 00    LDX #$0]
@@ -542,7 +535,6 @@ ScrollScoresUp:                       // XREF[5]: 3249(c), 3251(c), 3739(c), 3d2
 // SUMMARY: Scans sorted 50-entry BCD hi-score table ($7300); if current score
 //          qualifies, enters name input, shifts lower entries down, writes new
 //          score, copies displaced name entry via $0400 working buffer.
-// P2_DIVERGES: entry-point label CheckAndInsertHiScore → CheckAndInsert (dot notation inside namespace)
 //==============================================================================
                                       // XREF[1]: 331b(c)
 CheckAndInsert:

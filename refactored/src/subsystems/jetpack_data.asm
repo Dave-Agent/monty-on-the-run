@@ -8,7 +8,6 @@
 // P1_ROUTINE_NAME: thruster_mask_tables
 // RANGE:   $305B-$307E
 // STATUS:  understood
-// P2_DIVERGES: extracted from jetpack.asm into Jetpack.Data namespace.
 // SUMMARY: Two 18-byte pixel-mask tables for the flame animation, indexed
 //          X=17..0. ANDed with the XOR'd random byte to preserve the flame
 //          silhouette while allowing internal pixels to flicker.

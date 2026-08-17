@@ -8,9 +8,6 @@
 // P1_ROUTINE_NAME: hiscore_display_strings
 // RANGE:   $3D75-$3E22
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
-//              string_entry, rank_tens/rank_ones, entry_row_offsets referenced
-//              as HiScore.Data.* from hiscore.asm code.
 // SUMMARY: "CONGRATULATIONS !!" display text (6 rows × 28 chars), row-offset
 //          table, and rank-digit SMC targets; used by NameEntry.
 //==============================================================================
@@ -44,8 +41,7 @@ entry_row_offsets:                    // byte offsets into string_entry; 6 rows 
 // P1_ROUTINE_NAME: attract_row_tpl
 // RANGE:   $371E-$3739
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
-//              Byte 27 (trailing space) made an explicit part of the array. In
+// P2_DIVERGES: Byte 27 (trailing space) made an explicit part of the array. In
 //              P1 this byte is not part of the .text at all; it's borrowed
 //              from the $3739 opcode byte, which only produces the same
 //              result while that byte stays a JSR. Declaring it here removes
@@ -75,7 +71,6 @@ attract_row_tpl:
 // SECTION: border_tile_data
 // RANGE:   $37C0-$37D3
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
 // SUMMARY: Colour values for the DrawBorder decorative band, rows 6-7
 //          (20 entries, cols 10-29).
 //==============================================================================
@@ -87,7 +82,6 @@ border_tile_data:
 // SECTION: scores_row_tbl
 // RANGE:   $3821-$3827
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
 // SUMMARY: Row offsets 0-6 (×40 bytes/row) used by ScrollScoresUp to shift
 //          the score display rows up one line.
 //==============================================================================
@@ -98,10 +92,6 @@ scores_row_tbl:
 // SECTION: hiscore_data
 // RANGE:   $7300-$772B
 // STATUS:  understood
-// P2_DIVERGES: extracted from main.asm; name_input_buf (originally in
-//              main.asm hiscore_and_sprite_data section) consolidated here.
-//              top_scores/name_table/name_input_buf referenced as HiScore.Data.*
-//              from hiscore.asm and hud.asm.
 // SUMMARY: Hi-score score table (50 × 5 PETSCII digit chars, factory scores
 //          00500 down to 00010), 5-byte BCD shift-overflow sentinel, and
 //          50 × 16-byte name display table (factory: credits scroll followed

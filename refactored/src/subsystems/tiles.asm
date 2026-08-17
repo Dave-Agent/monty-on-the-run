@@ -4,7 +4,6 @@
 // SECTION: room_metadata_block
 // RANGE:   $9600-$970F (phase 1 pointer tables)
 // STATUS:  understood
-// P2_DIVERGES: room_tileset_ptr extracted here from room_metadata_block in motr.asm
 // SUMMARY: Pointer to the global tile library; part of the room load pipeline master index.
 //==============================================================================
 room_tileset_ptr:                     // constant ptr to global tile library (121 tiles × 8 bytes, shared by all rooms)
@@ -16,7 +15,6 @@ room_tileset_ptr:                     // constant ptr to global tile library (12
 // SECTION: tile_library
 // RANGE:   $AD3B-$B102
 // STATUS:  understood
-// P2_DIVERGES: label qualified as Tiles.tile_library (extracted from main.asm)
 // SUMMARY: 121 tile definitions (8 bytes each). Tile indices 0–7 are
 //          room-customised via zp.room_tile_chr_tbl; indices 8–120 are the
 //          shared global tileset. Referenced via room_tileset_ptr.

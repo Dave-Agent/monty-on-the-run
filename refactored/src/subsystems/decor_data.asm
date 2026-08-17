@@ -13,8 +13,6 @@
 // SECTION: decor_data
 // RANGE:   $E000-$FF71
 // STATUS:  understood
-// P2_DIVERGES: trailing $00 pad byte removed ($FF72) — was phase 1 file-size alignment, not data
-// P2_DIVERGES: chr/col blobs regrouped into chr_data/col_data sub-namespaces; _chr/_col suffixes dropped
 // SUMMARY: Decoration system data. Four sub-regions:
 //          type      — 4-byte global header + 97×4-byte per-type (chr_ptr, col_ptr)
 //          chr_data  — 84 chr bitmap blobs (bare names, _chr suffix dropped)

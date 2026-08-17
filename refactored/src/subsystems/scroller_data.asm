@@ -17,8 +17,6 @@
 // SECTION: scroller_msg_text
 // RANGE:   $3A59-$3BDA  (inline in scroller_char_render in phase 1)
 // STATUS:  understood
-// P2_DIVERGES: extracted from scroller_char_render; message text now in
-//              scroller_data.asm under Scroller.Data namespace.
 // SUMMARY: Attract-screen scroller message stream, $3A59-$3BDA.
 //          Mixed ASCII text and single-byte control codes $FA-$FF interpreted
 //          by scroller_text_dispatch. $FF (SCRL_RESTART) loops back to
@@ -69,7 +67,6 @@ message:                      // control-code stream + ASCII text; XREF: ptr ini
 // SECTION: scroller_bitmask_tbl
 // RANGE:   $3A51-$3A58
 // STATUS:  understood
-// P2_DIVERGES: moved from inline at end of scroller_char_render in scroller.asm
 // SUMMARY: One-hot pixel masks for 8 sub-pixel scroll positions.
 //          Indexed by zp.scroll_bit_idx in scroller_char_render; each pair of
 //          adjacent entries tests left then right pixel of a character bit-pair.
@@ -82,7 +79,6 @@ bitmask_tbl:
 // SECTION: scroller_nybble_mask_tbl
 // RANGE:   $3C1A-$3C1D
 // STATUS:  understood
-// P2_DIVERGES: moved from inline at end of scroller_pixel_writer in scroller.asm
 // SUMMARY: Nybble-selector masks for 4 sub-cell positions in multicolour mode.
 //          Index = (col_bit | row_bit). ScrollPlotPixel uses this to select
 //          which nybble of the target screen byte receives the plotted pixel.

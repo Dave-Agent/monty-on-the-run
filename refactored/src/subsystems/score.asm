@@ -11,9 +11,6 @@
 // P1_ROUTINE_NAME: IncreaseScore
 // RANGE:   $2188-$21AD
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into its own Score namespace — score
-//              mutation is a cross-cutting concern (special_items.asm,
-//              game_over.asm), not owned by the hi-score table subsystem.
 //              Entry-point label IncreaseScore → Increase (dot notation).
 // SUMMARY: Score stored as 5 ASCII digits '0'-'9' at score_in_memory-4..score_in_memory
 //          ($0294-$0298) so they copy directly to screen RAM without conversion.
@@ -54,8 +51,6 @@ Increase:
 // P1_ROUTINE_NAME: DecrementScore
 // RANGE:   $21CF-$21E7
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into its own Score namespace (see
-//              Increase above). Entry-point label DecrementScore → Decrement.
 // SUMMARY: Decrements by 1 with borrow propagation; Y=$FF on underflow.
 //==============================================================================
                                       // XREF[1]: 21b3(c)
@@ -83,8 +78,6 @@ Decrement:
 // P1_ROUTINE_NAME: ConfiscateScore
 // RANGE:   $21AE-$21CE
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into its own Score namespace (see
-//              Increase above). Entry-point label ConfiscateScore → Confiscate.
 // SUMMARY: Counts score to zero, one unit per frame (arrested ending).
 //==============================================================================
                                       // XREF[2]: 21bf(j), 2b69(c)

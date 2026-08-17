@@ -8,7 +8,6 @@
 // P1_ROUTINE_NAME: enemy_attr_tables
 // RANGE:   $1319-$134A
 // STATUS:  understood
-// P2_DIVERGES: extracted from utils.asm into Utils.Data namespace.
 // SUMMARY: enemy_dir_flags_tbl: 5-entry dir_idx → movement flags
 //            (bit0=axis: 0=horiz 1=vert, bit7=dir).
 //          enemy_sprite_colour_tbl: 16-entry type_idx → sprite colour byte.
@@ -32,7 +31,6 @@ enemy_copy_flag_tbl:                    // type_id → non-zero if type needs ex
 // P1_ROUTINE_NAME: room_metadata_tbl
 // RANGE:   $2152-$2187
 // STATUS:  understood
-// P2_DIVERGES: extracted from utils.asm into Utils.Data namespace.
 // SUMMARY: 54-entry per-room metadata byte. bits[2:0]=theme (selects char
 //          $01-$08 in chrset). bits[7:4]=animation mode: RotLeft8/RotRight8/
 //          RolBytes3/RorBytes3 applied each frame to the theme character.

@@ -9,8 +9,6 @@
 // SECTION: chr_charset
 // RANGE:   $4000-$47FF
 // STATUS:  understood
-// P2_DIVERGES: P1 has mixed-width .byte lines (5 bytes, then labels, then 16-byte chunks);
-//              P2 reformats to uniform 8 bytes per line (one char per line). Same bytes, different grouping.
 // SUMMARY: VIC bank 1 ($4000-$7FFF) character set: 256 chars × 8 bytes = 2048 bytes.
 //          char N at chrset.base + N*8. Upper chars patched at runtime for loaded tiles.
 //          VIC bank 1 RAM layout:

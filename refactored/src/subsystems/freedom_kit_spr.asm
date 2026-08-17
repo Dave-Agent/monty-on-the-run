@@ -12,9 +12,6 @@
 // SECTION: freedom_kit_sprites
 // RANGE:   $D000-$D86C (P2); $CC72-$CFFF (P1)
 // STATUS:  understood
-// P2_DIVERGES: pinned at $7800 (P1: $CC72); sprites base → FreedomKit.sprites.base.
-//              _spr suffix dropped, fk_ prefix dropped within sprites sub-namespace.
-//              entity_master_tbl renamed to item_tbl (now in FreedomKit.Data).
 // SUMMARY: 22 FK item sprites (32 bytes each, indexed by slot×32 from fk_sprite_src_base).
 //          carousel_mask (item 21) is the carousel overlay mask, not a real FK item.
 //==============================================================================

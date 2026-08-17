@@ -9,7 +9,6 @@
 // P1_ROUTINE_NAME: keyboard_remap (string data portion)
 // RANGE:   $30D8-$31A0
 // STATUS:  understood
-// P2_DIVERGES: extracted from controls.asm into Controls.Data namespace.
 // SUMMARY: string_control_descriptions: 5 × 8-char descriptions for the
 //            remap UI (LEFT/RIGHT/UP/DOWN/FIRE); indexed as action*8.
 //          special_key_names: 15 '*'-terminated name strings for non-printable
@@ -44,7 +43,6 @@ special_key_names:                    // 15 '*'-terminated entries; index = char
 // P1_ROUTINE_NAME: read_player_input (binding data portion)
 // RANGE:   $0BF8-$0C07
 // STATUS:  understood
-// P2_DIVERGES: extracted from controls.asm into Controls.Data namespace.
 // SUMMARY: keyboard_controls: 5-byte active binding (char codes for L/R/U/D/FIRE);
 //            default ZXKM+SPACE equivalent.
 //          kbd_row_table: CIA1 Port A row selectors for each action (5 bytes).
@@ -64,7 +62,6 @@ kbd_col_table:                        // CIA1 Port B column masks for keyboard m
 // P1_ROUTINE_NAME: GetPressedKeyCode (mask data portion)
 // RANGE:   $22D7-$22E6
 // STATUS:  understood
-// P2_DIVERGES: extracted from controls.asm into Controls.Data namespace.
 // SUMMARY: kbd_col_mask_tbl: 8 active-low drive patterns for CIA1 port-A columns.
 //          kbd_row_mask_tbl: 8 active-high isolation masks for CIA1 port-B rows.
 //==============================================================================
@@ -78,7 +75,6 @@ kbd_row_mask_tbl:                     // 8 bytes: bitmask to isolate each CIA1 p
 // SECTION: key_press_map_data
 // RANGE:   $22F7-$2336
 // STATUS:  understood
-// P2_DIVERGES: extracted from controls.asm into Controls.Data namespace.
 // SUMMARY: 64-entry keyboard matrix → character-code lookup; $80-$8E = special
 //          keys, $FF = no-key. Matrix index = row*8 + col.
 //==============================================================================

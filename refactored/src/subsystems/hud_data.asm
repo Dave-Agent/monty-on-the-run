@@ -7,7 +7,6 @@
 // SECTION: header_text
 // RANGE:   $11A6-$11C9
 // STATUS:  understood
-// P2_DIVERGES: extracted from hud.asm into HUD.Data namespace.
 // SUMMARY: 36-byte ASCII template for the HUD score bar row 0 (cols 2-37).
 //          Init copies it via AND#$3F/OR#$40 to produce screen codes.
 //==============================================================================

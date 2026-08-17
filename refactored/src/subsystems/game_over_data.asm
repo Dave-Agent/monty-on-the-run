@@ -8,7 +8,6 @@
 // P1_ROUTINE_NAME: arrested_ending (data portion)
 // RANGE:   $2B74-$2C4D
 // STATUS:  understood
-// P2_DIVERGES: extracted from game_over.asm into GameOver.Data namespace.
 // SUMMARY: $DA-byte right-to-left scroll message displayed when Monty is
 //          arrested for crossing without a passport. $FF byte triggers colour
 //          change (yellow→cyan) mid-scroll in Arrested.

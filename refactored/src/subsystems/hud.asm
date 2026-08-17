@@ -64,7 +64,6 @@ Init:
 // P1_ROUTINE_NAME: UpdateScreenHeader
 // RANGE:   $1186-$11A5
 // STATUS:  understood
-// P2_DIVERGES: hud_score_header_text data extracted to hud_data.asm
 // SUMMARY: Refreshes live HUD data on every score/life change.
 //          score_in_memory ($0294-$0298, 5 BCD digits) → row 0, cols 10-14.
 //          HiScore.top_scores ($7300-$7304)            → row 0, cols 33-37.

@@ -8,7 +8,6 @@
 // SECTION: irq_nmi_main_loop
 // RANGE:   $0D16-$0D82
 // STATUS:  understood
-// P2_DIVERGES: InitializeInterrupts → Irq.Initialize, IrqHandler → Irq.Handler
 // SUMMARY: Memory banking: CPU.MOS6510.PORT=$05 selects CHAREN=1 (I/O at $D000),
 //          HIRAM=0+LORAM=1 (BASIC and KERNAL ROMs both hidden) — the full 64KB
 //          is game RAM. $A000-$BFFF and $E000-$FFFF are RAM; the decoration
@@ -94,7 +93,6 @@ Handler:                              // IRQ vector entry point ($0D54)
 // SECTION: IrqExit
 // RANGE:   $0D83-$0D89
 // STATUS:  understood
-// P2_DIVERGES: IrqExit → Irq.Exit
 // SUMMARY: Restores Y, X, A (from stack/ZP zp.irq_save_a) then RTIs.
 //          Shared exit point for Handler; also called from GameFrameUpdate and
 //          AttractFrameUpdate exit paths (4 callers total).
@@ -116,7 +114,6 @@ Exit:                                 // restore saved registers and RTI
 // SECTION: NmiHandler
 // RANGE:   $0D8A-$0DA3
 // STATUS:  understood
-// P2_DIVERGES: NmiHandler → Irq.Nmi
 // SUMMARY: NMI vector entry point ($0D8A), always one byte past Exit's RTI.
 //          In attract mode: silently RTIs (bne !- loops to the RTI in Exit).
 //          In gameplay: sets zp.freeze_flag, zeroes 5 score digits

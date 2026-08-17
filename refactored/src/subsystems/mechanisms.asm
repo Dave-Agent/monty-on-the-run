@@ -449,7 +449,6 @@ CheckContact:
 // P1_ROUTINE_NAME: piledriver_ride
 // RANGE:   $2248-$2261
 // STATUS:  understood
-// P2_DIVERGES: PauseGameOnP was in the P1 piledriver_ride section (no section banner); extracted to controls.asm
 // SUMMARY: Per-frame ride update: moves Monty sprite up while ride_active is set;
 //          clears ride state when Y < $62.
 //==============================================================================
@@ -865,7 +864,6 @@ UpdateBgTile:
 // P1_ROUTINE_NAME: DisplayTeleporters
 // RANGE:   $1E2F-$1E58 (search) + $1E59-$1EBD (render)
 // STATUS:  understood
-// P2_DIVERGES: P1 used named label DisplayTeleporters_found as beq target; P2 uses anonymous !++
 // SUMMARY: Searches data for the current room_id. If found, renders column and
 //          sets zp.tele_active. If not found, calls ClearChars.
 //==============================================================================
@@ -894,7 +892,6 @@ DisplayForRoom:
 // P1_ROUTINE_NAME: ClearTeleporterChars
 // RANGE:   $1E4E-$1E58
 // STATUS:  understood
-// P2_DIVERGES: P1 named label DisplayTeleporters_found: falls here; P2 uses anonymous !: target
 // SUMMARY: Resets 32 bytes of custom teleporter charset at chrset.base+$1C0
 //          to $AA pattern. Called when no teleporter in room or after animation.
 //==============================================================================
@@ -973,7 +970,6 @@ ClearChars:
 // P1_ROUTINE_NAME: TeleporterDisplayAndPulse
 // RANGE:   $1EBE-$1EFB
 // STATUS:  understood
-// P2_DIVERGES: anonymous branch target (!++++) renamed to Animate_exit for clarity
 // SUMMARY: Per-frame driver. Guards on zp.tele_active; animates colour cycling
 //          via zp.tele_anim_frame; every 32nd frame calls CycleColours then
 //          tails into ClearChars.
@@ -1020,7 +1016,6 @@ Animate_exit:
 // P1_ROUTINE_NAME: TeleporterCycleColours
 // RANGE:   $1EFC-$1F34
 // STATUS:  understood
-// P2_DIVERGES: teleporter_colour_table and teleporter_data extracted to mechanisms_data.asm (8 lines)
 // SUMMARY: Applies a randomly chosen colour from colour_table to the entire
 //          teleporter column via pointer loop. Called every 32 frames by Animate.
 //==============================================================================
@@ -1066,7 +1061,6 @@ CycleColours:
 // P1_ROUTINE_NAME: teleporter_contact
 // RANGE:   $2857-$28A4
 // STATUS:  understood
-// P2_DIVERGES: teleporter_dest_tbl data extracted to mechanisms_data.asm
 // SUMMARY: Scans 4 surrounding tiles for teleporter chars ($38-$3B). On match,
 //          reads dest_tbl by tele_repeat_ctr*4 to warp Monty to destination room.
 //          Anti-repeat guard via zp.tele_base_colour/zp.tele_cur_colour.

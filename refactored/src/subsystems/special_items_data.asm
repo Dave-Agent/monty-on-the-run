@@ -8,7 +8,6 @@
 // P1_ROUTINE_NAME: special_item_subsystem (data portion)
 // RANGE:   $25E1-$2856
 // STATUS:  understood
-// P2_DIVERGES: extracted from special_items.asm into SpecialItems.Data namespace.
 // SUMMARY: item_slot_idx: 5 indices into item_flags for the in-room FK
 //            collectibles (slots 1,3,11,12,15).
 //          si_spawn_tbl: 20 × 4-byte records (room_id, sprX, sprY, frame_base)

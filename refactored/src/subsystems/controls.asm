@@ -345,7 +345,6 @@ ValidateInput:
 // SECTION: is_input_active
 // RANGE:   $0BEA-$0BF7
 // STATUS:  understood
-// P2_DIVERGES: keyboard_controls/kbd_row_table/kbd_col_table data extracted to controls_data.asm
 // SUMMARY: Tests a keyboard matrix entry. Y = CIA row selector written to
 //          $DC00; A = column mask tested against $DC01 (active-low: pressed
 //          key pulls bit to 0 -> Z=1). Returns carry set if input active.

@@ -13,7 +13,6 @@
 // P1_ROUTINE_NAME: room_nav_tables
 // RANGE:   $187A-$1972
 // STATUS:  understood
-// P2_DIVERGES: extracted from room_engine.asm into RoomEngine.Data namespace.
 // SUMMARY: Room exit destination grid (6×23), jump-arc Y-delta table,
 //          screen-position offsets, and piledriver tile character seeds.
 //==============================================================================
@@ -90,7 +89,6 @@ piledriver_col2_chr:
 // P1_ROUTINE_NAME: sector_name_strings
 // RANGE:   $19E3-$1AD6
 // STATUS:  understood
-// P2_DIVERGES: extracted from room_engine.asm into RoomEngine.Data namespace.
 // SUMMARY: Ten sector name strings (column byte + ASCII text + '*' terminator)
 //          and room→sector index table (room_msg_idx_tbl).
 //==============================================================================
@@ -160,12 +158,6 @@ sector_idx:                       // room_id → index N; N=0 → sector_name_1 
 // SECTION: room_metadata_block
 // RANGE:   $9600-$970F (phase 1); floats within RoomData block in phase 2
 // STATUS:  understood
-// P2_DIVERGES: enemy_spr_ptrs extracted to enemies.asm as Enemies.spr_ptrs
-// P2_DIVERGES: room_enemy_ptrs entries → Room.Data.enemy_spawn.rm_XX
-// P2_DIVERGES: room_def_ptr → Room.Data.room_defs
-// P2_DIVERGES: room_tileset_ptr extracted to tiles.asm
-// P2_DIVERGES: room_entity_master_ptr/fk_sprite_src_base extracted to freedom_kit.asm
-// P2_DIVERGES: attract_chr_src_ptr extracted to attract.asm
 // SUMMARY: Level data master index. Little-endian 16-bit pointers and inline
 //          pointer tables used by the room load pipeline.
 //==============================================================================
@@ -209,7 +201,6 @@ enemy_ptrs:                   // 52x2-byte ptrs to per-room enemy spawn records;
 // SECTION: enemy_sprites
 // RANGE:   $C203-$C6B9
 // STATUS:  understood
-// P2_DIVERGES: rm_XX_spawn labels qualified as Rooms.rm_XX_spawn
 // SUMMARY: 52 enemy spawn record streams, one per room, indexed by room_enemy_ptrs; accessed as enemy_spawn.rm_XX.
 //          Each stream: variable-length 7-byte records terminated by $FF.
 //          Merges with enemies.asm sprite blobs to form P1 enemy_sprites section.
@@ -565,7 +556,6 @@ rm_33:  // [c6ab]
 // SECTION: rle_tilemap_streams
 // RANGE:   $9710-$AD3A
 // STATUS:  understood
-// P2_DIVERGES: rm_XX_tilemap labels → tilemap.rm_XX
 // SUMMARY: Per-room RLE tilemap data for all 52 rooms ($00-$33).
 //          Indexed by room_tilemap_ptrs ($960A); DrawRoomPlayfield
 //          decodes each stream into $0400 scratch then blits to screen RAM.

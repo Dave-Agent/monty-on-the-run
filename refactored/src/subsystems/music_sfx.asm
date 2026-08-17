@@ -517,7 +517,6 @@ loopcont:
 // SECTION: sfx_dispatch
 // RANGE:   $837D-$8565
 // STATUS:  understood
-// P2_DIVERGES: variable block uses labeled .byte entries instead of bare label + .label offset declarations
 // SUMMARY: SFX engine appended after the Hubbard player; runs once per frame.
 //          Data.sfx_id state: bit7=1 ($FF) no SFX active; bit6=1 needs init this frame;
 //          bits[3:0] = active record index (0-15) once running.

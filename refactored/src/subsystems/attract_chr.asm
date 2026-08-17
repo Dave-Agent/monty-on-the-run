@@ -7,7 +7,6 @@
 // SECTION: enemy_sprites
 // RANGE:   $C9FA-$CC71
 // STATUS:  understood
-// P2_DIVERGES: chr_src extracted from motr.asm; moved here from attract.asm
 // SUMMARY: chr_src — animation frames for the attract-screen charset
 //          (blitted by UpdateChrs). Part of P1 enemy_sprites section.
 //          Three blocks copied into the VIC charset by UpdateChrs:

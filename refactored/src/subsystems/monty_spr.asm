@@ -21,8 +21,6 @@
 // SECTION: monty_sprite_data
 // RANGE:   $5400-$7063
 // STATUS:  understood
-// P2_DIVERGES: extracted from main.asm character screen section.
-//             $7064-$70FF zero-padding dropped (unallocated frames, no code refs).
 // SUMMARY: Monty and Piledriver animation frames pre-loaded in VIC bank 1
 //          sprite RAM. Accessed directly by VIC; no runtime copy step.
 //          Frame ptr = (addr - chr_charset) / 64.

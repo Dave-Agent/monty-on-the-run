@@ -11,7 +11,6 @@
 // SECTION: room_metadata_block
 // RANGE:   $9672-$96A7
 // STATUS:  understood
-// P2_DIVERGES: enemy_spr_ptrs extracted here as Enemies.spr_ptrs
 // SUMMARY: spr_ptrs — 27×2-byte gfx bank pointer table indexed by (type_id-8)*2.
 //==============================================================================
 
@@ -25,8 +24,6 @@ spr_ptrs:                                        // 27×2-byte ptrs to enemy spr
 // SECTION: enemy_sprites
 // RANGE:   $B103-$C202
 // STATUS:  understood
-// P2_DIVERGES: extracted from main.asm; _spr suffix dropped within Enemies.sprites;
-//              flying_banner_1/2/3 extracted from hiscore_and_sprite_data and appended here.
 // SUMMARY: 27 entity sprite gfx banks (types $08–$22); each bank 64 bytes × N frames.
 //          8-frame: boot, lamp, knight, big_nose, king, kettle, hand, tank, medusa, fish
 //          4-frame: skate, ufo, queen_liz, clock, rubik, sad_mug, pi_pie, wasp,

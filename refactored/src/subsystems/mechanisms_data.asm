@@ -8,8 +8,6 @@
 // P1_ROUTINE_NAME: piledriver_config_data
 // RANGE:   $1BCA-$1C00
 // STATUS:  understood
-// P2_DIVERGES: extracted from mechanisms.asm (Mechanisms.Piledriver) into
-//              Mechanisms.Data namespace; referenced as Mechanisms.Data.config_tbl.
 // SUMMARY: 5-byte records: room_id, col, row, height, char_base. $FF-terminated.
 //          Describes every piledriver shaft instance in the game world.
 //==============================================================================
@@ -31,9 +29,6 @@ config_tbl:                           // room_id, col, row, height, char_base â€
 // P1_ROUTINE_NAME: teleporter_data (colour_table + data portion + dest_tbl)
 // RANGE:   $1F35-$28A4
 // STATUS:  understood
-// P2_DIVERGES: extracted from mechanisms.asm (Mechanisms.Teleporter) into
-//              Mechanisms.Data namespace. 'data' renamed teleporter_cfg_tbl for
-//              clarity. Referenced as Mechanisms.Data.colour_table / .teleporter_cfg_tbl / .dest_tbl.
 // SUMMARY: colour_table: 4 colours cycled at random by CycleColours.
 //          teleporter_cfg_tbl: 5-byte room records (room_id, scr_lo, scr_hi,
 //            height, colour), $FF-terminated; drives DisplayForRoom and ClearChars.

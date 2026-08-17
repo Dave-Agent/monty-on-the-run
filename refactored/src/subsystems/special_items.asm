@@ -8,9 +8,6 @@
 // SECTION: CollectCoin
 // RANGE:   $1DDF-$1E2E
 // STATUS:  understood
-// P2_DIVERGES: call site updated — HiScore.IncreaseScore → Score.Increase
-//              (IncreaseScore moved out of hiscore.asm into its own Score
-//              namespace; see score.asm).
 // SUMMARY: Scans up to 4 coin slots against Monty's current screen position.
 //          On match: marks collected in room_entity_collected_tbl, awards 50
 //          points via Score.Increase, plays coin SFX (code $07).
@@ -165,9 +162,6 @@ SpawnSIForRoom:                   // scan si_spawn_tbl for zp.room_id; set sprit
 // SECTION: HandleSICollision
 // RANGE:   $2684-$270F
 // STATUS:  understood
-// P2_DIVERGES: call site updated — HiScore.IncreaseScore → Score.Increase
-//              (IncreaseScore moved out of hiscore.asm into its own Score
-//              namespace; see score.asm).
 // SUMMARY: Sprite-sprite collision handler for special items (SI). Guards on
 //          zp.collision_store bits 2/3 (dead/alive paths). Dispatches: FK
 //          sprite touch → ShowFKItem; enemy/hazard → sets zp.action_counter
@@ -419,7 +413,6 @@ ApplyItemRoomEffects_26_2d:
 // SECTION: rising_cloud
 // RANGE:   $27ED-$2856
 // STATUS:  understood
-// P2_DIVERGES: cloud_frame_tbl data extracted to SpecialItems.Data section
 // SUMMARY: UpdateRisingCloud ($27ED): room-$01 only. Each call: increments zp.cloud_tick;
 //          on odd ticks steps sprite 1 Y up by 1 and cycles through cloud_frame_tbl
 //          (4 animation frames). Sets sprite 1 X=$3C (fixed), enables sprite 1.

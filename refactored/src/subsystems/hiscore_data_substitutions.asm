@@ -12,7 +12,6 @@
 // P1_ROUTINE_NAME: hi_score_triggers
 // RANGE:   $08BB-$0973
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
 // SUMMARY: Null-delimited ($00), $FF-terminated list of name trigger words
 //          scanned by ProcessName against the player's hi-score entry.
 //          Stored as PETSCII (ASCII); compared via AND #$3F → screen code.
@@ -58,7 +57,6 @@ triggers:
 // P1_ROUTINE_NAME: hi_score_replacements
 // RANGE:   $0974-$0A73
 // STATUS:  understood
-// P2_DIVERGES: extracted from hiscore.asm into HiScore.Data namespace.
 // SUMMARY: 16 entries × 16 bytes of PETSCII replacement text for substitution
 //          triggers 10-25. Written to the name display (screen row 15 col 12,
 //          colour yellow) via ProcessName_substitute.

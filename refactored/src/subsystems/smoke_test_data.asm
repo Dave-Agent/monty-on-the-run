@@ -8,7 +8,6 @@
 // P1_ROUTINE_NAME: spawn_tbl
 // RANGE:   TBD
 // STATUS:  understood
-// P2_DIVERGES: extracted from smoke_test.asm into SmokeTest.Data namespace.
 // SUMMARY: 52 × 4-byte per-room navigation records:
 //          spawn_x, spawn_y    — Monty's start position in screen coords
 //          exit_tile_col       — map-grid column; derived from room_exit_dest_tbl

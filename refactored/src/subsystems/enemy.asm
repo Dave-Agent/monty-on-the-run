@@ -7,9 +7,6 @@
 // SECTION: enemy_tick
 // RANGE:   $134A-$1454
 // STATUS:  understood
-// P2_DIVERGES: renamed UpdateActiveEnemies→Tick, ProcessEnemySlot→ProcessSlot,
-//              ProcessEnemySlot_sprite→ProcessSlot_sprite,
-//              EnemyMoveVertical→MoveVertical, EnemyMoveHorizontal→MoveHorizontal
 // SUMMARY: Per-frame enemy movement and sprite update.
 //          Tick loops slots 3→0; each active slot calls ProcessSlot, which
 //          dispatches to:

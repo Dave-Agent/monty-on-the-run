@@ -9,7 +9,6 @@
 // RANGE:   $8400-$84BF
 // STATUS:  understood
 // P1_ROUTINE_NAME: sfx_dispatch
-// P2_DIVERGES: extracted from sfx_dispatch section in music_sfx.asm into Music.Data
 // SUMMARY: SID note frequency table. 96 interleaved lo/hi pairs (C0–B7);
 //          8 octaves × 12 semitones. frequenzhi/freq_nxt_lo/freq_nxt_hi are
 //          offset aliases into the same table used by portamento and pitch code.
@@ -122,7 +121,6 @@ frequenzlo:                            // Rob Hubbard note frequency table: 96 l
 // RANGE:   $84C0-$8505
 // STATUS:  understood
 // P1_ROUTINE_NAME: sfx_dispatch
-// P2_DIVERGES: extracted from sfx_dispatch section in music_sfx.asm into Music.Data
 // SUMMARY: Rob Hubbard player working variables and SFX engine state. Initialised
 //          to default values in the PRG; all are mutated at runtime by Play/SFXDispatch.
 //          regofst_tbl (3 bytes): SID voice register offsets (0,$07,$0E).

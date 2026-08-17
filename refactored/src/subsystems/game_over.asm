@@ -8,7 +8,6 @@
 // SECTION: GameOverAnimation
 // RANGE:   $0AB8-$0B5B
 // STATUS:  understood
-// P2_DIVERGES: renamed GameOverAnimation → GameOver.Play
 // SUMMARY: Triggered when lives reach zero, after the Monty mole sprite has
 //          dissolved. Sprites 0-3 spell "GAME"; sprites 4-7 spell "OVER".
 //          Animation sequence:

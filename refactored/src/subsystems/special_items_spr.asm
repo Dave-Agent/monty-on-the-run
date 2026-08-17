@@ -7,9 +7,6 @@
 // SECTION: si_sprite_data
 // RANGE:   $6380-$66BF
 // STATUS:  understood
-// P2_DIVERGES: separated from monty_sprite_data (Phase 1 monolith). SI sprites
-//              are logically owned by SpecialItems; pinned at correct VIC bank
-//              1 address via .pc = $6380.
 // SUMMARY: 13 special-item sprite frames (1 frame = 64 bytes each, ptr=frame_base+$8E).
 //          first_aid_kit $6380/$8E | milk_jug    $63C0/$8F | teddy_bear $6400/$90
 //          cupcake       $6440/$91 | smoke_stack $6480/$92 | vase       $64C0/$93

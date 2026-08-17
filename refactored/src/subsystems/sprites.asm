@@ -38,7 +38,6 @@ SeparateSpritePair:
 // SECTION: ProcessSprites
 // RANGE:   $0C07-$0D15
 // STATUS:  understood
-// P2_DIVERGES: sprite pointer setup extracted to sprites_data.asm
 // SUMMARY: Per-frame sprite render routine; called twice per frame (main loop
 //          and raster IRQ). Five phases:
 //          1. Shadow buffer update: latch $D01E collision, copy Monty position
