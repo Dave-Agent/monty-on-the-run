@@ -8,8 +8,8 @@
 // RANGE:   $29A1-$29FA
 // STATUS:  understood
 // SUMMARY: Game completion sequence (event=5: action_counter=6 pre-dec, set by
-//          SpecialItems.HandleSICollision when Monty touches the Queen sprite
-//          placed by Enemies.PlaceQueen in room $2F). Freezes
+//          SpecialItems.HandleSICollision when Monty touches the treasure
+//          sprite placed by Enemies.PlaceTreasure in room $2F). Freezes
 //          gameplay, loads victory room $30, fills prize area chars ($65-$67)
 //          across rows 19-21, sets up Monty and boat sprites, plays music track 2.
 //          If passport not in inventory → GameOver.Arrested (bad ending).

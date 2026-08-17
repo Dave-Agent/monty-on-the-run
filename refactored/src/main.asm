@@ -20,7 +20,7 @@
 
 // Game parameters — platform-neutral
 .label STARTING_LIVES = 5           // lives at game start; loaded at startGame ($10BC)
-.var   SMOKE_TEST     = false        // true: Q/W room nav + correct FK items; false: production build
+.var   SMOKE_TEST     = true        // true: Q/W room nav + correct FK items; false: production build
 
 // Freedom Kit item selection: SMOKE_TEST=1 uses the five correct items to escape;
 // SMOKE_TEST=0 reverts to the original ROM's wrong default items.
@@ -322,7 +322,7 @@ GameFrameUpdate:
   jsr SpecialItems.HandleSICollision  // [0DCE:20 84 26 JSR $2684]
   jsr Utils.ComputeMontyTilePointer   // [0DD1:20 9c 14 JSR $149c]
   jsr Mechanisms.Piledriver.CheckTiles // [0DD4:20 8c 25 JSR $258c]
-  jsr Enemies.PlaceQueen              // [0DD7:20 80 29 JSR $2980]
+  jsr Enemies.PlaceTreasure           // [0DD7:20 80 29 JSR $2980]
   jsr Controls.PauseGameOnP           // [0DDA:20 62 22 JSR $2262]
   jsr Mechanisms.Piledriver.CheckContact // [0DDD:20 fe 21 JSR $21fe]
 

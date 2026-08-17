@@ -205,22 +205,26 @@ enemy_sprite_base_tbl:
   .byte $30,$38,$40,$48               // [1451] 08@H  sprite pointer base for enemy slots 0-3
 
 //==============================================================================
-// SECTION: place_queen
+// SECTION: place_treasure
 // P1_ROUTINE_NAME: freedom_room
 // RANGE:   $2980-$29A0
 // STATUS:  understood
 // SUMMARY: Room $2F only: if si_collected_tbl+8 is set (jerry can, SI item
-//          ordinal #8, room $23 — collected), positions Queen sprite (pointer
-//          $9B) at ($40,$9A) and enables sprite 0. Guards the colour-cycling
-//          2×2 end-goal treasure. Called every frame from the main game loop.
-//          Touching her routes through the generic sprite-0 collision handler
-//          (SpecialItems.HandleSICollision), which special-cases pointer $9B
-//          to set zp.action_counter=6 and jump straight to Completion.Begin —
-//          this is how the game-completion room ($30) actually gets reached;
-//          it is never entered via the room_exit_dest_tbl grid.
+//          ordinal #8, room $23 — collected), positions the treasure sprite
+//          (pointer $9B) at ($40,$9A) and enables sprite 0, incrementing its
+//          colour every frame (the colour-cycling effect). Called every frame
+//          from the main game loop. Room $2F separately has a stationary
+//          queen_liz enemy (enemy_spawn.rm_2f, near-zero movement range) as
+//          decoration next to the treasure — she is not involved in this.
+//          Touching the treasure routes through the generic sprite-0 collision
+//          handler (SpecialItems.HandleSICollision), which special-cases
+//          pointer $9B to set zp.action_counter=6 and jump straight to
+//          Completion.Begin — this is how the game-completion room ($30)
+//          actually gets reached; it is never entered via the
+//          room_exit_dest_tbl grid.
 //==============================================================================
                                       // XREF[1]: 0dd7(c)
-PlaceQueen:
+PlaceTreasure:
   lda zp.room_id                      // [2980:a5 46    LDA $0046]
   cmp #$2f                            // [2982:c9 2f    CMP #$2f]
   bne !+                              // [2984:d0 05    BNE $298b]

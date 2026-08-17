@@ -5400,13 +5400,13 @@ SetTileProperty_store:
 // STATUS:  understood
 // SUMMARY: MontyEventDispatch ($2394): Monty event/death dispatcher.
 //          zp_action_counter is set externally to an event code (1-7):
-//            1 smoke stack FK item   → MontyDeath4Split: 4 pieces fly off screen (sfx_09)
+//            1 smoke stack (SI item, room $0B) → MontyDeath4Split: 4 pieces fly off screen (sfx_09)
 //            2 enemy hit, alive      → MontyDeathEnemy_alive: dissolve 60 frames (sfx_0a)
 //            3 lift squash           → MontyDeathLift: dissolve 9 frames + reposition (sfx_0e)
 //                                      bypasses cheat mode — lift always kills
 //            4 piledriver            → MontyDeathPiledriver: dissolve 48 frames (sfx_0c)
 //            5 tile-type-4 hazard    → MontyDeathHazard: dissolve 18 frames (sfx_0d)
-//            6 Freedom bag FK item   → FreedomSequence: load room $30, MusicInit(2) (silent)
+//            6 jerry can (SI item, room $23) → FreedomSequence: load room $30, MusicInit(2) (silent)
 //            7 enemy hit, dead flag  → MontyDeathEnemy_dead: sprite var init (sfx_0e)
 //          All paths except 6 reach MontyLifeLost ($2526): decrement lives;
 //          lives remain → restore saved position, clear state, set room_exit;
@@ -5465,7 +5465,7 @@ MontyEventDispatch_dispatch:
   jmp MontyDeathLift                  // [23cf:4c e4 24 JMP $24e4]        event=2 (lift squash; pre-dec=3)
   jmp MontyDeathPiledriver            // [23d2:4c b1 24 JMP $24b1]        event=3 (piledriver; pre-dec=4)
   jmp MontyDeathHazard                // [23d5:4c d0 24 JMP $24d0]        event=4 (tile-type-4 hazard; pre-dec=5)
-  jmp FreedomSequence                 // [23d8:4c a1 29 JMP $29a1]        event=5 (Freedom bag; pre-dec=6)
+  jmp FreedomSequence                 // [23d8:4c a1 29 JMP $29a1]        event=5 (jerry can SI item; pre-dec=6)
   jmp MontyDeathEnemy_dead            // [23db:4c 98 24 JMP $2498]        event=6 (enemy hit, dead flag; pre-dec=7)
 
 // Part of: MontyEventDispatch — event=0: split into 4 sprite pieces flying off screen
@@ -6505,10 +6505,13 @@ DissolveFrameLoop:
 // SECTION: DisplayEndGoalRoom
 // RANGE:   $2980-$29A0
 // STATUS:  understood
-// SUMMARY: Game-complete sequence entry point. Room $2F only: when the escape
-//          bag (si_collected_tbl+8, $0310) is set, positions the Queen sprite
-//          (pointer $9B) at ($40,$9A) and enables sprite 0. The Queen's face
-//          guards the colour-cycling 2×2 treasure object — the game's end state.
+// SUMMARY: Game-complete sequence entry point. Room $2F only: when the jerry
+//          can (SI item, room $23; si_collected_tbl+8, $0310) is collected,
+//          positions the treasure sprite (pointer $9B) at ($40,$9A) and
+//          enables sprite 0, incrementing its colour every frame (the
+//          colour-cycling effect) — this is the game's end state. Room $2F
+//          separately has a stationary queen_liz enemy as decoration next to
+//          the treasure; she is not involved in this trigger.
 //==============================================================================
                                       // XREF[1]: 0dd7(c)
 DisplayFreedomRoom:
@@ -6536,13 +6539,13 @@ DisplayFreedomRoom:
 // SECTION: FreedomSequence
 // RANGE:   $29A1-$29FA
 // STATUS:  understood
-// SUMMARY: Victory sequence triggered when the Freedom Bag FK item is collected
-//          (event=5). Freezes gameplay, loads victory room $30, fills the prize
+// SUMMARY: Victory sequence triggered when the jerry can (SI item, room $23)
+//          is collected (event=5). Freezes gameplay, loads victory room $30, fills the prize
 //          area chars ($65-$67), inits freedom display, plays music track 2.
 //          If passport FK item not present → ArrestedEnding; else walks Monty
 //          offscreen via FreedomSlideSpritesIn/Out/WalkStep then GameOverAnimation.
 //==============================================================================
-FreedomSequence:                      // event=5 (counter=6): Freedom bag collected; load victory room $30
+FreedomSequence:                      // event=5 (counter=6): jerry can SI item collected; load victory room $30
   ldx #$01                            // [29A1:a2 01    LDX #$1]
   stx zp_freeze_flag                  // [29A3:86 0f    STX $000f]
   stx zp_level_active_flag            // [29A5:86 bb    STX $00bb]
@@ -6589,7 +6592,7 @@ FreedomSequence:                      // event=5 (counter=6): Freedom bag collec
   jmp GameOverAnimation               // [29FA:4c b8 0a JMP $0ab8]
 
                                       // XREF[1]: 29d1(c)
-// Part of: FreedomSequence — set up Monty and Queen sprite positions, colours, multicolour for the victory room
+// Part of: FreedomSequence — set up Monty and boat sprite positions, colours, multicolour for the victory room
 InitFreedomDisplay:
   lda #$9b                            // [29FD:a9 9b    LDA #$9b]
   sta zp_sprite7_x_buffer             // [29FF:85 17    STA $0017]
