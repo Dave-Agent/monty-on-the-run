@@ -8,9 +8,12 @@
 // SECTION: CollectCoin
 // RANGE:   $1DDF-$1E2E
 // STATUS:  understood
+// P2_DIVERGES: call site updated — HiScore.IncreaseScore → Score.Increase
+//              (IncreaseScore moved out of hiscore.asm into its own Score
+//              namespace; see score.asm).
 // SUMMARY: Scans up to 4 coin slots against Monty's current screen position.
 //          On match: marks collected in room_entity_collected_tbl, awards 50
-//          points via IncreaseScore, plays coin SFX (code $07).
+//          points via Score.Increase, plays coin SFX (code $07).
 //==============================================================================
                                       // XREF[1]: 0df9(c)
 CollectCoin:
@@ -19,7 +22,7 @@ CollectCoin:
   // Scans Monty's position against the coin table
   // If a coin is detected under Monty, it:
   // - Marks the coin as collected in memory
-  // - Updates the score via IncreaseScore
+  // - Updates the score via Score.Increase
   // - Triggers a coin collection sound effect (SFX)
   // The routine loops through all coin slots (up to 3 slots)
   // Each coin entry in table is 3 bytes: low/high index + marker
@@ -59,8 +62,8 @@ CollectCoin:
   lda #$ff                            // [1E15:a9 ff    LDA #$ff]
   sta room_entity_collected_tbl,x     // [1E17:9d a6 02 STA $2a6,X]       mark collected
   lda #$05                            // [1E1A:a9 05    LDA #$5]          Score increment (50)
-  ldy #$03                            // [1E1C:a0 03    LDY #$3]          Y for IncreaseScore
-  jsr HiScore.IncreaseScore           // [1E1E:20 88 21 JSR $2188]        Update score
+  ldy #$03                            // [1E1C:a0 03    LDY #$3]          Y for Score.Increase (tens digit)
+  jsr Score.Increase                  // [1E1E:20 88 21 JSR $2188]        Update score
   lda #$07                            // [1E21:a9 07    LDA #$7]          Sound effect code
   jsr Music.PlaySFX                   // [1E23:20 91 95 JSR $9591]        Play coin collection SFX
   rts                                 // [1E26:60       RTS]              Return
@@ -162,6 +165,9 @@ SpawnSIForRoom:                   // scan si_spawn_tbl for zp.room_id; set sprit
 // SECTION: HandleSICollision
 // RANGE:   $2684-$270F
 // STATUS:  understood
+// P2_DIVERGES: call site updated — HiScore.IncreaseScore → Score.Increase
+//              (IncreaseScore moved out of hiscore.asm into its own Score
+//              namespace; see score.asm).
 // SUMMARY: Sprite-sprite collision handler for special items (SI). Guards on
 //          zp.collision_store bits 2/3 (dead/alive paths). Dispatches: FK
 //          sprite touch → ShowFKItem; enemy/hazard → sets zp.action_counter
@@ -248,9 +254,9 @@ HandleSICollision:
   sta zp.action_counter               // [2700:85 b7    STA $00b7]  frame $9B = action 6
   rts                                 // [2702:60       RTS]
 !:
-  lda #$02                            // [2703:a9 02    LDA #$2]
-  ldy #$02                            // [2705:a0 02    LDY #$2]
-  jsr HiScore.IncreaseScore           // [2707:20 88 21 JSR $2188]
+  lda #$02                            // [2703:a9 02    LDA #$2]          Score increment (200)
+  ldy #$02                            // [2705:a0 02    LDY #$2]          Y for Score.Increase (hundreds digit)
+  jsr Score.Increase                  // [2707:20 88 21 JSR $2188]
   lda #$08                            // [270A:a9 08    LDA #$8]
   jsr Music.PlaySFX                   // [270C:20 91 95 JSR $9591]
   rts                                 // [270F:60       RTS]

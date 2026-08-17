@@ -146,7 +146,7 @@ Arrested:
   bne !---                            // [2B62:d0 e3    BNE $2b47]
   ldx #$ff                            // [2B64:a2 ff    LDX #$ff]
   jsr Utils.WaitDelay                 // [2B66:20 17 10 JSR $1017]
-  jsr HiScore.ConfiscateScore         // [2B69:20 ae 21 JSR $21ae]
+  jsr Score.Confiscate                // [2B69:20 ae 21 JSR $21ae]
   ldx #$ff                            // [2B6C:a2 ff    LDX #$ff]
   jsr Utils.WaitDelay                 // [2B6E:20 17 10 JSR $1017]
   jmp Play                            // [2B71:4c b8 0a JMP $0ab8]

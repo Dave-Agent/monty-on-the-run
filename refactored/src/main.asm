@@ -51,6 +51,7 @@
 // Subsystems — floating within Core_main.
 #import "subsystems/hud.asm"
 #import "subsystems/hud_data.asm"
+#import "subsystems/score.asm"
 #import "subsystems/enemy.asm"
 #import "subsystems/special_items.asm"
 #import "subsystems/special_items_data.asm"
