@@ -42,7 +42,11 @@
 // row 5: .. .. .. .. .. .. .. .. .. 1d 1c 17 16 15 14 12 13 .. .. .. .. .. ..
 //
 // row 2 col $04 is room_exit_dest_dyn (mutable, see below); room $30 does not
-// appear anywhere in this static grid — not yet confirmed how it's reached.
+// appear anywhere in this static grid because it's never entered via this
+// table at all — it's the game-completion room, force-loaded by
+// Completion.Begin (completion.asm) bypassing this grid entirely. See
+// Enemies.PlaceQueen (enemy.asm) and HandleSICollision (special_items.asm)
+// for the touch-the-Queen-in-room-$2F trigger that reaches it.
 room_exit_dest_tbl:
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$23,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff  // [187a] row 0
   .byte $ff,$2f,$2e,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$22,$ff,$ff,$ff,$ff,$ff,$ff,$06,$07,$08,$09,$ff,$ff  // [1891] row 1

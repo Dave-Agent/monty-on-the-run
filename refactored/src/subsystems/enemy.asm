@@ -209,10 +209,15 @@ enemy_sprite_base_tbl:
 // P1_ROUTINE_NAME: freedom_room
 // RANGE:   $2980-$29A0
 // STATUS:  understood
-// SUMMARY: Room $2F only: if si_collected_tbl+8 is set (Queen special item
-//          triggered), positions Queen sprite (pointer $9B) at ($40,$9A) and
-//          enables sprite 0. Guards the colour-cycling 2×2 end-goal treasure.
-//          Called every frame from the main game loop.
+// SUMMARY: Room $2F only: if si_collected_tbl+8 is set (jerry can, SI item
+//          ordinal #8, room $23 — collected), positions Queen sprite (pointer
+//          $9B) at ($40,$9A) and enables sprite 0. Guards the colour-cycling
+//          2×2 end-goal treasure. Called every frame from the main game loop.
+//          Touching her routes through the generic sprite-0 collision handler
+//          (SpecialItems.HandleSICollision), which special-cases pointer $9B
+//          to set zp.action_counter=6 and jump straight to Completion.Begin —
+//          this is how the game-completion room ($30) actually gets reached;
+//          it is never entered via the room_exit_dest_tbl grid.
 //==============================================================================
                                       // XREF[1]: 0dd7(c)
 PlaceQueen:
