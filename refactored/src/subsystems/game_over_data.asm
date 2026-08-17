@@ -22,5 +22,18 @@ arrested_text:                        // $DA bytes; Arrested reads X=$DA..1 (rig
   .text "ALL YOUR POINTS HAVE BEEN               " // [2c14] row 5
   .text "       CONFISCATED!"                       // [2c3c] row 6 (partial)
 
+//==============================================================================
+// SECTION: game_over_sprite_tables
+// P1_ROUTINE_NAME: ProcessSprites (data portion)
+// RANGE:   $0B7C-$0B83
+// STATUS:  understood
+// P2_DIVERGES: extracted from Sprites.Data (sprites_data.asm) — used only by
+//              GameOver.Arrested, not by anything in the Sprites domain.
+// SUMMARY: game_over_sprite_ptrs: 8-byte VIC sprite frame pointer table for
+//          sprites 0-7 during the GAME OVER screen.
+//==============================================================================
+game_over_sprite_ptrs:
+  .byte $b6,$b7,$b8,$b9,$bc,$b9,$bb,$ba // [0b7c] VIC sprite frame ptrs for sprites 0-7
+
 } // .namespace Data
 } // .namespace GameOver

@@ -61,7 +61,7 @@ Play:
   clc                                 // [0AF8:18       CLC]
   adc #$01                            // [0AF9:69 01    ADC #$1]
   sta zp.sprite0_colour,x             // [0AFB:95 2d    STA $2d,X]
-  lda Sprites.Data.game_over_sprite_ptrs,x // [0AFD:bd 7c 0b LDA $b7c,X]
+  lda GameOver.Data.game_over_sprite_ptrs,x // [0AFD:bd 7c 0b LDA $b7c,X]
   sta zp.sprite0_ptr,x                // [0B00:95 25    STA $25,X]
   dex                                 // [0B02:ca       DEX]
   bpl !-                              // [0B03:10 ee    BPL $0af3]

@@ -8,8 +8,6 @@
 // P1_ROUTINE_NAME: room_nav_tables
 // RANGE:   $1904-$192C
 // STATUS:  understood
-// P2_DIVERGES: extracted from the room_nav_tables block in room_data.asm —
-//              this is Monty's jump physics, not room-navigation data.
 // SUMMARY: Per-frame Y-delta sequences for Monty's jump arc (ascent then
 //          descent), stepped by zp.jump_arc_idx.
 //==============================================================================
