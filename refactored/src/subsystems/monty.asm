@@ -483,7 +483,7 @@ StepJumpArc:
   bmi !++                             // [1AE1:30 19    BMI $1afc]
   inc zp.jump_arc_idx                 // [1AE3:e6 76    INC $0076]
   ldx zp.jump_arc_idx                 // [1AE5:a6 76    LDX $0076]
-  lda Room.Data.jump_arc_tbl,x        // [1AE7:bd 04 19 LDA $1904,X]
+  lda Monty.Data.jump_arc_tbl,x       // [1AE7:bd 04 19 LDA $1904,X]
   cmp #$ff                            // [1AEA:c9 ff    CMP #$ff]
   bne !+                              // [1AEC:d0 07    BNE $1af5]
   lda zp.jump_arc_idx                 // [1AEE:a5 76    LDA $0076]
@@ -500,7 +500,7 @@ StepJumpArc:
   lda zp.jump_arc_idx                 // [1AFE:a5 76    LDA $0076]
   and #$7f                            // [1B00:29 7f    AND #$7f]
   tax                                 // [1B02:aa       TAX]
-  lda Room.Data.jump_arc_tbl,x        // [1B03:bd 04 19 LDA $1904,X]
+  lda Monty.Data.jump_arc_tbl,x       // [1B03:bd 04 19 LDA $1904,X]
   cmp #$ff                            // [1B06:c9 ff    CMP #$ff]
   beq !+                              // [1B08:f0 07    BEQ $1b11]
   sta zp.jump_dn_steps                // [1B0A:85 7e    STA $007e]
@@ -533,7 +533,7 @@ UpdateTileFlags:
 
                                       // XREF[1]: 2349(j)
 !:
-  ldy Room.Data.tile_2col_row_offsets,x // [233C:bc 34 19 LDY $1934,X]
+  ldy Utils.Data.tile_2col_row_offsets,x // [233C:bc 34 19 LDY $1934,X]
   lda (zp.monty_chr_x),y              // [233F:b1 7f    LDA ($7f),Y]
   jsr GetTileFlag                     // [2341:20 a0 17 JSR $17a0]
   cmp #$03                            // [2344:c9 03    CMP #$3]

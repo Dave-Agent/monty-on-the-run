@@ -28,7 +28,7 @@ CollectCoin:
   // ------------------------------------------------------------
   ldx #$03                            // [1DDF:a2 03    LDX #$3]          Set X to start at last coin slot
 !:
-  ldy Room.Data.tile_2col_row_offsets,x // [1DE1:bc 34 19 LDY $1934,X]      Load Y offset for coin position
+  ldy Utils.Data.tile_2col_row_offsets,x // [1DE1:bc 34 19 LDY $1934,X]      Load Y offset for coin position
   lda (zp.monty_chr_x),y              // [1DE4:b1 7f    LDA ($7f),Y]      Load screen/memory value at Monty's X+Y
   cmp #$34                            // [1DE6:c9 34    CMP #$34]         Compare with value representing no coin?
   beq !+                              // [1DE8:f0 04    BEQ $1dee]        If match, skip clearing
@@ -275,7 +275,7 @@ ApplyItemRoomEffects:
   beq ApplyItemRoomEffects_0c         // [2719:f0 1c    BEQ $2737]
   ldx #$03                            // [271B:a2 03    LDX #$3]
 !:
-  ldy Room.Data.screen_row_offset_tbl,x // [271D:bc 3c 19 LDY $193c,X]
+  ldy Utils.Data.screen_row_offset_tbl,x // [271D:bc 3c 19 LDY $193c,X]
   lda #$00                            // [2720:a9 00    LDA #$0]
   sta CHR_Screen + 13*$28 + 2,y       // [2722:99 0a 4a STA $4a0a,Y]
   sta CHR_Screen + 13*$28 + 3,y       // [2725:99 0b 4a STA $4a0b,Y]
@@ -368,7 +368,7 @@ ApplyItemRoomEffects_1c:
   ldx #$04                            // [27B0:a2 04    LDX #$4]
   lda #$00                            // [27B2:a9 00    LDA #$0]
 !:
-  ldy Room.Data.screen_row_offset_tbl,x // [27B4:bc 3c 19 LDY $193c,X]
+  ldy Utils.Data.screen_row_offset_tbl,x // [27B4:bc 3c 19 LDY $193c,X]
   sta CHR_Screen + 3*$28 + 17,y       // [27B7:99 89 48 STA $4889,Y]
   sta CHR_Screen + 8*$28 + 18,y       // [27BA:99 52 49 STA $4952,Y]
   dex                                 // [27BD:ca       DEX]

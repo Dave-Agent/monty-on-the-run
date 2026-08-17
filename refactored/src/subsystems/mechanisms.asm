@@ -129,7 +129,7 @@ DrawShaft:
   ldx #$00                            // [1B9F:a2 00    LDX #$0]
                                       // XREF[1]: 1bc7(j)
 !:
-  ldy Room.Data.screen_row_offset_tbl,x // [1BA1:bc 3c 19 LDY $193c,X]     Y = row byte-offset
+  ldy Utils.Data.screen_row_offset_tbl,x // [1BA1:bc 3c 19 LDY $193c,X]     Y = row byte-offset
   lda zp.s_ptr                        // [1BA4:a5 52    LDA $0052]
   sta (zp.screen_ptr),y               // [1BA6:91 49    STA ($49),Y]      screen: left col
   lda #$0f                            // [1BA8:a9 0f    LDA #$f]
@@ -375,13 +375,13 @@ SeedGlyphs:
 
                                       // XREF[1]: 1d18(j)
 !:
-  lda Room.Data.piledriver_frame_data,y // [1CF9:b9 43 19 LDA $1943,Y]
+  lda Mechanisms.Data.piledriver_frame_data,y // [1CF9:b9 43 19 LDA $1943,Y]
   sta chrset.base + $80,x             // [1CFC:9d 80 40 STA $4080,X]
   sta chrset.base + $110,x            // [1CFF:9d 10 41 STA $4110,X]
-  lda Room.Data.piledriver_col1_chr,y // [1D02:b9 4b 19 LDA $194b,Y]
+  lda Mechanisms.Data.piledriver_col1_chr,y // [1D02:b9 4b 19 LDA $194b,Y]
   sta chrset.base + $B0,x             // [1D05:9d b0 40 STA $40b0,X]
   sta chrset.base + $140,x            // [1D08:9d 40 41 STA $4140,X]
-  lda Room.Data.piledriver_col2_chr,y // [1D0B:b9 53 19 LDA $1953,Y]
+  lda Mechanisms.Data.piledriver_col2_chr,y // [1D0B:b9 53 19 LDA $1953,Y]
   sta chrset.base + $E0,x             // [1D0E:9d e0 40 STA $40e0,X]
   sta chrset.base + $170,x            // [1D11:9d 70 41 STA $4170,X]
   iny                                 // [1D14:c8       INY]
@@ -505,7 +505,7 @@ CheckTiles:
 
                                       // XREF[1]: 25b0(j)
 !:
-  ldy Room.Data.tile_2col_row_offsets,x // [259F:bc 34 19 LDY $1934,X]
+  ldy Utils.Data.tile_2col_row_offsets,x // [259F:bc 34 19 LDY $1934,X]
   lda (zp.monty_chr_x),y              // [25A2:b1 7f    LDA ($7f),Y]
   cmp #$10                            // [25A4:c9 10    CMP #$10]
   bcc !+                              // [25A6:90 07    BCC $25af]
@@ -1071,7 +1071,7 @@ CheckContact:
 
                                       // XREF[1]: 2867(j)
 !:
-  ldy Room.Data.tile_2col_row_offsets,x // [2859:bc 34 19 LDY $1934,X]
+  ldy Utils.Data.tile_2col_row_offsets,x // [2859:bc 34 19 LDY $1934,X]
   lda (zp.monty_chr_x),y              // [285C:b1 7f    LDA ($7f),Y]
   cmp #$38                            // [285E:c9 38    CMP #$38]
   bcc !+                              // [2860:90 04    BCC $2866]

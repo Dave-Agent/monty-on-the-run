@@ -12,7 +12,7 @@
 //          Copies HUD.Data.header_text (36 bytes, AND#$3F/OR#$40 → screen codes) to
 //          row 0 cols 2-37 in white; draws decorative border line (char $64)
 //          on row 1; places 4 lives-label chars (cyan) at col offsets from
-//          Room.Data.tile_2col_row_offsets. Falls through into Update.
+//          Utils.Data.tile_2col_row_offsets. Falls through into Update.
 //==============================================================================
 Init:
   ldx #$23                            // [113F:a2 23    LDX #$23]         36 bytes (X = 35..0)
@@ -44,7 +44,7 @@ Init:
   lda #$40                            // [1167:a9 40    LDA #$40]
   ldx #$03                            // [1169:a2 03    LDX #$3]
 !:
-  ldy Room.Data.tile_2col_row_offsets,x // [116B:bc 34 19 LDY $1934,X]
+  ldy Utils.Data.tile_2col_row_offsets,x // [116B:bc 34 19 LDY $1934,X]
   sta CHR_Screen + $10,y              // [116E:99 10 48 STA $4810,Y]
   pha                                 // [1171:48       PHA]
   lda #$08                            // [1172:a9 08    LDA #$8]          cyan

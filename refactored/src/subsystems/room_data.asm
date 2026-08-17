@@ -1,9 +1,8 @@
 // room_data.asm — Room engine tables, sector names, and room definition data.
-//   Sections 1-2: navigation grid, jump arc, sector name strings (from room_engine_data.asm)
+//   Sections 1-2: navigation grid, sector name strings (from room_engine_data.asm)
 //   Section  3+:  pointer index, tilemap streams, spawn records, room defs (from rooms.asm)
 
-// room_engine_data.asm — Room-navigation grid, jump-arc table, screen-position
-//                        offsets, piledriver tile data, and sector name strings.
+// room_engine_data.asm — Room-navigation grid and sector name strings.
 
 .namespace Room {
 .namespace Data {
@@ -11,10 +10,14 @@
 //==============================================================================
 // SECTION: room_nav_tables
 // P1_ROUTINE_NAME: room_nav_tables
-// RANGE:   $187A-$1972
+// RANGE:   $187A-$1933 (P1; the rest of the original $187A-$1972 P1 range —
+//          jump-arc table, screen-offset tables, piledriver glyph seeds —
+//          moved to Monty.Data, Utils.Data, and Mechanisms.Data respectively)
 // STATUS:  understood
-// SUMMARY: Room exit destination grid (6×23), jump-arc Y-delta table,
-//          screen-position offsets, and piledriver tile character seeds.
+// P2_DIVERGES: jump_arc_tbl, tile_2col_row_offsets, screen_row_offset_tbl, and
+//              piledriver_frame_data/col1_chr/col2_chr extracted out — they
+//              aren't room-navigation data, just physically adjacent in P1.
+// SUMMARY: Room exit destination grid (6×23) and its per-row byte-offset table.
 //==============================================================================
 // World-grid map: 6 rows × 23 cols, row stride $17 bytes
 // room_exit_dest_tbl[ room_exit_offset_tbl[zp.map_row] + zp.exit_tile_col ] → destination room_id
@@ -38,51 +41,9 @@ room_exit_dest_dyn:                     // col $04: mutable; init $33 (C5 return
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$1e,$ff,$1a,$19,$18,$ff,$10,$11,$ff,$ff,$ff,$ff,$ff,$ff  // [18d6] row 4
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$1d,$1c,$17,$16,$15,$14,$12,$13,$ff,$ff,$ff,$ff,$ff,$ff  // [18ed] row 5
 
-// Per-frame Y-delta sequences for Monty's jump; each byte = pixels to move that frame.
-// Arc 0 (ascent):  delta subtracted from zp.monty_sprite_y2 (moves UP); starts fast, decelerates at peak.
-// Arc 1 (descent): delta added to zp.monty_sprite_y2 (moves DOWN); starts slow, accelerates under gravity.
-// $FF sentinel: end of arc — arc 0 $FF sets bit 7 of zp.jump_arc_idx to switch to descent phase.
-// zp.jump_arc_idx steps through arc 0 (ascent) then arc 1 (descent) on each jump
-jump_arc_tbl:
-  .byte $00,$03,$02,$02,$01,$02,$01,$01,$00,$01,$01,$01,$00,$01,$01,$01,$00,$01,$00,$01,$00,$00,$ff  // [1904] arc 0: ascent  (22 steps): fast start ($03), eases to $01, coasts at peak ($00)
-  .byte $01,$00,$00,$00,$01,$00,$01,$00,$01,$00,$02,$01,$02,$01,$02,$02,$00,$ff                      // [191b] arc 1: descent (17 steps): slow start ($00×3), accelerates to $02
-
 // Byte offset into room_exit_dest_tbl for each zp.map_row; stride = $17 (23 bytes per row)
 room_exit_offset_tbl:
   .byte $00,$17,$2e,$45,$5c,$73,$8a     // [192d] rows 0-6
-
-// Screen-RAM byte offsets for a 2-wide tile; one pair (left col, right col) per tile row, stride = $28
-tile_2col_row_offsets:
-  .byte $00,$01                         // [1934] row 0
-  .byte $28,$29                         // [1936] row 1
-  .byte $50,$51                         // [1938] row 2
-  .byte $78,$79                         // [193a] row 3
-
-// Screen-RAM byte offset for each screen row: row N = N × $28
-screen_row_offset_tbl:
-  .byte $00,$28,$50,$78,$a0,$c8,$f0     // [193c] rows 0-6
-
-// Glyph seeds for the 3-column piledriver tile: 8 bytes × 3 cols × 2 frames = 48 bytes.
-// Each byte = one 8-pixel row of a VIC character definition (MSB = leftmost pixel).
-// Normal frame: col 0 at +$00, col 1 at +$08, col 2 at +$10
-// Cheat  frame: col 0 at +$18, col 1 at +$20, col 2 at +$28  (Easter egg: enter a special hi-score name to activate; shows alternate piledriver graphics)
-piledriver_frame_data:
-// normal frame — col 0  (rows 0-7 of left tile character)
-  .byte $0f,$0f,$00,$ff,$ff,$ff,$7f,$00 // [1943]
-
-piledriver_col1_chr:
-// normal frame — col 1
-  .byte $ff,$ff,$00,$ff,$ff,$ff,$ff,$00 // [194b]
-
-piledriver_col2_chr:
-// normal frame — col 2
-  .byte $f0,$f0,$00,$ff,$ff,$ff,$fe,$00 // [1953]
-// cheat frame — col 0
-  .byte $00,$00,$1f,$20,$fb,$71,$20,$00 // [195b]
-// cheat frame — col 1
-  .byte $3c,$c3,$ff,$99,$e7,$c3,$81,$00 // [1963]
-// cheat frame — col 2
-  .byte $00,$00,$f8,$04,$df,$8e,$04,$00 // [196b]
 
 //==============================================================================
 // SECTION: sector_name_strings

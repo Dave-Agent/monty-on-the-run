@@ -25,6 +25,37 @@ config_tbl:                           // room_id, col, row, height, char_base �
   .byte $ff,$ff,$ff,$ff,$ff           // [1bfc] terminator
 
 //==============================================================================
+// SECTION: piledriver_glyph_data
+// P1_ROUTINE_NAME: room_nav_tables
+// RANGE:   $1943-$1972
+// STATUS:  understood
+// P2_DIVERGES: extracted from the room_nav_tables block in room_data.asm —
+//              this is piledriver charset glyph data, not room-navigation data.
+// SUMMARY: Glyph seeds for the 3-column piledriver tile: 8 bytes × 3 cols × 2 frames = 48 bytes.
+//          Each byte = one 8-pixel row of a VIC character definition (MSB = leftmost pixel).
+//          Normal frame: col 0 at +$00, col 1 at +$08, col 2 at +$10
+//          Cheat  frame: col 0 at +$18, col 1 at +$20, col 2 at +$28  (Easter egg: enter a
+//          special hi-score name to activate; shows alternate piledriver graphics)
+//==============================================================================
+piledriver_frame_data:
+// normal frame — col 0  (rows 0-7 of left tile character)
+  .byte $0f,$0f,$00,$ff,$ff,$ff,$7f,$00 // [1943]
+
+piledriver_col1_chr:
+// normal frame — col 1
+  .byte $ff,$ff,$00,$ff,$ff,$ff,$ff,$00 // [194b]
+
+piledriver_col2_chr:
+// normal frame — col 2
+  .byte $f0,$f0,$00,$ff,$ff,$ff,$fe,$00 // [1953]
+// cheat frame — col 0
+  .byte $00,$00,$1f,$20,$fb,$71,$20,$00 // [195b]
+// cheat frame — col 1
+  .byte $3c,$c3,$ff,$99,$e7,$c3,$81,$00 // [1963]
+// cheat frame — col 2
+  .byte $00,$00,$f8,$04,$df,$8e,$04,$00 // [196b]
+
+//==============================================================================
 // SECTION: teleporter_tables
 // P1_ROUTINE_NAME: teleporter_data (colour_table + data portion + dest_tbl)
 // RANGE:   $1F35-$28A4

@@ -58,6 +58,7 @@
 #import "subsystems/mechanisms.asm"
 #import "subsystems/mechanisms_data.asm"
 #import "subsystems/monty.asm"
+#import "subsystems/monty_data.asm"
 #import "subsystems/decor.asm"
 #import "subsystems/jetpack.asm"
 #import "subsystems/jetpack_data.asm"

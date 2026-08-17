@@ -91,5 +91,27 @@ room_metadata_tbl:                    // bits[2:0]=theme→char $01-$08  bits[7:
   .byte $a0  // [2186] room $34  t=0  RotLeft8+RolBytes3
   .byte $04  // [2187] room $35  t=4  -
 
+//==============================================================================
+// SECTION: screen_offset_tables
+// P1_ROUTINE_NAME: room_nav_tables
+// RANGE:   $1934-$1943
+// STATUS:  understood
+// P2_DIVERGES: extracted from the room_nav_tables block in room_data.asm —
+//              generic screen-RAM offset math used across Monty, HUD,
+//              SpecialItems, and Mechanisms, not room-navigation data.
+// SUMMARY: tile_2col_row_offsets: screen-RAM byte offsets for a 2-wide tile,
+//            one (left col, right col) pair per tile row, stride $28.
+//          screen_row_offset_tbl: screen-RAM byte offset for each screen row
+//            (row N = N × $28).
+//==============================================================================
+tile_2col_row_offsets:
+  .byte $00,$01                         // [1934] row 0
+  .byte $28,$29                         // [1936] row 1
+  .byte $50,$51                         // [1938] row 2
+  .byte $78,$79                         // [193a] row 3
+
+screen_row_offset_tbl:
+  .byte $00,$28,$50,$78,$a0,$c8,$f0     // [193c] rows 0-6
+
 } // .namespace Data
 } // .namespace Utils
