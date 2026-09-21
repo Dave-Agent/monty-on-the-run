@@ -20,7 +20,7 @@
 
 // Game parameters — platform-neutral
 .label STARTING_LIVES = 5           // lives at game start; loaded at startGame ($10BC)
-.var   SMOKE_TEST     = false        // true: Q/W room nav + correct FK items; false: production build
+.var   SMOKE_TEST     = false       // true: Q/W room nav + correct FK items; false: production build
 
 // Freedom Kit item selection: SMOKE_TEST=1 uses the five correct items to escape;
 // SMOKE_TEST=0 reverts to the original ROM's wrong default items.
