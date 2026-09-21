@@ -292,8 +292,9 @@ UpdateMovement_right:
 // RANGE:   $17A0-$17B3
 // STATUS:  understood
 // SUMMARY: Converts a screen tile character code (1-8) to its collision property
-//          using the 8-entry table at ZP $0062. Returns 0 for empty (A=0) or
-//          out-of-range (A>=9) tiles.
+//          (0=empty, 1=wall, 2=one-way platform, 3=rope, 4=piledriver/trap; see
+//          SetTileProperty) using the 8-entry table at ZP $0062. Returns 0 for
+//          empty (A=0) or out-of-range (A>=9) tiles.
 //==============================================================================
 GetTileFlag:
   beq !++                             // [17A0:f0 11    BEQ $17b3]        A=0: empty tile, return 0
@@ -520,11 +521,11 @@ StepJumpArc:
 // RANGE:   $2337-$2367
 // STATUS:  understood
 // SUMMARY: Scans the 6 tiles of Monty's 2×3 footprint (tile_2col_row_offsets,
-//          x=5..0) for collision type 3 (solid surface).
-//          If a type-3 tile is found and zp.monty_action <= 0 (landed):
+//          x=5..0) for collision type 3 (rope).
+//          If a rope tile is found and zp.monty_action <= 0 (landed):
 //            first contact (tile_state=0): clears zp.monty_action and
 //            zp.monty_jumping_flag2, then sets tile_state=1.
-//          If no type-3 tile found: clears tile_state (airborne).
+//          If no rope tile found: clears tile_state (airborne).
 //==============================================================================
                                       // XREF[1]: 14ce(c)
 UpdateTileFlags:
@@ -536,7 +537,7 @@ UpdateTileFlags:
   ldy Utils.Data.tile_2col_row_offsets,x // [233C:bc 34 19 LDY $1934,X]
   lda (zp.monty_chr_x),y              // [233F:b1 7f    LDA ($7f),Y]
   jsr GetTileFlag                     // [2341:20 a0 17 JSR $17a0]
-  cmp #$03                            // [2344:c9 03    CMP #$3]
+  cmp #$03                            // [2344:c9 03    CMP #$3]          type 3 = rope
   beq !+                              // [2346:f0 08    BEQ $2350]
   dex                                 // [2348:ca       DEX]
   bpl !-                              // [2349:10 f1    BPL $233c]
@@ -574,11 +575,13 @@ OnSurface:
 // SUMMARY: Classifies a char code (Y) into a collision property value and
 //          stores it in zp.tile_property_tbl[X]. Called by SetupTileGraphics
 //          for each of the 8 room tile slots.
-//          Property values by char code range:
-//            $00-$26 → 1    $27-$46 → 2    $47-$4D → 1
-//            $4E-$55 → 4    $56-$76 → 3    $77+    → 0
-//          GetTileFlag reads this table; collision logic interprets
-//          the 0-4 values (exact semantics TBD from dynamic analysis).
+//          Property meanings by char code range:
+//            0 ($77-$FF)         empty/background
+//            1 ($00-$26,$47-$4D) wall (blocks all directions)
+//            2 ($27-$46)         one-way platform
+//            3 ($56-$76)         rope (climbable)
+//            4 ($4E-$55)         piledriver/trap trigger
+//          GetTileFlag reads this table for per-tile collision checks.
 //==============================================================================
 SetTileProperty:
   lda #$01                            // [2368:a9 01    LDA #$1]
