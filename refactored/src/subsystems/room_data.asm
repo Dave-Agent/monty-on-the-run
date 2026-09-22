@@ -45,7 +45,7 @@
 // appear anywhere in this static grid because it's never entered via this
 // table at all — it's the game-completion room, force-loaded by
 // Completion.Begin (completion.asm) bypassing this grid entirely. See
-// Enemies.PlaceTreasure (enemy.asm) and HandleSICollision (special_items.asm)
+// Completion.PlaceTreasure (completion.asm) and HandleSICollision (special_items.asm)
 // for the touch-the-treasure-in-room-$2F trigger that reaches it.
 room_exit_dest_tbl:
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$23,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff  // [187a] row 0

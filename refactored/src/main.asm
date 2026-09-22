@@ -322,7 +322,7 @@ GameFrameUpdate:
   jsr SpecialItems.HandleSICollision  // [0DCE:20 84 26 JSR $2684]
   jsr Utils.ComputeMontyTilePointer   // [0DD1:20 9c 14 JSR $149c]
   jsr Mechanisms.Piledriver.CheckTiles // [0DD4:20 8c 25 JSR $258c]
-  jsr Enemies.PlaceTreasure           // [0DD7:20 80 29 JSR $2980]
+  jsr Completion.PlaceTreasure        // [0DD7:20 80 29 JSR $2980]
   jsr Controls.PauseGameOnP           // [0DDA:20 62 22 JSR $2262]
   jsr Mechanisms.Piledriver.CheckContact // [0DDD:20 fe 21 JSR $21fe]
 

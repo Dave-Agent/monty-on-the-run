@@ -3,13 +3,55 @@
 .namespace Completion {
 
 //==============================================================================
+// SECTION: place_treasure
+// P1_ROUTINE_NAME: freedom_room
+// RANGE:   $2980-$29A0
+// STATUS:  understood
+// SUMMARY: Room $2F only: if si_collected_tbl+8 is set (jerry can, SI item
+//          ordinal #8, room $23 — collected), positions the treasure sprite
+//          (pointer $9B) at ($40,$9A) and enables sprite 0, incrementing its
+//          colour every frame (the colour-cycling effect). Called every frame
+//          from the main game loop. Room $2F separately has a stationary
+//          queen_liz enemy (enemy_spawn.rm_2f, near-zero movement range) as
+//          decoration next to the treasure — she is not involved in this.
+//          Touching the treasure routes through the generic sprite-0 collision
+//          handler (SpecialItems.HandleSICollision), which special-cases
+//          pointer $9B to set zp.action_counter=6 and jump straight to
+//          Begin — this is how the game-completion room ($30) actually gets
+//          reached; it is never entered via the room_exit_dest_tbl grid.
+// P2: Moved out of Enemies (it isn't an enemy) into Completion, alongside
+//     the sequence it exists to trigger.
+//==============================================================================
+                                      // XREF[1]: 0dd7(c)
+PlaceTreasure:
+  lda zp.room_id                      // [2980:a5 46    LDA $0046]
+  cmp #$2f                            // [2982:c9 2f    CMP #$2f]
+  bne !+                              // [2984:d0 05    BNE $298b]
+  lda si_collected_tbl+8              // [2986:ad 10 03 LDA $0310]
+  bne !++                             // [2989:d0 01    BNE $298c]
+!:                                    // XREF[1]: 2984(j)
+  rts                                 // [298B:60       RTS]
+!:
+  lda #$40                            // [298C:a9 40    LDA #$40]
+  sta zp.sprite0_x_buffer             // [298E:85 10    STA $0010]
+  lda #$9a                            // [2990:a9 9a    LDA #$9a]
+  sta zp.sprite0_y_buffer             // [2992:85 18    STA $0018]
+  lda #$9b                            // [2994:a9 9b    LDA #$9b]
+  sta zp.sprite0_ptr                  // [2996:85 25    STA $0025]
+  lda #$01                            // [2998:a9 01    LDA #$1]
+  ora zp.vic_shadow_enable            // [299A:05 20    ORA $0020]
+  sta zp.vic_shadow_enable            // [299C:85 20    STA $0020]
+  inc zp.sprite0_colour               // [299E:e6 2d    INC $002d]
+  rts                                 // [29A0:60       RTS]
+
+//==============================================================================
 // SECTION: Begin
 // P1_ROUTINE_NAME: Sequence
 // RANGE:   $29A1-$29FA
 // STATUS:  understood
 // SUMMARY: Game completion sequence (event=5: action_counter=6 pre-dec, set by
 //          SpecialItems.HandleSICollision when Monty touches the treasure
-//          sprite placed by Enemies.PlaceTreasure in room $2F). Freezes
+//          sprite placed by PlaceTreasure in room $2F). Freezes
 //          gameplay, loads victory room $30, fills prize area chars ($65-$67)
 //          across rows 19-21, sets up Monty and boat sprites, plays music track 2.
 //          If passport not in inventory → GameOver.Arrested (bad ending).
