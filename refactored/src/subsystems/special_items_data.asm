@@ -32,7 +32,7 @@ si_spawn_tbl:                         // 20 × 4-byte records: (room_id, sprX, s
   .byte $2b,$68,$5a,$09             // [260e] #10 room=$2B  key             (ptr=$97)
   .byte $02,$88,$a2,$00             // [2612] #11 room=$02  first aid kit   (ptr=$8E)
   .byte $04,$7c,$c2,$01             // [2616] #12 room=$04  milk jug        (ptr=$8F)
-  .byte $08,$50,$5a,$02             // [261a] #13 room=$08  teddy bear      (ptr=$90)
+  .byte $08,$50,$5a,$02             // [261a] #13 room=$08  teddy bear      (ptr=$90) — poison pill: see SpecialItems.ApplyItemRoomEffects room-$08 block
   .byte $09,$28,$62,$03             // [261e] #14 room=$09  cupcake         (ptr=$91)
   .byte $0a,$3c,$ca,$03             // [2622] #15 room=$0A  cupcake         (ptr=$91)
   .byte $0b,$38,$7a,$04             // [2626] #16 room=$0B  smoke stack     (ptr=$92)

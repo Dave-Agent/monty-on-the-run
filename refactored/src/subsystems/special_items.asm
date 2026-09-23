@@ -91,10 +91,19 @@ CollectCoin:
 //          Room effects: $0C reverse piledriver, $14 FK-gated wall (×2),
 //          $19 giant fly + mini piledriver, $1C teleporter tile clear,
 //          $22 rope to top exit (FK slot 1).
-//          Behavioural only (no visual change confirmed by dynamic analysis):
-//            $08/$19/$2F: enemy_state_tbl+$18 ($0218) set $FF or $6F — side-effect on
-//              enemy logic only; no visible sprite/tile difference observed.
-//            $26/$2D: zp.tile_property_tbl+3/4 ($65/$66) zeroed unconditionally on entry —
+//          $08/$19/$2F all target enemy_state_tbl+$18 ($0218) — the X-position
+//          field of enemy slot 3, whose $FF value is the Enemies.Tick loop's
+//          "inactive slot" sentinel. So these activate/deactivate whichever
+//          enemy that room's spawn table (enemy_spawn.rm_XX) puts in slot 3:
+//            $08: bubble (rm_08 slot 3) — suppressed ($FF) on every room entry;
+//              collecting the teddy bear (item #13, a poison pill) makes the
+//              very next pass reactivate it near its spawn X ($6F) instead of
+//              suppressing it, trapping the player — unavoidable once taken.
+//            $19: wasp (rm_19 slot 3) — deactivated when fly spray (item #3) collected.
+//            $2F: queen_liz (rm_2f slot 3, the decorative one — see
+//              Completion.PlaceTreasure notes) — deactivated when item #$0A is
+//              collected and FK slot 4 is active.
+//          $26/$2D: zp.tile_property_tbl+3/4 ($65/$66) zeroed unconditionally on entry —
 //              no visible difference with or without FK items; behavioural tile-state reset.
 //==============================================================================
 InitRoomItemFlags:                    // XREF[1]: 10b3(c) — called once from startGame
@@ -319,7 +328,8 @@ ApplyItemRoomEffects_0c:
 !:
 
   // room $19 (mini piledriver + giant fly blocking exit): if fly spray (item #3/$17) collected,
-  // set enemy_state_tbl + $18=$FF — no visible effect found; behavioural side-effect TBD
+  // deactivate enemy slot 3 (wasp, enemy_spawn.rm_19) by setting its X-pos
+  // (enemy_state_tbl+$18) to $FF, the Enemies.Tick "inactive slot" sentinel
   lda zp.room_id                      // [276B:a5 46    LDA $0046]
   cmp #$19                            // [276D:c9 19    CMP #$19]
   bne !+                              // [276F:d0 0a    BNE $277b]
@@ -346,7 +356,9 @@ ApplyItemRoomEffects_0c:
 // Part of: ApplyItemRoomEffects — room $1C tile effects
 ApplyItemRoomEffects_1c:
 
-  // room $2F: if item #$0A AND FK slot 4 active, set enemy_state_tbl + $18=$FF
+  // room $2F: if item #$0A AND FK slot 4 active, deactivate enemy slot 3
+  // (queen_liz, enemy_spawn.rm_2f — the decorative one, uninvolved in the
+  // treasure/completion trigger) by setting its X-pos (enemy_state_tbl+$18) to $FF
   lda zp.room_id                      // [2790:a5 46    LDA $0046]
   cmp #$2f                            // [2792:c9 2f    CMP #$2f]
   bne !+                              // [2794:d0 0f    BNE $27a5]
@@ -377,9 +389,18 @@ ApplyItemRoomEffects_1c:
 // Part of: ApplyItemRoomEffects — room $22 tile effects
 ApplyItemRoomEffects_22:
 
-  // room $08 (teleporter + teddy bear): always set enemy_state_tbl + $18=$FF;
-  // if si_collected_tbl[13] (teddy bear counter) non-zero and < $82,
-  // increment it and override enemy_state_tbl + $18 to $6F
+  // room $08 (teleporter + teddy bear): the teddy bear (item #13) is a poison
+  // pill. Room $08's slot-3 enemy (bubble, enemy_spawn.rm_08) is suppressed
+  // ($FF, inactive) by default on every pass through here — room load and
+  // every item pickup while in this room. si_collected_tbl+$0D holds the
+  // teddy-bear-collected flag ($81 once picked up, from the generic collect
+  // path above); the very next pass after that sees it as non-zero and < $82,
+  // bumps it to $82, and — instead of suppressing — reactivates the bubble at
+  // X=$6F (near its rm_08 spawn position). That one-shot reveal is unavoidable
+  // once the teddy bear is taken: from then on the flag stays >= $82, so this
+  // check never fires again and every later room entry goes back to the
+  // default suppress branch, leaving the bubble to trap the player for the
+  // rest of that room visit.
   lda zp.room_id                      // [27C0:a5 46    LDA $0046]
   cmp #$08                            // [27C2:c9 08    CMP #$8]
   bne !+                              // [27C4:d0 16    BNE $27dc]
