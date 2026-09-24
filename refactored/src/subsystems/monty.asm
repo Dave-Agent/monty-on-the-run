@@ -29,7 +29,7 @@ UpdateMovement:
   beq !+                              // [14C0:f0 01    BEQ $14c3]
   rts                                 // [14C2:60       RTS]
 !:
-  lda zp.player_dead_flag             // [14C3:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active             // [14C3:a5 bc    LDA $00bc]
   beq !+                              // [14C5:f0 03    BEQ $14ca]
   jmp FreedomKit.C5DriveMovement      // [14C7:4c cb 2c JMP $2ccb]
 !:

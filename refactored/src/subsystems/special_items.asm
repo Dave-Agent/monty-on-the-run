@@ -180,7 +180,7 @@ SpawnSIForRoom:                   // scan si_spawn_tbl for zp.room_id; set sprit
                                       // XREF[1]: 0dce(c)
 HandleSICollision:
   // gate: if dead check bit2, else check bit3 of zp.collision_store for Monty sprite touch
-  lda zp.player_dead_flag             // [2684:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active             // [2684:a5 bc    LDA $00bc]
   beq !+                              // [2686:f0 06    BEQ $268e]
   lda zp.collision_store              // [2688:a5 48    LDA $0048]
   and #$04                            // [268A:29 04    AND #$4]
@@ -201,7 +201,7 @@ HandleSICollision:
   and #$f0                            // [26A0:29 f0    AND #$f0]
   beq !++                             // [26A2:f0 0a    BEQ $26ae]
   ldy #$02                            // [26A4:a0 02    LDY #$2]
-  lda zp.player_dead_flag             // [26A6:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active             // [26A6:a5 bc    LDA $00bc]
   beq !+                              // [26A8:f0 02    BEQ $26ac]
   ldy #$07                            // [26AA:a0 07    LDY #$7]
 !:

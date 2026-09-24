@@ -31,7 +31,7 @@ Play:
   ldx #$01                            // [0AC0:a2 01    LDX #$1]
   stx zp.game_over_active             // [0AC2:86 cc    STX $00cc]
   dex                                 // [0AC4:ca       DEX]
-  stx zp.player_dead_flag             // [0AC5:86 bc    STX $00bc]
+  stx zp.c5_drive_active             // [0AC5:86 bc    STX $00bc]
   stx zp.vic_shadow_expand_x          // [0AC7:86 21    STX $0021]
   stx zp.level_active_flag            // [0AC9:86 bb    STX $00bb]
   stx zp.vic_shadow_priority          // [0ACB:86 24    STX $0024]

@@ -873,15 +873,15 @@ InitRoom1FEntities:
 // SECTION: init_room_death_flag
 // RANGE:   $2C63-$2CCA
 // STATUS:  understood
-// SUMMARY: Called on every room load. Clears player_dead_flag and sprite expand,
-//          then sets player_dead_flag=1 if the room is instantly lethal
+// SUMMARY: Called on every room load. Clears c5_drive_active and sprite expand,
+//          then sets c5_drive_active=1 if the room is instantly lethal
 //          (rooms $24, $25, or any room >= $31). Room $33 also resets Monty's
 //          position to a safe spawn.
 //==============================================================================
                                       // XREF[1]: 0e89(c)
 InitRoomDeathFlag:
   lda #$00                            // [2C63:a9 00    LDA #$0]
-  sta zp.player_dead_flag             // [2C65:85 bc    STA $00bc]
+  sta zp.c5_drive_active             // [2C65:85 bc    STA $00bc]
   sta zp.vic_shadow_expand_x          // [2C67:85 21    STA $0021]
   sta zp.c5_fall_flag                 // [2C69:85 bf    STA $00bf]
   lda zp.room_id                      // [2C6B:a5 46    LDA $0046]
@@ -894,7 +894,7 @@ InitRoomDeathFlag:
   rts                                 // [2C79:60       RTS]        safe room → return
 !:                                    // XREF[3]: 2c6f(j), 2c73(j), 2c77(j)
   lda #$01                            // [2C7A:a9 01    LDA #$1]
-  sta zp.player_dead_flag             // [2C7C:85 bc    STA $00bc]
+  sta zp.c5_drive_active             // [2C7C:85 bc    STA $00bc]
   sta zp.c5_rate_ctr                  // [2C7E:85 c2    STA $00c2]
   lda #$00                            // [2C80:a9 00    LDA #$0]
   sta zp.sprite1_y_buffer             // [2C82:85 19    STA $0019]

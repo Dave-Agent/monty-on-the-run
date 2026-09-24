@@ -39,7 +39,7 @@
 // RANGE:   $2CCB-$2EB5
 // STATUS:  understood
 // SUMMARY: Movement handler for deadly transit rooms ($24, $25, $31+). Called
-//          via tail-jump from MontyMovementUpdate when zp.player_dead_flag is set.
+//          via tail-jump from MontyMovementUpdate when zp.c5_drive_active is set.
 //          Rooms $24 and $33 are the active transit zones; the rest cause death.
 //          C5DriveMovement: tile check (type 2 → set action_counter=$07),
 //            then dispatches C5CheckReturnTeleport/C5CheckEntryTrigger, handles

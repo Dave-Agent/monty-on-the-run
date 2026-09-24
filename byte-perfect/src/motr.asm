@@ -376,7 +376,7 @@ GameOverAnimation:
   ldx #$01                            // [0AC0:a2 01    LDX #$1]
   stx zp_game_over_active             // [0AC2:86 cc    STX $00cc]
   dex                                 // [0AC4:ca       DEX]
-  stx zp_player_dead_flag             // [0AC5:86 bc    STX $00bc]
+  stx zp_c5_drive_active              // [0AC5:86 bc    STX $00bc]
   stx zp_vic_shadow_expand_x          // [0AC7:86 21    STX $0021]
   stx zp_level_active_flag            // [0AC9:86 bb    STX $00bb]
   stx zp_vic_shadow_priority          // [0ACB:86 24    STX $0024]
@@ -645,7 +645,7 @@ ProcessSprites:
   // latch sprite-sprite collisions before VIC resets $D01E on read
   lda VIC.SPRITE.COLLIDE_SPRITE       // [0C0E:ad 1e d0 LDA $d01e]
   sta zp_collision_store              // [0C11:85 48    STA $0048]
-  lda zp_player_dead_flag             // [0C13:a5 bc    LDA $00bc]
+  lda zp_c5_drive_active              // [0C13:a5 bc    LDA $00bc]
   beq !+                              // [0C15:f0 06    BEQ $0c1d]
   jsr C5SetupSprites                  // [0C17:20 9f 2d JSR $2d9f]
   jmp ProcessSprites_flush            // [0C1A:4c 66 0c JMP $0c66]
@@ -735,7 +735,7 @@ ProcessSprites_flush:
   lda zp_level_active_flag            // [0C95:a5 bb    LDA $00bb]
   bne !+++                            // [0C97:d0 18    BNE $0cb1]  level intro: FK carousel sprites
   // normal play: apply zp_sprite_xmsb X MSB to jetpack (sprite 2) and Monty (sprite 3)
-  lda zp_player_dead_flag             // [0C99:a5 bc    LDA $00bc]
+  lda zp_c5_drive_active              // [0C99:a5 bc    LDA $00bc]
   bne !+                              // [0C9B:d0 04    BNE $0ca1]
   lda zp_show_jetpack                 // [0C9D:a5 3a    LDA $003a]
   beq !++                             // [0C9F:f0 08    BEQ $0ca9]
@@ -2540,7 +2540,7 @@ MontyMovementUpdate:
   beq !+                              // [14C0:f0 01    BEQ $14c3]
   rts                                 // [14C2:60       RTS]
 !:
-  lda zp_player_dead_flag             // [14C3:a5 bc    LDA $00bc]
+  lda zp_c5_drive_active              // [14C3:a5 bc    LDA $00bc]
   beq !+                              // [14C5:f0 03    BEQ $14ca]
   jmp C5DriveMovement                 // [14C7:4c cb 2c JMP $2ccb]
 !:
@@ -5950,7 +5950,7 @@ SpawnSIForRoom:                   // scan si_spawn_tbl for zp_room_id; set sprit
                                       // XREF[1]: 0dce(c)
 HandleSICollision:
   // gate: if dead check bit2, else check bit3 of zp_collision_store for Monty sprite touch
-  lda zp_player_dead_flag             // [2684:a5 bc    LDA $00bc]
+  lda zp_c5_drive_active              // [2684:a5 bc    LDA $00bc]
   beq !+                              // [2686:f0 06    BEQ $268e]
   lda zp_collision_store              // [2688:a5 48    LDA $0048]
   and #$04                            // [268A:29 04    AND #$4]
@@ -5971,7 +5971,7 @@ HandleSICollision:
   and #$f0                            // [26A0:29 f0    AND #$f0]
   beq !++                             // [26A2:f0 0a    BEQ $26ae]
   ldy #$02                            // [26A4:a0 02    LDY #$2]
-  lda zp_player_dead_flag             // [26A6:a5 bc    LDA $00bc]
+  lda zp_c5_drive_active              // [26A6:a5 bc    LDA $00bc]
   beq !+                              // [26A8:f0 02    BEQ $26ac]
   ldy #$07                            // [26AA:a0 07    LDY #$7]
 !:
@@ -6910,15 +6910,15 @@ colour_gradients:                       // XREF[1]: 2c57(d)
 // SECTION: init_room_death_flag
 // RANGE:   $2C63-$2CCA
 // STATUS:  understood
-// SUMMARY: Called on every room load. Clears player_dead_flag and sprite expand,
-//          then sets player_dead_flag=1 if the room is instantly lethal
+// SUMMARY: Called on every room load. Clears c5_drive_active and sprite expand,
+//          then sets c5_drive_active=1 if the room is instantly lethal
 //          (rooms $24, $25, or any room >= $31). Room $33 also resets Monty's
 //          position to a safe spawn.
 //==============================================================================
                                       // XREF[1]: 0e89(c)
 InitRoomDeathFlag:
   lda #$00                            // [2C63:a9 00    LDA #$0]
-  sta zp_player_dead_flag             // [2C65:85 bc    STA $00bc]
+  sta zp_c5_drive_active              // [2C65:85 bc    STA $00bc]
   sta zp_vic_shadow_expand_x          // [2C67:85 21    STA $0021]
   sta zp_c5_fall_flag                 // [2C69:85 bf    STA $00bf]
   lda zp_room_id                      // [2C6B:a5 46    LDA $0046]
@@ -6931,7 +6931,7 @@ InitRoomDeathFlag:
   rts                                 // [2C79:60       RTS]        safe room → return
 !:                                    // XREF[3]: 2c6f(j), 2c73(j), 2c77(j)
   lda #$01                            // [2C7A:a9 01    LDA #$1]
-  sta zp_player_dead_flag             // [2C7C:85 bc    STA $00bc]
+  sta zp_c5_drive_active              // [2C7C:85 bc    STA $00bc]
   sta zp_c5_rate_ctr                  // [2C7E:85 c2    STA $00c2]
   lda #$00                            // [2C80:a9 00    LDA #$0]
   sta zp_sprite1_y_buffer             // [2C82:85 19    STA $0019]
@@ -6980,7 +6980,7 @@ InitRoomDeathFlag:
 // RANGE:   $2CCB-$2EB5
 // STATUS:  understood
 // SUMMARY: Movement handler for deadly transit rooms ($24, $25, $31+). Called
-//          via tail-jump from MontyMovementUpdate when zp_player_dead_flag is set.
+//          via tail-jump from MontyMovementUpdate when zp_c5_drive_active is set.
 //          Rooms $24 and $33 are the active transit zones; the rest cause death.
 //          C5DriveMovement: tile check (type 2 → set action_counter=$07),
 //            then dispatches C5CheckReturnTeleport/C5CheckEntryTrigger, handles

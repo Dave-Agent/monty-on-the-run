@@ -69,7 +69,7 @@ ProcessSprites:
   // latch sprite-sprite collisions before VIC resets $D01E on read
   lda VIC.SPRITE.COLLIDE_SPRITE       // [0C0E:ad 1e d0 LDA $d01e]
   sta zp.collision_store              // [0C11:85 48    STA $0048]
-  lda zp.player_dead_flag             // [0C13:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active             // [0C13:a5 bc    LDA $00bc]
   beq !+                              // [0C15:f0 06    BEQ $0c1d]
   jsr FreedomKit.C5SetupSprites       // [0C17:20 9f 2d JSR $2d9f]
   jmp ProcessSprites_flush            // [0C1A:4c 66 0c JMP $0c66]
@@ -159,7 +159,7 @@ ProcessSprites_flush:
   lda zp.level_active_flag            // [0C95:a5 bb    LDA $00bb]
   bne !+++                            // [0C97:d0 18    BNE $0cb1]  level intro: FK carousel sprites
   // normal play: apply zp.sprite_xmsb X MSB to jetpack (sprite 2) and Monty (sprite 3)
-  lda zp.player_dead_flag             // [0C99:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active             // [0C99:a5 bc    LDA $00bc]
   bne !+                              // [0C9B:d0 04    BNE $0ca1]
   lda zp.show_jetpack                 // [0C9D:a5 3a    LDA $003a]
   beq !++                             // [0C9F:f0 08    BEQ $0ca9]

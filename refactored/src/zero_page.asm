@@ -176,7 +176,7 @@ si_active_idx:           .byte $00
 cloud_tick:              .byte $00
 tele_repeat_ctr:         .byte $00
 level_active_flag:       .byte $00
-player_dead_flag:        .byte $00
+c5_drive_active:        .byte $00
 c5_speed:                .byte $00
 c5_bounce_phase:         .byte $00
 c5_fall_flag:            .byte $00
