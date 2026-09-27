@@ -5410,7 +5410,7 @@ SetTileProperty_store:
 //            4 piledriver            → MontyDeathPiledriver: dissolve 48 frames (sfx_0c)
 //            5 tile-type-4 hazard    → MontyDeathHazard: dissolve 18 frames (sfx_0d)
 //            6 jerry can (SI item, room $23) → FreedomSequence: load room $30, MusicInit(2) (silent)
-//            7 enemy hit, dead flag  → MontyDeathEnemy_dead: sprite var init (sfx_0e)
+//            7 C5 vehicle crash      → MontyDeathC5Crash: reset C5 physics state, fixed respawn (sfx_0e)
 //          All paths except 6 reach MontyLifeLost ($2526): decrement lives;
 //          lives remain → restore saved position, clear state, set room_exit;
 //          last life → GameOverAnimation.
@@ -5469,7 +5469,7 @@ MontyEventDispatch_dispatch:
   jmp MontyDeathPiledriver            // [23d2:4c b1 24 JMP $24b1]        event=3 (piledriver; pre-dec=4)
   jmp MontyDeathHazard                // [23d5:4c d0 24 JMP $24d0]        event=4 (tile-type-4 hazard; pre-dec=5)
   jmp FreedomSequence                 // [23d8:4c a1 29 JMP $29a1]        event=5 (jerry can SI item; pre-dec=6)
-  jmp MontyDeathEnemy_dead            // [23db:4c 98 24 JMP $2498]        event=6 (enemy hit, dead flag; pre-dec=7)
+  jmp MontyDeathC5Crash               // [23db:4c 98 24 JMP $2498]    event=6 (C5 vehicle crash; pre-dec=7)
 
 // Part of: MontyEventDispatch — event=0: split into 4 sprite pieces flying off screen
                                       // XREF[1]: 23c9(j)
@@ -5588,8 +5588,8 @@ MontyDeathEnemy_alive:                // event=1 (counter=2): enemy hit, alive; 
   bpl !-                              // [2493:10 f4    BPL $2489]
   jmp MontyLifeLost                   // [2495:4c 26 25 JMP $2526]
 
-// Part of: MontyEventDispatch — event=6: enemy hit, dead flag; init transit vars
-MontyDeathEnemy_dead:                 // event=6 (counter=7): enemy hit, dead flag set
+// Part of: MontyEventDispatch — event=6: C5 vehicle crash; reset C5 physics, fixed respawn anchor
+MontyDeathC5Crash:                    // event=6 (counter=7): C5 vehicle crash
   lda #$08                            // [2498:a9 08    LDA #$8]
   sta zp_exit_tile_col                // [249A:85 82    STA $0082]
   lda #$00                            // [249C:a9 00    LDA #$0]

@@ -619,7 +619,7 @@ SetTileProperty_store:
 //          Events: 1=smoke stack 4-split, 2=enemy alive dissolve 60f,
 //          3=lift squash dissolve 9f, 4=piledriver dissolve 48f,
 //          5=hazard dissolve 18f, 6=game completion (Completion.Begin),
-//          7=enemy dead transit.
+//          7=C5 vehicle crash (reset C5 physics state, fixed respawn anchor).
 //          All paths except 6 reach Death.LifeLost: decrement lives; lives
 //          remain → restore saved position, set room_exit; last life → GameOverAnimation.
 //          P2: Dispatch promoted out of Death sub-namespace into Monty.
@@ -673,10 +673,10 @@ event_dispatch_lo:                    // [23C9] lo bytes of 7 handler addresses
   .byte <Death.ByPiledriver           // event=3 (piledriver; pre-dec=4)
   .byte <Death.ByHazard               // event=4 (tile-type-4 hazard; pre-dec=5)
   .byte <Completion.Begin             // event=5 (game completion; pre-dec=6)
-  .byte <Death.ByEnemyDead            // event=6 (enemy hit, dead flag; pre-dec=7)
+  .byte <Death.ByC5Crash               // event=6 (C5 vehicle crash; pre-dec=7)
 
 event_dispatch_hi:
-  .byte >Death.Death4Split, >Death.ByEnemyAlive, >Death.ByLift, >Death.ByPiledriver, >Death.ByHazard, >Completion.Begin, >Death.ByEnemyDead
+  .byte >Death.Death4Split, >Death.ByEnemyAlive, >Death.ByLift, >Death.ByPiledriver, >Death.ByHazard, >Completion.Begin, >Death.ByC5Crash
 
 .namespace Death {
 
@@ -796,8 +796,8 @@ ByEnemyAlive:
   bpl !-                              // [2493:10 f4    BPL $2489]
   jmp LifeLost                        // [2495:4c 26 25 JMP $2526]
 
-// Part of: Monty.Dispatch — event=6: enemy hit, dead flag; init transit vars
-ByEnemyDead:
+// Part of: Monty.Dispatch — event=6: C5 vehicle crash; reset C5 physics, fixed respawn anchor
+ByC5Crash:
   lda #$08                            // [2498:a9 08    LDA #$8]
   sta zp.exit_tile_col                // [249A:85 82    STA $0082]
   lda #$00                            // [249C:a9 00    LDA #$0]
