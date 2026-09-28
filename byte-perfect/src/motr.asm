@@ -378,7 +378,7 @@ GameOverAnimation:
   dex                                 // [0AC4:ca       DEX]
   stx zp_c5_drive_active              // [0AC5:86 bc    STX $00bc]
   stx zp_vic_shadow_expand_x          // [0AC7:86 21    STX $0021]
-  stx zp_level_active_flag            // [0AC9:86 bb    STX $00bb]
+  stx zp_completion_active            // [0AC9:86 bb    STX $00bb]
   stx zp_vic_shadow_priority          // [0ACB:86 24    STX $0024]
   stx cheatmode                       // [0ACD:8e 0e 08 STX $080e]        cheat mode off
   dex                                 // [0AD0:ca       DEX]
@@ -623,12 +623,15 @@ kbd_col_table:                        // CIA1 Port B column masks for keyboard m
 //             accumulator), Y, frame pointer and colour to VIC + sprite_ptr_table.
 //          3. X MSB assembly: builds $D010 sprite-X-MSB byte from the
 //             per-sprite carry bits collected in phase 2. Sprites 2-3 (Monty +
-//             jetpack) use zp_sprite_xmsb; sprites 4-7 (FK carousel) use enemy_xmsb_tbl
-//             during zp_level_active_flag. zp_attract_mode skips this phase.
+//             jetpack) merge in zp_sprite_xmsb, but only outside
+//             zp_completion_active (true only during the Completion boat
+//             sequence — not the FK carousel, which never sets this flag).
+//             Sprites 4-7 always merge in enemy_xmsb_tbl regardless of mode.
+//             zp_attract_mode skips this phase entirely.
 //          4. VIC shadow flush: shadow registers → $D015/$D01D/$D017/$D01C/$D01B.
 //             During zp_attract_mode arms all sprites (zp_vic_shadow_enable=$FF) and
 //             blacks sprite 0 colour, then returns early.
-//          5. Cleanup: when not level_active, AND $D01C clear sprites 0-3
+//          5. Cleanup: when not zp_completion_active, AND $D01C clear sprites 0-3
 //             multicolour (unless lift or zp_game_over_active active). AND $D015 to $F1
 //             (disable sprites 1-3) when zp_action_counter >= 0.
 //          sprite_x_msb_bitmask_tbl ($0D0E): 8-byte power-of-2 table; used
@@ -650,7 +653,7 @@ ProcessSprites:
   jsr C5SetupSprites                  // [0C17:20 9f 2d JSR $2d9f]
   jmp ProcessSprites_flush            // [0C1A:4c 66 0c JMP $0c66]
 !:
-  lda zp_level_active_flag            // [0C1D:a5 bb    LDA $00bb]
+  lda zp_completion_active            // [0C1D:a5 bb    LDA $00bb]
   bne ProcessSprites_flush            // [0C1F:d0 45    BNE $0c66]
   lda zp_action_counter               // [0C21:a5 b7    LDA $00b7]
   bmi ProcessSprites_flush            // [0C23:30 41    BMI $0c66]
@@ -732,7 +735,7 @@ ProcessSprites_flush:
   // phase 3: assemble X MSBs for sprites whose X > 255
   lda zp_attract_mode                 // [0C91:a5 41    LDA $0041]
   bne ProcessSprites_vicsync          // [0C93:d0 30    BNE $0cc5]
-  lda zp_level_active_flag            // [0C95:a5 bb    LDA $00bb]
+  lda zp_completion_active            // [0C95:a5 bb    LDA $00bb]
   bne !+++                            // [0C97:d0 18    BNE $0cb1]  level intro: FK carousel sprites
   // normal play: apply zp_sprite_xmsb X MSB to jetpack (sprite 2) and Monty (sprite 3)
   lda zp_c5_drive_active              // [0C99:a5 bc    LDA $00bc]
@@ -789,7 +792,7 @@ ProcessSprites_vicsync:
 ProcessSprites_cleanup:
 !:
   // phase 5: post-flush state cleanup — disable sprites not needed this frame
-  lda zp_level_active_flag            // [0CF1:a5 bb    LDA $00bb]
+  lda zp_completion_active            // [0CF1:a5 bb    LDA $00bb]
   bne !++                             // [0CF3:d0 18    BNE $0d0d]
   // clear sprites 0-3 multicolour unless lift or zp_game_over_active is active
   lda zp_lift_type                    // [0CF5:a5 97    LDA $0097]
@@ -1033,11 +1036,11 @@ MainGameLoop:
 
                                       // XREF[2]: 0de6(j), 0dea(j)
 !:
-  lda zp_level_active_flag            // [0E0E:a5 bb    LDA $00bb]
+  lda zp_completion_active            // [0E0E:a5 bb    LDA $00bb]
   beq !+                              // [0E10:f0 09    BEQ $0e1b]
   jsr RotateCharBitmapOddFrame        // [0E12:20 2a 2a JSR $2a2a]
   jsr UpdateActiveEnemies             // [0E15:20 4a 13 JSR $134a]
-  jsr CycleLevelSprite                // [0E18:20 4a 2a JSR $2a4a]
+  jsr CycleMontySprite                // [0E18:20 4a 2a JSR $2a4a]
 
                                       // XREF[1]: 0e10(j)
 // Set raster compare to line $E0 and clear MSB so the next IRQ fires at line 224.
@@ -6551,7 +6554,7 @@ DisplayFreedomRoom:
 FreedomSequence:                      // event=5 (counter=6): jerry can SI item collected; load victory room $30
   ldx #$01                            // [29A1:a2 01    LDX #$1]
   stx zp_freeze_flag                  // [29A3:86 0f    STX $000f]
-  stx zp_level_active_flag            // [29A5:86 bb    STX $00bb]
+  stx zp_completion_active            // [29A5:86 bb    STX $00bb]
   dex                                 // [29A7:ca       DEX]
   stx zp_action_counter               // [29A8:86 b7    STX $00b7]
   lda #$30                            // [29AA:a9 30    LDA #$30]
@@ -6657,13 +6660,15 @@ RotateCharBitmap:
 
                                       // XREF[1]: 0e18(c)
 //==============================================================================
-// SECTION: level_sprite_cycle
+// SECTION: monty_sprite_cycle
 // RANGE:   $2A4A-$2A58
 // STATUS:  understood
-// SUMMARY: Cycles zp_sprite0_ptr through sprite pointers $A0-$A3 in the level-complete
-//          path (one step every 8 colour_cycle_store increments).
+// SUMMARY: Cycles zp_sprite0_ptr (Monty's own sprite) through pointers $A0-$A3
+//          during the Completion boat sequence (one step every 8
+//          colour_cycle_store increments); only ever reached while
+//          zp_completion_active is set. Part of FreedomSequence.
 //==============================================================================
-CycleLevelSprite:
+CycleMontySprite:
   inc colour_cycle_store              // [2A4A:e6 3e    INC $003e]
   lda colour_cycle_store              // [2A4C:a5 3e    LDA $003e]
   and #$18                            // [2A4E:29 18    AND #$18]

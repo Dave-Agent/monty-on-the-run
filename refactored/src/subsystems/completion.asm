@@ -45,6 +45,30 @@ PlaceTreasure:
   rts                                 // [29A0:60       RTS]
 
 //==============================================================================
+// SECTION: monty_sprite_cycle
+// RANGE:   $2A4A-$2A58
+// STATUS:  understood
+// SUMMARY: Cycles zp.sprite0_ptr (Monty's own sprite) through pointers $A0-$A3
+//          during the boat sequence (one step every 8 zp.colour_cycle_store
+//          increments). Called from main.asm's GameFrameUpdate only while
+//          zp.completion_active is set.
+// P2: Moved out of Sprites (not a general sprite utility — only ever reached
+//     during the Completion sequence) into Completion, alongside PlaceTreasure.
+//==============================================================================
+                                      // XREF[1]: 0e18(c)
+CycleMontySprite:
+  inc zp.colour_cycle_store           // [2A4A:e6 3e    INC $003e]
+  lda zp.colour_cycle_store           // [2A4C:a5 3e    LDA $003e]
+  and #$18                            // [2A4E:29 18    AND #$18]
+  lsr                                 // [2A50:4a       LSR A]
+  lsr                                 // [2A51:4a       LSR A]
+  lsr                                 // [2A52:4a       LSR A]
+  clc                                 // [2A53:18       CLC]
+  adc #$a0                            // [2A54:69 a0    ADC #$a0]
+  sta zp.sprite0_ptr                  // [2A56:85 25    STA $0025]
+  rts                                 // [2A58:60       RTS]
+
+//==============================================================================
 // SECTION: Begin
 // P1_ROUTINE_NAME: Sequence
 // RANGE:   $29A1-$29FA
@@ -62,7 +86,7 @@ PlaceTreasure:
 Begin:                                // XREF[1]: Monty.event_dispatch_lo/hi (event=5)
   ldx #$01                            // [29A1:a2 01    LDX #$1]
   stx zp.freeze_flag                  // [29A3:86 0f    STX $000f]
-  stx zp.level_active_flag            // [29A5:86 bb    STX $00bb]
+  stx zp.completion_active            // [29A5:86 bb    STX $00bb]
   dex                                 // [29A7:ca       DEX]
   stx zp.action_counter               // [29A8:86 b7    STX $00b7]
   lda #$30                            // [29AA:a9 30    LDA #$30]

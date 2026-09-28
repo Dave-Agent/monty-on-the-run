@@ -48,12 +48,15 @@ SeparateSpritePair:
 //             accumulator), Y, frame pointer and colour to VIC + sprite_ptr_table.
 //          3. X MSB assembly: builds $D010 sprite-X-MSB byte from the
 //             per-sprite carry bits collected in phase 2. Sprites 2-3 (Monty +
-//             jetpack) use zp.sprite_xmsb; sprites 4-7 (FK carousel) use enemy_xmsb_tbl
-//             during zp.level_active_flag. zp.attract_mode skips this phase.
+//             jetpack) merge in zp.sprite_xmsb, but only outside
+//             zp.completion_active (true only during the Completion boat
+//             sequence — not the FK carousel, which never sets this flag).
+//             Sprites 4-7 always merge in enemy_xmsb_tbl regardless of mode.
+//             zp.attract_mode skips this phase entirely.
 //          4. VIC shadow flush: shadow registers → $D015/$D01D/$D017/$D01C/$D01B.
 //             During zp.attract_mode arms all sprites (zp.vic_shadow_enable=$FF) and
 //             blacks sprite 0 colour, then returns early.
-//          5. Cleanup: when not level_active, AND $D01C clear sprites 0-3
+//          5. Cleanup: when not zp.completion_active, AND $D01C clear sprites 0-3
 //             multicolour (unless lift or zp.game_over_active active). AND $D015 to $F1
 //             (disable sprites 1-3) when zp.action_counter >= 0.
 //          sprite_x_msb_bitmask_tbl ($0D0E): 8-byte power-of-2 table; used
@@ -74,7 +77,7 @@ ProcessSprites:
   jsr FreedomKit.C5SetupSprites       // [0C17:20 9f 2d JSR $2d9f]
   jmp ProcessSprites_flush            // [0C1A:4c 66 0c JMP $0c66]
 !:
-  lda zp.level_active_flag            // [0C1D:a5 bb    LDA $00bb]
+  lda zp.completion_active            // [0C1D:a5 bb    LDA $00bb]
   bne ProcessSprites_flush            // [0C1F:d0 45    BNE $0c66]
   lda zp.action_counter               // [0C21:a5 b7    LDA $00b7]
   bmi ProcessSprites_flush            // [0C23:30 41    BMI $0c66]
@@ -156,7 +159,7 @@ ProcessSprites_flush:
   // phase 3: assemble X MSBs for sprites whose X > 255
   lda zp.attract_mode                 // [0C91:a5 41    LDA $0041]
   bne ProcessSprites_vicsync          // [0C93:d0 30    BNE $0cc5]
-  lda zp.level_active_flag            // [0C95:a5 bb    LDA $00bb]
+  lda zp.completion_active            // [0C95:a5 bb    LDA $00bb]
   bne !+++                            // [0C97:d0 18    BNE $0cb1]  level intro: FK carousel sprites
   // normal play: apply zp.sprite_xmsb X MSB to jetpack (sprite 2) and Monty (sprite 3)
   lda zp.c5_drive_active             // [0C99:a5 bc    LDA $00bc]
@@ -213,7 +216,7 @@ ProcessSprites_vicsync:
 ProcessSprites_cleanup:
 !:
   // phase 5: post-flush state cleanup — disable sprites not needed this frame
-  lda zp.level_active_flag            // [0CF1:a5 bb    LDA $00bb]
+  lda zp.completion_active            // [0CF1:a5 bb    LDA $00bb]
   bne !++                             // [0CF3:d0 18    BNE $0d0d]
   // clear sprites 0-3 multicolour unless lift or zp.game_over_active is active
   lda zp.lift_type                    // [0CF5:a5 97    LDA $0097]
@@ -283,26 +286,6 @@ DeinterleaveSpriteRow:
   cpx #$08                            // [11FD:e0 08    CPX #$8]          Processed all 8 bytes?
   bne !-                              // [11FF:d0 ec    BNE $11ed]        No, continue loop
   rts                                 // [1201:60       RTS]
-
-//==============================================================================
-// SECTION: level_sprite_cycle
-// RANGE:   $2A4A-$2A58
-// STATUS:  understood
-// SUMMARY: Cycles zp.sprite0_ptr through sprite pointers $A0-$A3 in the level-complete
-//          path (one step every 8 zp.colour_cycle_store increments).
-//==============================================================================
-                                      // XREF[1]: 0e18(c)
-CycleLevelSprite:
-  inc zp.colour_cycle_store           // [2A4A:e6 3e    INC $003e]
-  lda zp.colour_cycle_store           // [2A4C:a5 3e    LDA $003e]
-  and #$18                            // [2A4E:29 18    AND #$18]
-  lsr                                 // [2A50:4a       LSR A]
-  lsr                                 // [2A51:4a       LSR A]
-  lsr                                 // [2A52:4a       LSR A]
-  clc                                 // [2A53:18       CLC]
-  adc #$a0                            // [2A54:69 a0    ADC #$a0]
-  sta zp.sprite0_ptr                  // [2A56:85 25    STA $0025]
-  rts                                 // [2A58:60       RTS]
 
 //==============================================================================
 // SECTION: WalkSprite7ToTarget

@@ -360,11 +360,11 @@ GameFrameUpdate:
 
                                       // XREF[2]: 0de6(j), 0dea(j)
 !:
-  lda zp.level_active_flag            // [0E0E:a5 bb    LDA $00bb]
+  lda zp.completion_active            // [0E0E:a5 bb    LDA $00bb]
   beq !+                              // [0E10:f0 09    BEQ $0e1b]
   jsr Utils.RotateCharOddFrame        // [0E12:20 2a 2a JSR $2a2a]
   jsr Enemies.Tick                    // [0E15:20 4a 13 JSR $134a]
-  jsr Sprites.CycleLevelSprite        // [0E18:20 4a 2a JSR $2a4a]
+  jsr Completion.CycleMontySprite     // [0E18:20 4a 2a JSR $2a4a]
 
                                       // XREF[1]: 0e10(j)
 // Set raster compare to line $E0 and clear MSB so the next IRQ fires at line 224.
