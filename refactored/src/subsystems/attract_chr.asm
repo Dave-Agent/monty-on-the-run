@@ -44,11 +44,11 @@ chr_src:                      // attract-screen charset source; blitted by Updat
   .byte $00,$01,$0e,$3e,$3f,$0f,$10,$3b  // chr $c8
   .byte $00,$00,$e0,$e0,$d0,$38,$dc,$5c  // chr $c9
   .byte $00,$00,$00,$01,$03,$0d,$30,$40  // chr $ca
-  .byte $1f,$3c,$7d,$7d,$7d,$7c,$7c,$7c  // chr $cb
-  .byte $ff,$fc,$7a,$32,$02,$84,$cc,$fc  // chr $cc
+  .byte $1f,$3c,$7c,$7c,$7c,$7c,$7c,$7c  // chr $cb
+  .byte $ff,$fc,$78,$30,$00,$84,$cc,$fc  // chr $cc
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$e1,$c0  // chr $cd
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$cf,$cf  // chr $ce
-  .byte $ff,$ff,$ff,$ff,$ff,$ff,$20,$23  // chr $cf
+  .byte $ff,$ff,$ff,$ff,$ff,$ff,$20,$20  // chr $cf
   .byte $ff,$ff,$ff,$ff,$ff,$ff,$13,$13  // chr $d0
   .byte $fc,$fe,$ff,$ff,$ff,$ff,$cf,$cf  // chr $d1
   .byte $3f,$7f,$ff,$ff,$ff,$ff,$ff,$ff  // chr $d2
@@ -67,10 +67,10 @@ chr_src:                      // attract-screen charset source; blitted by Updat
   .byte $7c,$7c,$7c,$7c,$7c,$7c,$3c,$1f  // chr $df
   .byte $fc,$fc,$fc,$fc,$fc,$fc,$fc,$ff  // chr $e0
   .byte $8c,$9e,$9e,$9e,$8c,$c0,$e1,$ff  // chr $e1
-  .byte $57,$53,$49,$49,$4c,$ce,$cf,$ff  // chr $e2
-  .byte $3c,$3c,$3c,$3c,$bc,$bc,$3c,$ff  // chr $e3
-  .byte $f9,$f9,$fc,$fd,$fe,$fe,$fe,$ff  // chr $e4
-  .byte $9f,$9f,$3f,$bf,$7f,$7f,$7e,$fc  // chr $e5
+  .byte $47,$43,$41,$48,$4c,$ce,$cf,$ff  // chr $e2
+  .byte $3c,$3c,$3c,$3c,$3c,$3c,$3c,$ff  // chr $e3
+  .byte $f9,$f9,$fc,$fc,$fe,$fe,$fe,$ff  // chr $e4
+  .byte $9f,$9f,$3f,$3f,$7f,$7f,$7e,$fc  // chr $e5
   .byte $f8,$f3,$f3,$f8,$ff,$f3,$78,$3f  // chr $e6
   .byte $3f,$9f,$fc,$39,$99,$99,$3c,$ff  // chr $e7
   // Block 3: chars $e8–$ff → chrset+$740 (custom graphics)
