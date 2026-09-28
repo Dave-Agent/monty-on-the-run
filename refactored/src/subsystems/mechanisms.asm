@@ -205,8 +205,8 @@ Animate:
   jsr SeedGlyphs                      // [1C35:20 ee 1c JSR $1cee]
   lda zp.sound_mode                   // [1C38:ad 0f 08 LDA $080f]
   bne !+                              // [1C3B:d0 05    BNE $1c42]
-  lda #$02                            // [1C3D:a9 02    LDA #$2]
-  jsr Music.PlaySFX                   // [1C3F:20 91 95 JSR $9591]        sfx_02: piledriver sound
+  lda #(Music.Data.sfx.piledriver_descend - Music.Data.sfx_tbl) / 16 // [1C3D:a9 02    LDA #$2]
+  jsr Music.PlaySFX                   // [1C3F:20 91 95 JSR $9591]
 
                                       // XREF[1]: 1c3b(j)
 !:
@@ -422,7 +422,7 @@ CheckContact:
   sta zp.piledriver_ride_active       // [2213:85 b1    STA $00b1]
   lda #$03                            // [2215:a9 03    LDA #$3]
   sta zp.vic_shadow_priority          // [2217:85 24    STA $0024]
-  lda #$05                            // [2219:a9 05    LDA #$5]
+  lda #(Music.Data.sfx.lift_descend_piledriver_ride - Music.Data.sfx_tbl) / 16 // [2219:a9 05    LDA #$5]
   jsr Music.PlaySFX                   // [221B:20 91 95 JSR $9591]
   lda #$75                            // [221E:a9 75    LDA #$75]
   sta zp.monty_sprite_x2              // [2220:85 35    STA $0035]
@@ -608,7 +608,7 @@ InitForRoom:
   sta zp.lift_type                    // [1F91:85 97    STA $0097]
   lda #$82                            // [1F93:a9 82    LDA #$82]
   sta zp.lift_speed_dir               // [1F95:85 98    STA $0098]
-  lda #$05                            // [1F97:a9 05    LDA #$5]
+  lda #(Music.Data.sfx.lift_descend_piledriver_ride - Music.Data.sfx_tbl) / 16 // [1F97:a9 05    LDA #$5]
   jsr Music.PlaySFX                   // [1F99:20 91 95 JSR $9591]
   rts                                 // [1F9C:60       RTS]
 !:
@@ -730,7 +730,7 @@ MovementUpdate_asc:
   lda zp.lift_y                       // [2039:a5 96    LDA $0096]
   cmp #$62                            // [203B:c9 62    CMP #$62]
   bcs !+                              // [203D:b0 0a    BCS $2049]
-  lda #$05                            // [203F:a9 05    LDA #$5]
+  lda #(Music.Data.sfx.lift_descend_piledriver_ride - Music.Data.sfx_tbl) / 16 // [203F:a9 05    LDA #$5]
   jsr Music.PlaySFX                   // [2041:20 91 95 JSR $9591]
   lda #$88                            // [2044:a9 88    LDA #$88]
   sta zp.lift_speed_dir               // [2046:85 98    STA $0098]
@@ -796,13 +796,13 @@ CheckContact:
   beq !+                              // [2092:f0 0a    BEQ $209e]
   lda #$82                            // [2094:a9 82    LDA #$82]
   sta zp.lift_speed_dir               // [2096:85 98    STA $0098]
-  lda #$05                            // [2098:a9 05    LDA #$5]
+  lda #(Music.Data.sfx.lift_descend_piledriver_ride - Music.Data.sfx_tbl) / 16 // [2098:a9 05    LDA #$5]
   jsr Music.PlaySFX                   // [209A:20 91 95 JSR $9591]
   rts                                 // [209D:60       RTS]
 !:
   lda #$02                            // [209E:a9 02    LDA #$2]
   sta zp.lift_speed_dir               // [20A0:85 98    STA $0098]
-  lda #$04                            // [20A2:a9 04    LDA #$4]
+  lda #(Music.Data.sfx.lift_ascend - Music.Data.sfx_tbl) / 16 // [20A2:a9 04    LDA #$4]
   jsr Music.PlaySFX                   // [20A4:20 91 95 JSR $9591]
 
 CheckContact_exit:
@@ -1107,7 +1107,7 @@ CheckContact:
   lda #$01                            // [2889:a9 01    LDA #$1]
   sta zp.room_exit                    // [288B:85 83    STA $0083]
   sta zp.dissolve_pending             // [288D:85 cb    STA $00cb]
-  lda #$00                            // [288F:a9 00    LDA #$0]
+  lda #(Music.Data.sfx.teleporter_warp - Music.Data.sfx_tbl) / 16 // [288F:a9 00    LDA #$0]
   jsr Music.PlaySFX                   // [2891:20 91 95 JSR $9591]
   rts                                 // [2894:60       RTS]
 

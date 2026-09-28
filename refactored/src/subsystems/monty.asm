@@ -68,7 +68,7 @@ UpdateMovement:
   sta zp.monty_action                 // [1503:85 74    STA $0074]
   ldy zp.sound_mode                   // [1505:ac 0f 08 LDY $080f]
   bne !+                              // [1508:d0 03    BNE $150d]
-  jsr Music.PlaySFX                   // [150A:20 91 95 JSR $9591]
+  jsr Music.PlaySFX                   // [150A:20 91 95 JSR $9591]        A still $01 from above == Music.Data.sfx.jump ID
 !:
   lda #$ff                            // [150D:a9 ff    LDA #$ff]
   sta zp.monty_movement_ticker        // [150F:85 88    STA $0088]
@@ -140,7 +140,7 @@ UpdateMovement_dirs:
   inc VIC.SPRITE.MULTICOLOR_2         // [1583:ee 26 d0 INC $d026]
   lda zp.sound_mode                   // [1586:ad 0f 08 LDA $080f]
   bne !+                              // [1589:d0 05    BNE $1590]
-  lda #$03                            // [158B:a9 03    LDA #$3]
+  lda #(Music.Data.sfx.jetpack_thrust - Music.Data.sfx_tbl) / 16 // [158B:a9 03    LDA #$3]
   jsr Music.PlaySFX                   // [158D:20 91 95 JSR $9591]
 !:
   lda #$81                            // [1590:a9 81    LDA #$81]
@@ -625,8 +625,14 @@ SetTileProperty_store:
 //          P2: Dispatch promoted out of Death sub-namespace into Monty.
 //          P2: SMC BNE dispatch replaced by pointer-table + jmp(zp.s_tmp_ptr).
 //==============================================================================
-event_sfx_tbl:
-  .byte $09,$0a,$0e,$0c,$0d,$00,$0e   // [238d] SFX IDs indexed by post-dec event code (0-6)
+event_sfx_tbl:                        // [238d] SFX IDs indexed by post-dec event code (0-6)
+  .byte (Music.Data.sfx.death_smoke_stack - Music.Data.sfx_tbl) / 16       // event 0: Death4Split
+  .byte (Music.Data.sfx.death_enemy_alive - Music.Data.sfx_tbl) / 16       // event 1: ByEnemyAlive
+  .byte (Music.Data.sfx.death_lift_squash_c5_crash - Music.Data.sfx_tbl) / 16 // event 2: ByLift
+  .byte (Music.Data.sfx.death_piledriver - Music.Data.sfx_tbl) / 16        // event 3: ByPiledriver
+  .byte (Music.Data.sfx.death_hazard - Music.Data.sfx_tbl) / 16            // event 4: ByHazard
+  .byte (Music.Data.sfx.teleporter_warp - Music.Data.sfx_tbl) / 16         // event 5: Completion.Begin (near-silent placeholder)
+  .byte (Music.Data.sfx.death_lift_squash_c5_crash - Music.Data.sfx_tbl) / 16 // event 6: ByC5Crash
 
                                       // XREF[1]: 10f1(c)
 Dispatch:

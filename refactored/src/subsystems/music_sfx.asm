@@ -664,14 +664,16 @@ InitSFXVoices:
 //            else stores A|$40 into Data.sfx_id (bit6 = needs-init flag for sfx_dispatch).
 //          Dead code at $9589: lda #$ff; sta Data.sfx_trigger_latch; jmp $83A7 — a
 //            superseded SFX-cancel path, no XREFs.
-//          SFX ID → game event (9 of 16 records used; $06/$0B/$0F unused):
+//          SFX ID → game event (13 of 16 records used; $06/$0B/$0F unused):
 //            $00 teleporter pad entry       $01 jump start (fire from ground)
 //            $02 piledriver shaft start     $03 jetpack thrust (per-frame while held)
 //            $04 lift board type-1          $05 lift board type-2 / lift at top / piledriver ride
-//            $07 coin collected (+50)       $08 SI enemy-contact award (+200)
+//            $07 coin collected (+50)       $08 SI item collected (+200; not enemy-related —
+//                                              HandleSICollision's item-pickup branch, distinct
+//                                              from its earlier enemy/hazard-contact branch)
 //            $09 death: FK smoke-stack      $0A death: enemy hit, Monty alive
 //            $0C death: piledriver          $0D death: tile-type-4 hazard
-//            $0E death: lift squash / enemy dead
+//            $0E death: lift squash / C5 vehicle crash
 // P2_DIVERGES: dead code removed — 8-byte superseded SFX-cancel path ($9589)
 //              and 96-byte development test harness ($95A0-$95FF), both zero XREFs.
 //==============================================================================

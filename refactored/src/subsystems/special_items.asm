@@ -61,7 +61,7 @@ CollectCoin:
   lda #$05                            // [1E1A:a9 05    LDA #$5]          Score increment (50)
   ldy #$03                            // [1E1C:a0 03    LDY #$3]          Y for Score.Increase (tens digit)
   jsr Score.Increase                  // [1E1E:20 88 21 JSR $2188]        Update score
-  lda #$07                            // [1E21:a9 07    LDA #$7]          Sound effect code
+  lda #(Music.Data.sfx.coin_collected - Music.Data.sfx_tbl) / 16 // [1E21:a9 07    LDA #$7]
   jsr Music.PlaySFX                   // [1E23:20 91 95 JSR $9591]        Play coin collection SFX
   rts                                 // [1E26:60       RTS]              Return
 !:
@@ -260,7 +260,7 @@ HandleSICollision:
   lda #$02                            // [2703:a9 02    LDA #$2]          Score increment (200)
   ldy #$02                            // [2705:a0 02    LDY #$2]          Y for Score.Increase (hundreds digit)
   jsr Score.Increase                  // [2707:20 88 21 JSR $2188]
-  lda #$08                            // [270A:a9 08    LDA #$8]
+  lda #(Music.Data.sfx.item_collected - Music.Data.sfx_tbl) / 16 // [270A:a9 08    LDA #$8]
   jsr Music.PlaySFX                   // [270C:20 91 95 JSR $9591]
   rts                                 // [270F:60       RTS]
 
