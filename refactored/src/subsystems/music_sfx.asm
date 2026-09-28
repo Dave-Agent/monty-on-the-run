@@ -676,6 +676,19 @@ InitSFXVoices:
 //            $0E death: lift squash / C5 vehicle crash
 // P2_DIVERGES: dead code removed — 8-byte superseded SFX-cancel path ($9589)
 //              and 96-byte development test harness ($95A0-$95FF), both zero XREFs.
+//
+// Known-dead data (music_sfx_data.asm), confirmed by walking every track/
+// pattern the 3 songs (Main Theme / Game Over Jingle / Victory Fanfare)
+// actually play — not just checking for direct references:
+//   instr_tbl: instruments #7 and #13 (of 20) are defined but never selected
+//     by any pattern's instrument-change byte, in any of the 3 songs.
+//   pattern_data: pat_014 (of 77 patterns) is defined but never referenced
+//     by any of the 9 voice tracks (3 songs x 3 voices).
+//   sfx_tbl: $06/$0B/$0F, as above.
+// None of these are wired up to anything reachable — safe to remove, but
+// left in place for now (removing instr_tbl rows would require renumbering
+// every pattern's instrument-select byte, since instrument number is used
+// by value, not just by reference).
 //==============================================================================
                                       // XREF[4]: 0abd(c), 29d6(c), 30ca(c)
                                       //           3c4f(c)

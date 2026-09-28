@@ -691,7 +691,7 @@ pat_038:
 pat_016:
   .byte $07,$1a,$4f,$47,$ff                                    // [8f79]
 
-pat_014:
+pat_014:                            // unused — never referenced by any of the 9 voice tracks
   .byte $03,$1f,$03,$1f,$03,$24,$03,$26                        // [8f7e]
   .byte $07,$13,$47,$ff                                        // [8f86]
 
@@ -851,13 +851,13 @@ instr_tbl:                              // 20 instruments × 8 bytes: pw_lo, pw_
   .byte $00,$08,$41,$08,$50,$02,$00,$04 // [93d4] instr  4
   .byte $00,$01,$41,$3f,$c0,$02,$00,$00 // [93dc] instr  5
   .byte $00,$08,$41,$04,$40,$02,$00,$00 // [93e4] instr  6
-  .byte $00,$08,$41,$09,$00,$02,$00,$00 // [93ec] instr  7
+  .byte $00,$08,$41,$09,$00,$02,$00,$00 // [93ec] instr  7 — unused (never selected by any song's patterns)
   .byte $00,$09,$41,$09,$70,$02,$5f,$04 // [93f4] instr  8
   .byte $00,$09,$41,$4a,$69,$02,$81,$00 // [93fc] instr  9
   .byte $00,$09,$41,$40,$6f,$00,$81,$02 // [9404] instr 10
   .byte $80,$07,$81,$0a,$0a,$00,$00,$01 // [940c] instr 11
   .byte $00,$09,$41,$3f,$ff,$01,$e7,$02 // [9414] instr 12
-  .byte $00,$08,$41,$90,$f0,$01,$e8,$02 // [941c] instr 13
+  .byte $00,$08,$41,$90,$f0,$01,$e8,$02 // [941c] instr 13 — unused (never selected by any song's patterns)
   .byte $00,$08,$41,$06,$0a,$00,$00,$01 // [9424] instr 14
   .byte $00,$09,$41,$19,$70,$02,$a8,$00 // [942c] instr 15
   .byte $00,$02,$41,$09,$90,$02,$00,$00 // [9434] instr 16
