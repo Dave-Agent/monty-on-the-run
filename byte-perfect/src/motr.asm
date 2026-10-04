@@ -7136,7 +7136,7 @@ C5ScrollLeft:
 // STATUS:  understood
 // SUMMARY: Positions sprite pair 2+3 at Monty's current X/Y and selects the
 //          correct animation frame from zp_c5_anim_ctr and zp_c5_dir
-//          (right-facing frames $A4-$A7, left-facing frames $A8-$AB). Enables
+//          (left-facing frames $A4-$A7, right-facing frames $A8-$AB; confirmed visually). Enables
 //          both sprites white. Called at transit zone entry.
 //==============================================================================
                                       // XREF[1]: 0c17(c)
