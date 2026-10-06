@@ -3058,7 +3058,7 @@ CheckTileBelow:
 // RANGE:   $17A0-$17B3
 // STATUS:  understood
 // SUMMARY: Converts a screen tile character code (1-8) to its collision property
-//          (0=empty, 1=wall, 2=one-way platform, 3=rope, 4=piledriver/trap; see
+//          (0=empty, 1=wall, 2=one-way platform, 3=rope, 4=hazard (lava/water); see
 //          SetTileProperty) using the 8-entry table at ZP $0062. Returns 0 for
 //          empty (A=0) or out-of-range (A>=9) tiles.
 //==============================================================================
@@ -4730,6 +4730,8 @@ LiftUpdateBgTile:
 //            bit6 → RotateBufferRight8: cycle all 8 rows right 1 row
 //            bit5 → RolBytes3: ROL each of rows[0..2] independently (pixel-shift left)
 //            bit4 → RorBytes3: ROR each of rows[0..2] independently (pixel-shift right)
+//          Hazard identification: the animated theme char of a room is its hazard tile, if it
+//          has one. Vertical modes (RotateBuffer*8) = lava; horizontal modes (Rol/RorBytes3) = water.
 //==============================================================================
 
                                       // XREF[1]: 0e86(c)
@@ -5371,7 +5373,9 @@ MontyOnSurface:
 //            1 ($00-$26,$47-$4D) wall (blocks all directions)
 //            2 ($27-$46)         one-way platform
 //            3 ($56-$76)         rope (climbable)
-//            4 ($4E-$55)         piledriver/trap trigger
+//            4 ($4E-$55)         hazard (kills Monty). Lava: $4F, $51 (animate vertically);
+//                                water: $53, $54, $55 (animate horizontally); $4E = roof/door tiles of the C5 street
+//                                rooms $24/$25 and room $30 (class 4 by char range only); $50, $52 unused
 //          GetTileCollisionFlag reads this table for per-tile collision checks.
 //==============================================================================
 SetTileProperty:
@@ -5845,14 +5849,24 @@ CheckPiledriverTiles:
 //          Item $13 collecting enables cheat mode. si_collected_tbl ($0308): 21-entry flags.
 //          ApplyItemRoomEffects ($2710): 9 room-specific checks; clears screen-RAM tiles or
 //          sets enemy_state_tbl + $18.
-//          Room effects: $0C reverse piledriver, $14 FK-gated wall (×2),
-//          $19 giant fly + mini piledriver, $1C teleporter tile clear,
+//          Room effects: $0C tile block cleared by cupcake, $14 two walls (vase; cupcake + gas mask),
+//          $19 wasp removed by fly spray, $1C floor gap cut until joystick collected,
 //          $22 rope to top exit (FK slot 1).
-//          Behavioural only (no visual change confirmed by dynamic analysis):
-//            $08/$19/$2F: enemy_state_tbl+$18 ($0218) set $FF or $6F — side-effect on
-//              enemy logic only; no visible sprite/tile difference observed.
-//            $26/$2D: zp_tile_property_tbl+3/4 ($65/$66) zeroed unconditionally on entry —
-//              no visible difference with or without FK items; behavioural tile-state reset.
+//          $08/$19/$2F all target enemy_state_tbl+$18 ($0218) — the X-position field of
+//          enemy slot 3, whose $FF value is the enemy loop's "inactive slot" sentinel.
+//          So these activate/deactivate whichever enemy that room's spawn table puts in slot 3:
+//            $08: bubble — suppressed ($FF) on every room entry; collecting the teddy bear
+//              (item #13, a poison pill) makes the next pass reactivate it near its spawn X ($6F).
+//            $19: wasp — deactivated when the fly spray (item #3) is collected.
+//            $2F: queen_liz — a blocking enemy beside the treasure; she cannot be jumped
+//              past (owner-confirmed), so removing her is the only way to reach it.
+//              Deactivated when item #$0A (the key, room $2B) is collected AND FK slot 4
+//              (barrel_of_rum, fk_item_flags[15]) is in the kit. The treasure appearing is a
+//              separate gate (jerry can, si_collected_tbl+8 — see DisplayFreedomRoom).
+//          $26/$2D: zp_tile_property_tbl+3/4 ($65/$66) — the collision property of tile
+//              slots 4 and 5 (chars 4/5) — forced to 0 (empty, non-colliding) unconditionally
+//              on entry, independent of FK items. Room $26: chars $49/$4A (walls) stop
+//              blocking. Room $2D: chars $5D/$5E (ropes) stop being climbable.
 //==============================================================================
 InitRoomItemFlags:                    // XREF[1]: 10b3(c) — called once from startGame
   ldy #$04                            // [25CF:a0 04    LDY #$4]
@@ -5940,6 +5954,46 @@ SpawnSIForRoom:                   // scan si_spawn_tbl for zp_room_id; set sprit
   sty zp_si_active_idx                // [2681:84 b8    STY $00b8]  save item index for collection check
   rts                                 // [2683:60       RTS]
 
+//==============================================================================
+// SECTION: special_item_catalogue
+// RANGE:   $25E6-$2632 (si_spawn_tbl) / $2684-$27EC (effects)
+// STATUS:  understood
+// SUMMARY: Catalogue of all 20 special items, in si_spawn_tbl order. The index is
+//          also the item's si_collected_tbl slot ($0308+index; $81 once collected).
+//          Every collectible item (#0-#18) awards 200 points and plays
+//          the item-collected SFX (SFX $08, HandleSICollision tail; NOT the coin sound),
+//          then applies the "also" column. Room numbers are hex.
+//
+//          #   item        room  also
+//          0   cupcake     $0D   room $0C: blanks 3 cols (2 left-gutter cols + playfield col 0), rows 10-17
+//          1   vase        $13   room $14: blanks col 15, rows 14-17 (no FK item needed)
+//          2   cupcake     $14   room $14: blanks col 3, rows 15-17, only if gas_mask (FK slot 3) in kit
+//          3   fly spray   $17   room $19: wasp (enemy slot 3) set inactive on each room load
+//          4   cupcake     $16   nothing
+//          5   joystick    $1B   room $1C: floor gap (row 15, left gutter-col 23) is cut UNTIL this is collected
+//          6   cupcake     $1A   nothing
+//          7   cupcake     $1F   nothing
+//          8   jerry can   $23   room $2F: makes the treasure appear (DisplayFreedomRoom)
+//          9   cupcake     $29   nothing
+//          10  key         $2B   room $2F: with barrel_of_rum (FK slot 4) in kit, queen_liz (enemy slot 3)
+//                                set inactive. She is a near-static blocking enemy beside the treasure.
+//          11  first aid   $02   +1 life (INC lives_count; no cap in this routine)
+//          12  milk jug    $04   nothing
+//          13  teddy bear  $08   room $08: wakes the dormant slot-3 enemy (bubble) — poison pill
+//          14  cupcake     $09   nothing
+//          15  cupcake     $0A   nothing
+//          16  smoke stack $0B   zp_action_counter=1 → death event 0 (4-piece death, after the
+//                                points are awarded; skipped while cheat mode is on)
+//          17  cupcake     $10   nothing
+//          18  cupcake     $2D   nothing (room $2D itself has the unconditional tile override)
+//          19  cake        $01   cheat-mode only: sets cheat mode, no points, no sound
+//          Treasure (sprite ptr $9B, not a table item): touching it sets action_counter=6 → game completion.
+//
+//          Unconditional, item-independent room overrides in ApplyItemRoomEffects:
+//          rooms $26 and $2D force tile slots 4 and 5 (zp_tile_property_tbl+3/+4) to property 0.
+//          Raw data: room $26 slots 4/5 are chars $49/$4A (class 1, wall); room $2D slots 4/5
+//          are chars $5D/$5E (class 3, rope). So those wall / rope tiles stop colliding / climbing.
+//==============================================================================
 //==============================================================================
 // SECTION: HandleSICollision
 // RANGE:   $2684-$270F
@@ -6071,8 +6125,8 @@ ApplyItemRoomEffects:
 // Part of: ApplyItemRoomEffects — room $0C tile effects
 ApplyItemRoomEffects_0c:
 
-  // room $14 (FK-gated wall, part 1): if vase (item #1/$13) collected,
-  // clear 4 wall tile positions
+  // room $14 (wall, part 1): if vase (item #1/$13) collected — no FK item
+  // needed — clear 4 wall tile positions
   lda zp_room_id                      // [2737:a5 46    LDA $0046]
   cmp #$14                            // [2739:c9 14    CMP #$14]
   bne !+                              // [273B:d0 13    BNE $2750]
@@ -6086,7 +6140,7 @@ ApplyItemRoomEffects_0c:
 !:
 
   // room $14 (FK-gated wall, part 2): if cupcake (item #2/$14) collected
-  // AND FK slot 3 active, clear 3 more wall tile positions
+  // AND FK slot 3 (gas_mask, fk_item_flags[12]) active, clear 3 more wall tile positions
   lda zp_room_id                      // [2750:a5 46    LDA $0046]
   cmp #$14                            // [2752:c9 14    CMP #$14]
   bne !+                              // [2754:d0 15    BNE $276b]
@@ -6101,7 +6155,8 @@ ApplyItemRoomEffects_0c:
 !:
 
   // room $19 (mini piledriver + giant fly blocking exit): if fly spray (item #3/$17) collected,
-  // set enemy_state_tbl + $18=$FF — no visible effect found; behavioural side-effect TBD
+  // deactivate enemy slot 3 (wasp) by setting its X-pos (enemy_state_tbl + $18) to $FF,
+  // the enemy loop's "inactive slot" sentinel
   lda zp_room_id                      // [276B:a5 46    LDA $0046]
   cmp #$19                            // [276D:c9 19    CMP #$19]
   bne !+                              // [276F:d0 0a    BNE $277b]
@@ -6111,8 +6166,9 @@ ApplyItemRoomEffects_0c:
   sta enemy_state_tbl + $18           // [2778:8d 18 02 STA $0218]
 !:
 
-  // room $1C (teleporter): if joystick (item #5/$1B) NOT yet collected,
-  // clear 26 screen tiles at $4AD2
+  // room $1C: if joystick (item #5/$1B) NOT yet collected, clear 26 screen
+  // tiles (row 18, cols 2-27) — a gap in the floor; collecting the joystick
+  // leaves the floor intact. Runs on room load and after every item pickup.
   lda zp_room_id                      // [277B:a5 46    LDA $0046]
   cmp #$1c                            // [277D:c9 1c    CMP #$1c]
   bne ApplyItemRoomEffects_1c         // [277F:d0 0f    BNE $2790]
@@ -6128,7 +6184,13 @@ ApplyItemRoomEffects_0c:
 // Part of: ApplyItemRoomEffects — room $1C tile effects
 ApplyItemRoomEffects_1c:
 
-  // room $2F: if item #$0A AND FK slot 4 active, set enemy_state_tbl + $18=$FF
+  // room $2F: if item #$0A (key, room $2B) AND FK slot 4 (barrel_of_rum) active,
+  // deactivate enemy slot 3 — queen_liz, a near-static blocking enemy at sprite
+  // ($4C,$9A) beside the treasure ($40,$9A) — by setting her X-pos
+  // (enemy_state_tbl + $18) to $FF. The player cannot jump past her (confirmed by
+  // the game's owner), so removing her is the only way to reach the treasure. The
+  // treasure itself appears on a separate gate (jerry can, si_collected_tbl+8 in
+  // DisplayFreedomRoom), which never reads this enemy slot.
   lda zp_room_id                      // [2790:a5 46    LDA $0046]
   cmp #$2f                            // [2792:c9 2f    CMP #$2f]
   bne !+                              // [2794:d0 0f    BNE $27a5]
@@ -6159,9 +6221,11 @@ ApplyItemRoomEffects_1c:
 // Part of: ApplyItemRoomEffects — room $22 tile effects
 ApplyItemRoomEffects_22:
 
-  // room $08 (teleporter + teddy bear): always set enemy_state_tbl + $18=$FF;
-  // if si_collected_tbl[13] (teddy bear counter) non-zero and < $82,
-  // increment it and override enemy_state_tbl + $18 to $6F
+  // room $08 (teleporter + teddy bear): the teddy bear (item #13) is a poison pill.
+  // Slot 3's enemy (bubble) is suppressed ($FF) on every pass through here; once
+  // si_collected_tbl[13] (teddy bear flag) is non-zero and < $82, the next pass
+  // increments it and reactivates the bubble at X=$6F instead (one-shot, unavoidable
+  // once the teddy bear is taken)
   lda zp_room_id                      // [27C0:a5 46    LDA $0046]
   cmp #$08                            // [27C2:c9 08    CMP #$8]
   bne !+                              // [27C4:d0 16    BNE $27dc]
@@ -6176,7 +6240,8 @@ ApplyItemRoomEffects_22:
   sta enemy_state_tbl + $18           // [27D9:8d 18 02 STA $0218]
 !:
 
-  // rooms $26 and $2D: zero zp_tile_property_tbl+3/0066 on entry
+  // rooms $26 and $2D: force tile slots 4 and 5 (zp_tile_property_tbl+3/+4) to
+  // property 0 (empty, non-colliding) on entry — real collision effect, not a no-op
   lda zp_room_id                      // [27DC:a5 46    LDA $0046]
   cmp #$26                            // [27DE:c9 26    CMP #$26]
   beq ApplyItemRoomEffects_26_2d      // [27E0:f0 04    BEQ $27e6]
@@ -6516,8 +6581,10 @@ DissolveFrameLoop:
 //          positions the treasure sprite (pointer $9B) at ($40,$9A) and
 //          enables sprite 0, incrementing its colour every frame (the
 //          colour-cycling effect) — this is the game's end state. Room $2F
-//          separately has a stationary queen_liz enemy as decoration next to
-//          the treasure; she is not involved in this trigger.
+//          also has a near-static queen_liz enemy beside the
+//          treasure, which blocks the way to it and cannot be jumped past;
+//          ApplyItemRoomEffects removes her (key + barrel_of_rum). That is a separate
+//          gate — this routine never reads her enemy slot.
 //==============================================================================
                                       // XREF[1]: 0dd7(c)
 DisplayFreedomRoom:
@@ -13463,14 +13530,14 @@ tile_library:                                                            // 121 
   .byte $01,$03,$07,$0f,$1f,$3f,$7f,$ff // [af93] tile  75
   .byte $66,$66,$3c,$18,$18,$3c,$3c,$3c // [af9b] tile  76
   .byte $ff,$c0,$b0,$8c,$83,$ff,$7e,$3c // [afa3] tile  77
-  .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff // [afab] tile  78
-  .byte $6e,$7e,$c7,$d3,$da,$c3,$67,$ef // [afb3] tile  79
+  .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff // [afab] tile  78 — yellow roof / door in the C5 street rooms $24, $25 and room $30; property class 4 by char range but not a visible hazard
+  .byte $6e,$7e,$c7,$d3,$da,$c3,$67,$ef // [afb3] tile  79 — lava (hazard class)
   .byte $fc,$80,$e3,$e7,$fc,$80,$e3,$e7 // [afbb] tile  80
-  .byte $49,$19,$f7,$f7,$e7,$87,$27,$6d // [afc3] tile  81
+  .byte $49,$19,$f7,$f7,$e7,$87,$27,$6d // [afc3] tile  81 — lava (hazard class)
   .byte $08,$11,$17,$2f,$3b,$73,$6b,$4b // [afcb] tile  82
-  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afd3] tile  83
-  .byte $88,$cc,$ee,$ff,$ff,$ff,$00,$00 // [afdb] tile  84
-  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afe3] tile  85
+  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afd3] tile  83 — water (hazard class)
+  .byte $88,$cc,$ee,$ff,$ff,$ff,$00,$00 // [afdb] tile  84 — water (hazard class)
+  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afe3] tile  85 — water (hazard class)
   .byte $22,$66,$ee,$ff,$ff,$ff,$00,$00 // [afeb] tile  86
   .byte $80,$c0,$e0,$f0,$f8,$fc,$fe,$ff // [aff3] tile  87
   .byte $00,$0f,$3f,$7f,$7f,$ff,$ff,$ff // [affb] tile  88
