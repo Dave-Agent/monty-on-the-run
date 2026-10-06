@@ -11,9 +11,11 @@
 //          ordinal #8, room $23 — collected), positions the treasure sprite
 //          (pointer $9B) at ($40,$9A) and enables sprite 0, incrementing its
 //          colour every frame (the colour-cycling effect). Called every frame
-//          from the main game loop. Room $2F separately has a stationary
-//          queen_liz enemy (enemy_spawn.rm_2f, near-zero movement range) as
-//          decoration next to the treasure — she is not involved in this.
+//          from the main game loop. Room $2F also has a near-static
+//          queen_liz enemy (enemy_spawn.rm_2f slot 3) beside the treasure,
+//          which blocks the way to it and cannot be jumped past; SpecialItems.ApplyItemRoomEffects
+//          removes her (key + barrel_of_rum). That is a separate gate — this
+//          routine never reads her enemy slot.
 //          Touching the treasure routes through the generic sprite-0 collision
 //          handler (SpecialItems.HandleSICollision), which special-cases
 //          pointer $9B to set zp.action_counter=6 and jump straight to

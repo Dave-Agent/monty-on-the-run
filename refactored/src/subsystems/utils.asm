@@ -472,6 +472,8 @@ CheckTileBelow:
 //            bit6 → RotateBufferRight8: cycle all 8 rows right 1 row
 //            bit5 → RolBytes3: ROL each of rows[0..2] independently (pixel-shift left)
 //            bit4 → RorBytes3: ROR each of rows[0..2] independently (pixel-shift right)
+//          Hazard identification: the animated theme char of a room is its hazard tile, if it
+//          has one. Vertical modes (RotateBuffer*8) = lava; horizontal modes (Rol/RorBytes3) = water.
 
 InitRoomThemePointer:
   ldx zp.room_id                      // [20D8:a6 46    LDX $0046]

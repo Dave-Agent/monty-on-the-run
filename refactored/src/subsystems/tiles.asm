@@ -104,14 +104,14 @@ tile_library:                                                            // 121 
   .byte $01,$03,$07,$0f,$1f,$3f,$7f,$ff // [af93] tile  75 — wall
   .byte $66,$66,$3c,$18,$18,$3c,$3c,$3c // [af9b] tile  76 — wall
   .byte $ff,$c0,$b0,$8c,$83,$ff,$7e,$3c // [afa3] tile  77 — wall
-  .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff // [afab] tile  78 — piledriver/trap trigger
-  .byte $6e,$7e,$c7,$d3,$da,$c3,$67,$ef // [afb3] tile  79 — piledriver/trap trigger
+  .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff // [afab] tile  78 — yellow roof / door in the C5 street rooms $24, $25 and room $30; property class 4 by char range but not a visible hazard
+  .byte $6e,$7e,$c7,$d3,$da,$c3,$67,$ef // [afb3] tile  79 — lava (hazard class)
   .byte $fc,$80,$e3,$e7,$fc,$80,$e3,$e7 // [afbb] tile  80 — piledriver/trap trigger
-  .byte $49,$19,$f7,$f7,$e7,$87,$27,$6d // [afc3] tile  81 — piledriver/trap trigger
+  .byte $49,$19,$f7,$f7,$e7,$87,$27,$6d // [afc3] tile  81 — lava (hazard class)
   .byte $08,$11,$17,$2f,$3b,$73,$6b,$4b // [afcb] tile  82 — piledriver/trap trigger
-  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afd3] tile  83 — piledriver/trap trigger
-  .byte $88,$cc,$ee,$ff,$ff,$ff,$00,$00 // [afdb] tile  84 — piledriver/trap trigger
-  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afe3] tile  85 — piledriver/trap trigger
+  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afd3] tile  83 — water (hazard class)
+  .byte $88,$cc,$ee,$ff,$ff,$ff,$00,$00 // [afdb] tile  84 — water (hazard class)
+  .byte $18,$7e,$ff,$ff,$ff,$ff,$ff,$ff // [afe3] tile  85 — water (hazard class)
   .byte $22,$66,$ee,$ff,$ff,$ff,$00,$00 // [afeb] tile  86 — rope
   .byte $80,$c0,$e0,$f0,$f8,$fc,$fe,$ff // [aff3] tile  87 — rope
   .byte $00,$0f,$3f,$7f,$7f,$ff,$ff,$ff // [affb] tile  88 — rope

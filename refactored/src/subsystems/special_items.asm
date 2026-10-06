@@ -100,11 +100,18 @@ CollectCoin:
 //              very next pass reactivate it near its spawn X ($6F) instead of
 //              suppressing it, trapping the player — unavoidable once taken.
 //            $19: wasp (rm_19 slot 3) — deactivated when fly spray (item #3) collected.
-//            $2F: queen_liz (rm_2f slot 3, the decorative one — see
-//              Completion.PlaceTreasure notes) — deactivated when item #$0A is
-//              collected and FK slot 4 is active.
-//          $26/$2D: zp.tile_property_tbl+3/4 ($65/$66) zeroed unconditionally on entry —
-//              no visible difference with or without FK items; behavioural tile-state reset.
+//            $2F: queen_liz (rm_2f slot 3) — a blocking enemy: she stands next to the
+//              treasure, cannot be jumped past (owner-confirmed), and removing
+//              her is the only way to reach it. Deactivated
+//              when item #$0A (the key, room $2B) is collected AND FK slot 4
+//              (barrel_of_rum, item_flags[15]) is in the kit. The treasure
+//              appearing is a separate gate (jerry can, si_collected_tbl+8 — see
+//              Completion.PlaceTreasure); neither gate reads the other's state.
+//          $26/$2D: zp.tile_property_tbl+3/4 ($65/$66) — the collision property of
+//              tile slots 4 and 5 (chars 4/5) — forced to 0 (empty, non-colliding)
+//              unconditionally on entry, independent of FK items. Mechanically
+//              this makes those two tile types non-solid in these rooms; which
+//              on-screen tiles they are has not been identified yet.
 //==============================================================================
 InitRoomItemFlags:                    // XREF[1]: 10b3(c) — called once from startGame
   ldy #$04                            // [25CF:a0 04    LDY #$4]
@@ -167,6 +174,46 @@ SpawnSIForRoom:                   // scan si_spawn_tbl for zp.room_id; set sprit
   sty zp.si_active_idx                // [2681:84 b8    STY $00b8]  save item index for collection check
   rts                                 // [2683:60       RTS]
 
+//==============================================================================
+// SECTION: special_item_catalogue
+// RANGE:   $25E6-$2632 (si_spawn_tbl) / $2684-$27EC (effects)
+// STATUS:  understood
+// SUMMARY: Catalogue of all 20 special items, in si_spawn_tbl order. The index is
+//          also the item's si_collected_tbl slot ($0308+index; $81 once collected).
+//          Every collectible item (#0-#18) awards 200 points and plays
+//          sfx.item_collected (HandleSICollision tail; NOT the coin sound), then
+//          applies the "also" column. Room numbers are hex.
+//
+//          #   item        room  also
+//          0   cupcake     $0D   room $0C: blanks 3 cols (2 left-gutter cols + playfield col 0), rows 10-17
+//          1   vase        $13   room $14: blanks col 15, rows 14-17 (no FK item needed)
+//          2   cupcake     $14   room $14: blanks col 3, rows 15-17, only if gas_mask (FK slot 3) in kit
+//          3   fly spray   $17   room $19: wasp (enemy slot 3) set inactive on each room load
+//          4   cupcake     $16   nothing
+//          5   joystick    $1B   room $1C: floor gap (row 15, left gutter-col 23) is cut UNTIL this is collected
+//          6   cupcake     $1A   nothing
+//          7   cupcake     $1F   nothing
+//          8   jerry can   $23   room $2F: makes the treasure appear (Completion.PlaceTreasure)
+//          9   cupcake     $29   nothing
+//          10  key         $2B   room $2F: with barrel_of_rum (FK slot 4) in kit, queen_liz (enemy slot 3)
+//                                set inactive. She is a near-static blocking enemy beside the treasure.
+//          11  first aid   $02   +1 life (INC lives_count; no cap in this routine)
+//          12  milk jug    $04   nothing
+//          13  teddy bear  $08   room $08: wakes the dormant slot-3 enemy (bubble) — poison pill
+//          14  cupcake     $09   nothing
+//          15  cupcake     $0A   nothing
+//          16  smoke stack $0B   zp.action_counter=1 → Monty.Dispatch event 0, Death.Death4Split
+//                                (4-piece death, after the points are awarded; skipped while cheat mode is on)
+//          17  cupcake     $10   nothing
+//          18  cupcake     $2D   nothing (room $2D itself has the unconditional tile override below)
+//          19  cake        $01   cheat-mode only: sets zp.cheat_mode, no points, no sound
+//          Treasure (sprite ptr $9B, not a table item): touching it sets action_counter=6 → Completion.Begin.
+//
+//          Unconditional, item-independent room overrides in ApplyItemRoomEffects:
+//          rooms $26 and $2D force tile slots 4 and 5 (zp.tile_property_tbl+3/+4) to property 0.
+//          Raw data: room $26 slots 4/5 are chars $49/$4A (class 1, wall); room $2D slots 4/5
+//          are chars $5D/$5E (class 3, rope). So those wall / rope tiles stop colliding / climbing.
+//==============================================================================
 //==============================================================================
 // SECTION: HandleSICollision
 // RANGE:   $2684-$270F
@@ -298,8 +345,8 @@ ApplyItemRoomEffects:
 // Part of: ApplyItemRoomEffects — room $0C tile effects
 ApplyItemRoomEffects_0c:
 
-  // room $14 (FK-gated wall, part 1): if vase (item #1/$13) collected,
-  // clear 4 wall tile positions
+  // room $14 (wall, part 1): if vase (item #1/$13) collected — no FK item
+  // needed — clear 4 wall tile positions
   lda zp.room_id                      // [2737:a5 46    LDA $0046]
   cmp #$14                            // [2739:c9 14    CMP #$14]
   bne !+                              // [273B:d0 13    BNE $2750]
@@ -313,7 +360,7 @@ ApplyItemRoomEffects_0c:
 !:
 
   // room $14 (FK-gated wall, part 2): if cupcake (item #2/$14) collected
-  // AND FK slot 3 active, clear 3 more wall tile positions
+  // AND FK slot 3 (gas_mask, item_flags[12]) active, clear 3 more wall tile positions
   lda zp.room_id                      // [2750:a5 46    LDA $0046]
   cmp #$14                            // [2752:c9 14    CMP #$14]
   bne !+                              // [2754:d0 15    BNE $276b]
@@ -339,8 +386,9 @@ ApplyItemRoomEffects_0c:
   sta enemy_state_tbl + $18           // [2778:8d 18 02 STA $0218]
 !:
 
-  // room $1C (teleporter): if joystick (item #5/$1B) NOT yet collected,
-  // clear 26 screen tiles at $4AD2
+  // room $1C: if joystick (item #5/$1B) NOT yet collected, clear 26 screen
+  // tiles (row 18, cols 2-27) — a gap in the floor; collecting the joystick
+  // leaves the floor intact. Runs on room load and after every item pickup.
   lda zp.room_id                      // [277B:a5 46    LDA $0046]
   cmp #$1c                            // [277D:c9 1c    CMP #$1c]
   bne ApplyItemRoomEffects_1c         // [277F:d0 0f    BNE $2790]
@@ -356,9 +404,14 @@ ApplyItemRoomEffects_0c:
 // Part of: ApplyItemRoomEffects — room $1C tile effects
 ApplyItemRoomEffects_1c:
 
-  // room $2F: if item #$0A AND FK slot 4 active, deactivate enemy slot 3
-  // (queen_liz, enemy_spawn.rm_2f — the decorative one, uninvolved in the
-  // treasure/completion trigger) by setting its X-pos (enemy_state_tbl+$18) to $FF
+  // room $2F: if item #$0A (key, room $2B) AND FK slot 4 (barrel_of_rum) active,
+  // deactivate enemy slot 3 — queen_liz (enemy_spawn.rm_2f), a near-static
+  // blocking enemy at sprite ($4C,$9A), beside the treasure ($40,$9A) — by
+  // setting her X-pos (enemy_state_tbl+$18) to $FF. The player cannot jump past
+  // her (confirmed by the game's owner), so removing her is the only way to
+  // reach the treasure. The treasure itself appears on a separate
+  // gate (jerry can, si_collected_tbl+8 in Completion.PlaceTreasure), which
+  // never reads this enemy slot.
   lda zp.room_id                      // [2790:a5 46    LDA $0046]
   cmp #$2f                            // [2792:c9 2f    CMP #$2f]
   bne !+                              // [2794:d0 0f    BNE $27a5]
@@ -415,7 +468,8 @@ ApplyItemRoomEffects_22:
   sta enemy_state_tbl + $18           // [27D9:8d 18 02 STA $0218]
 !:
 
-  // rooms $26 and $2D: zero zp.tile_property_tbl+3/0066 on entry
+  // rooms $26 and $2D: force tile slots 4 and 5 (zp.tile_property_tbl+3/+4) to
+  // property 0 (empty, non-colliding) on entry — real collision effect, not a no-op
   lda zp.room_id                      // [27DC:a5 46    LDA $0046]
   cmp #$26                            // [27DE:c9 26    CMP #$26]
   beq ApplyItemRoomEffects_26_2d      // [27E0:f0 04    BEQ $27e6]

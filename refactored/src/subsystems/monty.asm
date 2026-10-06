@@ -292,7 +292,7 @@ UpdateMovement_right:
 // RANGE:   $17A0-$17B3
 // STATUS:  understood
 // SUMMARY: Converts a screen tile character code (1-8) to its collision property
-//          (0=empty, 1=wall, 2=one-way platform, 3=rope, 4=piledriver/trap; see
+//          (0=empty, 1=wall, 2=one-way platform, 3=rope, 4=hazard (lava/water); see
 //          SetTileProperty) using the 8-entry table at ZP $0062. Returns 0 for
 //          empty (A=0) or out-of-range (A>=9) tiles.
 //==============================================================================
@@ -580,7 +580,9 @@ OnSurface:
 //            1 ($00-$26,$47-$4D) wall (blocks all directions)
 //            2 ($27-$46)         one-way platform
 //            3 ($56-$76)         rope (climbable)
-//            4 ($4E-$55)         piledriver/trap trigger
+//            4 ($4E-$55)         hazard (kills Monty). Lava: $4F, $51 (animate vertically);
+//                                water: $53, $54, $55 (animate horizontally); $4E = roof/door tiles of the C5 street
+//                                rooms $24/$25 and room $30 (class 4 by char range only); $50, $52 unused
 //          GetTileFlag reads this table for per-tile collision checks.
 //==============================================================================
 SetTileProperty:
