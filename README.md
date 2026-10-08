@@ -6,11 +6,12 @@ address is identified, named, and commented. Two buildable versions are provided
 
 | Directory | Description |
 |-----------|-------------|
-| [`refactored/`](#refactored) | Multi-file, namespace-structured. SMC removed. Dead code excised. |
+| [`refactored/`](#refactored) | Multi-file, namespace-structured. SMC removed or named. Dead code largely excised. |
 | [`byte-perfect/`](#byte-perfect) | Single-file monolith. Assembled output is bit-for-bit identical to the original PRG. |
 
 Both share the same hardware register libraries. Neither includes the original
-binary — you need a legal copy of the tape release to verify byte-identity.
+binary. You only need a legal copy of the tape release if you want to verify
+byte-identity yourself; it is not needed to build either version.
 
 ---
 
@@ -46,17 +47,19 @@ other.
 The monolith is split into per-subsystem files using KickAssembler namespaces.
 Key improvements over the original code:
 
-- **SMC removed** — every address the original game patched at runtime is now
-  named by its operand label (KickAssembler's `label:operand` syntax); runtime
-  dispatch uses pointer tables instead of patched branch displacements
-- **Dead code and data excised** — PRG bytes that were never read at runtime
-  are gone
+- **SMC removed or named** — addresses the original game patched at runtime are
+  named by their operand label (KickAssembler's `label:operand` syntax), and
+  runtime dispatch uses pointer tables instead of patched branch displacements.
+  A few cases remain (for example the hi-score rank text, which is still patched
+  at runtime)
+- **Dead code and data largely excised** — PRG bytes that were never read at
+  runtime are gone, apart from a few short dead-byte stubs kept and annotated
 - **Idiomatic naming** — namespace-qualified call sites (`Monty.Dispatch`,
   `Mechanisms.Piledriver.CheckContact`, `Completion.Begin`) that read cold
   without looking up the implementation
-- **Smoke test tooling** — `SMOKE_TEST=true` enables Q/W keyboard room
-  navigation and pre-fills the correct Freedom Kit items, making it easy to
-  step through specific sequences during development
+- **Smoke test tooling** — `SMOKE_TEST=true` (default `false`) enables Q/W
+  keyboard room navigation and pre-fills the correct Freedom Kit items, making
+  it easy to step through specific sequences during development
 - **Designed to be edited** — every address is a label; moving or modifying
   a routine won't silently break cross-references
 
@@ -180,34 +183,38 @@ refactored/src/
 
   libs/               Hardware register definitions (VIC, SID, CIA, CPU).
 
-  subsystems/         One file per game subsystem, each with a paired _data.asm:
+  subsystems/         One file per game subsystem. Most have a paired _data.asm
+                      for their tables; sprite and character graphics live in
+                      _spr.asm / _chr.asm files; tiles_data.asm is pure data:
     irq.asm             IRQ handler, raster timing
     monty.asm           Player movement, collision, death, dispatch
-    enemy.asm           Enemy spawn, movement, collision, Queen placement
+    enemy.asm           Enemy spawn, movement, collision
     sprites.asm         Sprite engine, multiplexer, per-frame VIC updates
     room.asm            Room loading, scrolling, tile placement
-    tiles.asm           Tile rendering and attribute tables
+    tiles_data.asm      Shared tile graphics library (121 tiles, all rooms)
     decor.asm           Room decoration objects
     mechanisms.asm      Lifts, piledrivers, rising bollard, teleporters
     jetpack.asm         Jetpack physics and fuel
     hud.asm             Score display, lives, status bar
+    score.asm           Live score counter, increase/decrease, arrest confiscation
     controls.asm        Joystick and keyboard input
     special_items.asm   Collectible items and inventory
     freedom_kit.asm     Freedom Kit carousel, C5 vehicle
-    completion.asm      Game completion sequence
+    completion.asm      Game completion sequence (treasure, boat, Union Jack flag)
     game_over.asm       Game over, arrest, and continue screens
     attract.asm         Attract mode and title screen
     scroller.asm        Bottom text scroller
     hiscore.asm         High score table entry and display
     music_sfx.asm       Rob Hubbard player integration
     utils.asm           Shared arithmetic and utility routines
+    smoke_test.asm      Q/W room navigation (only active when SMOKE_TEST=true)
 ```
 
 ---
 
 ## byte-perfect
 
-`byte-perfect/src/motr.asm` is the entire game in a single ~9,000-line file.
+`byte-perfect/src/motr.asm` is the entire game in a single ~15,700-line file.
 Every instruction carries its original C64 address and opcode bytes in the
 end-of-line comment — these are the ground truth from the original disassembly
 and are never removed. Every function has a section banner with status and
@@ -265,9 +272,9 @@ output byte-identical to the original.
 **Phase 2 (refactored)** extracts each subsystem into its own file and namespace.
 Code that patches its own operands at runtime is replaced with named operand
 labels (KickAssembler's `label:operand` syntax) so the locations being patched
-have names rather than raw addresses. The build is verified against phase 1 by
-normalised instruction comparison — same mnemonics and operand shapes, different
-file structure.
+have names rather than raw addresses. Byte-identity is deliberately given up in
+this phase, so it is checked by assembling cleanly and running in an emulator
+rather than by diffing against phase 1.
 
 ---
 
@@ -284,6 +291,8 @@ just open in a browser):
 | `hiscore_sprites.html` | Flying-banner composite sprites |
 | `decor_viewer.html` | Room decoration tile viewer |
 | `world_map.html` | Room connectivity map |
+| `vic_bank_map.html` | VIC bank 1 memory layout |
+| `migration_plan.html` | Phase 2 migration plan for `main.asm` |
 
 ---
 

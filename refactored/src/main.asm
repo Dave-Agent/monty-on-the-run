@@ -417,7 +417,7 @@ CHR_Screen:                                              // VIC bank 1 screen RA
 
 .pc = PC_DATA_START "RoomData"
 
-#import "subsystems/tiles.asm"
+#import "subsystems/tiles_data.asm"
 #import "subsystems/enemy_spr.asm"
 
 #import "subsystems/attract.asm"
