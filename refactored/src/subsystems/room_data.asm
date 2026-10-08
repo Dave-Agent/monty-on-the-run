@@ -139,6 +139,9 @@ sector_idx:                       // room_id → index N; N=0 → sector_name_1 
 // SUMMARY: Level data master index. Little-endian 16-bit pointers and inline
 //          pointer tables used by the room load pipeline.
 //==============================================================================
+room_tileset_ptr:                // constant ptr to global tile library (121 tiles × 8 bytes, shared by all rooms)
+  .word Tiles.Data.tile_library // [9606]
+
 def_ptr:                         // 2-byte ptr to 16-byte-per-room definition table (room_id*16 base)
   .word room_defs               // [9608]
 

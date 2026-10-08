@@ -1,14 +1,5 @@
 // tiles_data.asm — Shared tile graphics bank (all rooms); pure data, no code partner
 
-//==============================================================================
-// SECTION: room_metadata_block
-// RANGE:   $9600-$970F (phase 1 pointer tables)
-// STATUS:  understood
-// SUMMARY: Pointer to the global tile library; part of the room load pipeline master index.
-//==============================================================================
-room_tileset_ptr:                     // constant ptr to global tile library (121 tiles × 8 bytes, shared by all rooms)
-  .word Tiles.Data.tile_library            // [9606]
-
 .namespace Tiles {
 .namespace Data {
 
@@ -18,7 +9,7 @@ room_tileset_ptr:                     // constant ptr to global tile library (12
 // STATUS:  understood
 // SUMMARY: 121 tile definitions (8 bytes each). Tile indices 0–7 are
 //          room-customised via zp.room_tile_chr_tbl; indices 8–120 are the
-//          shared global tileset. Referenced via room_tileset_ptr.
+//          shared global tileset. Referenced via Room.Data.room_tileset_ptr.
 //          EOL comments carry the collision property each tile classifies
 //          as under Monty.SetTileProperty (wall / one-way platform / rope /
 //          piledriver-trap / empty). That's a category, not a confirmed

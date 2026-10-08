@@ -106,9 +106,9 @@ DrawShaft:
   lda zp.piledriver_row               // [1B75:a5 8b    LDA $008b]
   asl                                 // [1B77:0a       ASL A]
   tay                                 // [1B78:a8       TAY]
-  lda Utils.screen_row_ptrs+1,y       // [1B79:b9 69 14 LDA $1469,Y]     screen row base hi
+  lda Utils.Data.screen_row_ptrs+1,y  // [1B79:b9 69 14 LDA $1469,Y]     screen row base hi
   sta zp.screen_ptr_hi                // [1B7C:85 4a    STA $004a]
-  lda Utils.screen_row_ptrs,y         // [1B7E:b9 68 14 LDA $1468,Y]     screen row base lo
+  lda Utils.Data.screen_row_ptrs,y    // [1B7E:b9 68 14 LDA $1468,Y]     screen row base lo
   clc                                 // [1B81:18       CLC]
   adc zp.piledriver_col               // [1B82:65 8a    ADC $008a]        + column offset
   sta zp.screen_ptr                   // [1B84:85 49    STA $0049]

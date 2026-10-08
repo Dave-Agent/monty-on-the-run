@@ -183,14 +183,18 @@ refactored/src/
 
   libs/               Hardware register definitions (VIC, SID, CIA, CPU).
 
-  subsystems/         One file per game subsystem. Most have a paired _data.asm
-                      for their tables; sprite and character graphics live in
-                      _spr.asm / _chr.asm files; tiles_data.asm is pure data:
+  subsystems/         One file per game subsystem. Each has a paired _data.asm
+                      for its tables (data sits in a nested <Name>.Data namespace),
+                      except irq, score, completion and enemy, which have no tables
+                      of their own (enemy spawn records live in room_data.asm).
+                      Sprite and character graphics live in _spr.asm / _chr.asm
+                      files; tiles_data.asm is pure data with no code partner:
     irq.asm             IRQ handler, raster timing
     monty.asm           Player movement, collision, death, dispatch
     enemy.asm           Enemy spawn, movement, collision
     sprites.asm         Sprite engine, multiplexer, per-frame VIC updates
-    room.asm            Room loading, scrolling, tile placement
+    room.asm            Room loading, scrolling, tile placement (tables and
+                        tile-set pointer in room_data.asm)
     tiles_data.asm      Shared tile graphics library (121 tiles, all rooms)
     decor.asm           Room decoration objects
     mechanisms.asm      Lifts, piledrivers, rising bollard, teleporters

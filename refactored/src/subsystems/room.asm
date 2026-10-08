@@ -378,10 +378,10 @@ SetupTileGraphics:
   asl                                 // [0FD1:0a       ASL A]
   rol zp.s_ptr_hi                     // [0FD2:26 53    ROL $0053]        zp.s_ptr_hi:A = char_code * 8
   clc                                 // [0FD4:18       CLC]
-  adc room_tileset_ptr                // [0FD5:6d 06 96 ADC $9606]
+  adc Data.room_tileset_ptr           // [0FD5:6d 06 96 ADC $9606]
   sta zp.s_tmp_a                      // [0FD8:85 54    STA $0054]        src ptr lo
   lda zp.s_ptr_hi                     // [0FDA:a5 53    LDA $0053]
-  adc room_tileset_ptr+1              // [0FDC:6d 07 96 ADC $9607]
+  adc Data.room_tileset_ptr+1         // [0FDC:6d 07 96 ADC $9607]
   sta zp.s_tile_ptr_hi                // [0FDF:85 55    STA $0055]        src ptr hi
 
   // Copy 8 bitmap bytes to char RAM. X accumulates across all 8 tiles,
@@ -881,7 +881,7 @@ InitRoom1FEntities:
                                       // XREF[1]: 0e89(c)
 InitRoomDeathFlag:
   lda #$00                            // [2C63:a9 00    LDA #$0]
-  sta zp.c5_drive_active             // [2C65:85 bc    STA $00bc]
+  sta zp.c5_drive_active              // [2C65:85 bc    STA $00bc]
   sta zp.vic_shadow_expand_x          // [2C67:85 21    STA $0021]
   sta zp.c5_fall_flag                 // [2C69:85 bf    STA $00bf]
   lda zp.room_id                      // [2C6B:a5 46    LDA $0046]
@@ -894,7 +894,7 @@ InitRoomDeathFlag:
   rts                                 // [2C79:60       RTS]        safe room → return
 !:                                    // XREF[3]: 2c6f(j), 2c73(j), 2c77(j)
   lda #$01                            // [2C7A:a9 01    LDA #$1]
-  sta zp.c5_drive_active             // [2C7C:85 bc    STA $00bc]
+  sta zp.c5_drive_active              // [2C7C:85 bc    STA $00bc]
   sta zp.c5_rate_ctr                  // [2C7E:85 c2    STA $00c2]
   lda #$00                            // [2C80:a9 00    LDA #$0]
   sta zp.sprite1_y_buffer             // [2C82:85 19    STA $0019]

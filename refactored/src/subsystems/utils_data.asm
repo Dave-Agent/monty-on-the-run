@@ -113,5 +113,27 @@ tile_2col_row_offsets:
 screen_row_offset_tbl:
   .byte $00,$28,$50,$78,$a0,$c8,$f0     // [193c] rows 0-6
 
+//==============================================================================
+// SECTION: screen_row_ptrs
+// RANGE:   $1468-$149B
+// STATUS:  understood
+// SUMMARY: Screen RAM base address for each of the 26 rows (lo/hi pairs); used by
+//          Utils.GetScreenRowAddress, the scroller and the piledriver.
+//==============================================================================
+screen_row_ptrs:                  // 26 lo/hi pairs: screen RAM base address for rows 0-25 ($4800 + row*$28)
+  .byte $00,$48,$28,$48,$50,$48,$78,$48,$a0,$48,$c8,$48,$f0,$48,$18,$49 // [1468] rows  0- 7
+  .byte $40,$49,$68,$49,$90,$49,$b8,$49,$e0,$49,$08,$4a,$30,$4a,$58,$4a // [1478] rows  8-15
+  .byte $80,$4a,$a8,$4a,$d0,$4a,$f8,$4a,$20,$4b,$48,$4b,$70,$4b,$98,$4b // [1488] rows 16-23
+  .byte $c0,$4b,$e8,$4b               // [1498] rows 24-25
+
+//==============================================================================
+// SECTION: grey_pulse_tbl
+// RANGE:   $2C5B-$2C62
+// STATUS:  understood
+// SUMMARY: Eight-step greyscale pulse sequence indexed by Utils.PulseGreyscale.
+//==============================================================================
+grey_pulse_tbl:                       // XREF[1]: 2c57(d)
+  .byte $00,$0b,$0c,$0f,$01,$0f,$0c,$0b // [2c5b] black,dk-grey,med-grey,lt-grey,white,lt-grey,med-grey,dk-grey
+
 } // .namespace Data
 } // .namespace Utils

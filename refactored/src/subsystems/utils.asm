@@ -671,17 +671,11 @@ GetScreenRowAddress:
 !:
   asl                                 // [145B:0a       ASL A]
   tay                                 // [145C:a8       TAY]
-  lda screen_row_ptrs,y               // [145D:b9 68 14 LDA $1468,Y]      Get low byte of the row's start address.
+  lda Data.screen_row_ptrs,y          // [145D:b9 68 14 LDA $1468,Y]      Get low byte of the row's start address.
   sta zp.monty_chr_x                  // [1460:85 7f    STA $007f]
-  lda screen_row_ptrs+1,y             // [1462:b9 69 14 LDA $1469,Y]      Get high byte of the row's start address.
+  lda Data.screen_row_ptrs+1,y        // [1462:b9 69 14 LDA $1469,Y]      Get high byte of the row's start address.
   sta zp.monty_chr_y                  // [1465:85 80    STA $0080]
   rts                                 // [1467:60       RTS]
-
-screen_row_ptrs:                  // 26 lo/hi pairs: screen RAM base address for rows 0-25 ($4800 + row*$28)
-  .byte $00,$48,$28,$48,$50,$48,$78,$48,$a0,$48,$c8,$48,$f0,$48,$18,$49 // [1468] rows  0- 7
-  .byte $40,$49,$68,$49,$90,$49,$b8,$49,$e0,$49,$08,$4a,$30,$4a,$58,$4a // [1478] rows  8-15
-  .byte $80,$4a,$a8,$4a,$d0,$4a,$f8,$4a,$20,$4b,$48,$4b,$70,$4b,$98,$4b // [1488] rows 16-23
-  .byte $c0,$4b,$e8,$4b               // [1498] rows 24-25
 
 
 //==============================================================================
@@ -700,11 +694,8 @@ PulseGreyscale:
   lsr                                 // [2C53:4a       LSR A]            half-speed: each shade lasts 2 frames
   and #$07                            // [2C54:29 07    AND #$7]          wrap to 0–7
   tax                                 // [2C56:aa       TAX]
-  lda grey_pulse_tbl,x                // [2C57:bd 5b 2c LDA $2c5b,X]
+  lda Data.grey_pulse_tbl,x           // [2C57:bd 5b 2c LDA $2c5b,X]
   rts                                 // [2C5A:60       RTS]
-
-grey_pulse_tbl:                       // XREF[1]: 2c57(d)
-  .byte $00,$0b,$0c,$0f,$01,$0f,$0c,$0b // [2c5b] black,dk-grey,med-grey,lt-grey,white,lt-grey,med-grey,dk-grey
 
 //==============================================================================
 // SECTION: WaitForVSync
