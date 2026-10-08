@@ -1040,7 +1040,7 @@ MainGameLoop:
   beq !+                              // [0E10:f0 09    BEQ $0e1b]
   jsr RotateCharBitmapOddFrame        // [0E12:20 2a 2a JSR $2a2a]
   jsr UpdateActiveEnemies             // [0E15:20 4a 13 JSR $134a]
-  jsr CycleMontySprite                // [0E18:20 4a 2a JSR $2a4a]
+  jsr AnimateFlagSprite               // [0E18:20 4a 2a JSR $2a4a]
 
                                       // XREF[1]: 0e10(j)
 // Set raster compare to line $E0 and clear MSB so the next IRQ fires at line 224.
@@ -6665,7 +6665,7 @@ FreedomSequence:                      // event=5 (counter=6): jerry can SI item 
   jmp GameOverAnimation               // [29FA:4c b8 0a JMP $0ab8]
 
                                       // XREF[1]: 29d1(c)
-// Part of: FreedomSequence — set up Monty and boat sprite positions, colours, multicolour for the victory room
+// Part of: FreedomSequence — position the Union Jack flag (sprite 0, ($7B,$56), near the top of the screen) and boat (sprite 7); both white, multicolour red/blue for the flag
 InitFreedomDisplay:
   lda #$9b                            // [29FD:a9 9b    LDA #$9b]
   sta zp_sprite7_x_buffer             // [29FF:85 17    STA $0017]
@@ -6727,15 +6727,18 @@ RotateCharBitmap:
 
                                       // XREF[1]: 0e18(c)
 //==============================================================================
-// SECTION: monty_sprite_cycle
+// SECTION: AnimateFlagSprite
 // RANGE:   $2A4A-$2A58
 // STATUS:  understood
-// SUMMARY: Cycles zp_sprite0_ptr (Monty's own sprite) through pointers $A0-$A3
-//          during the Completion boat sequence (one step every 8
-//          colour_cycle_store increments); only ever reached while
-//          zp_completion_active is set. Part of FreedomSequence.
+// SUMMARY: Animates the waving Union Jack flag on the completion screen: cycles
+//          zp_sprite0_ptr through pointers $A0-$A3 (union_jack_flag_spr, $6800)
+//          one step every 8 colour_cycle_store increments. Sprite 0 is the flag
+//          here, not Monty (position set by InitFreedomDisplay). Only reached
+//          while zp_completion_active is set. Part of FreedomSequence.
+//          (Earlier named CycleMontySprite — corrected after the flag was
+//          identified from a video walk-through and the frames rendered.)
 //==============================================================================
-CycleMontySprite:
+AnimateFlagSprite:
   inc colour_cycle_store              // [2A4A:e6 3e    INC $003e]
   lda colour_cycle_store              // [2A4C:a5 3e    LDA $003e]
   and #$18                            // [2A4E:29 18    AND #$18]
@@ -10664,7 +10667,10 @@ piledriver_death_spr:                 // runtime: piledriver death animation, 16
   .byte $00,$58,$00,$00,$ac,$00,$00,$fc,$00,$00,$fc,$00,$00,$5c,$00,$00 // [67c5] .X...........\..
   .byte $7f,$ff,$00,$55,$57,$00,$55,$57,$00,$55,$57,$00,$55,$57,$ff,$55 // [67d5] ...UW.UW.UW.UW.U
   .byte $55,$5c,$55,$55,$5c,$ff,$ff,$fc,$aa,$aa,$a0,$aa,$aa,$a0,$aa,$aa // [67e5] U\UU\...........
-  .byte $80,$aa,$aa,$80,$aa,$aa,$00,$aa,$aa,$00,$00,$ff,$9b,$fc,$bf,$9b // [67f5] ................
+  .byte $80,$aa,$aa,$80,$aa,$aa,$00,$aa,$aa,$00,$00 // [67f5] ...........
+
+union_jack_flag_spr:                  // runtime: Union Jack flag on the completion screen, 4 frames (ptr $A0-$A3, $6800-$68BF); sprite 0 during the completion sequence, cycled by Completion.AnimateFlag; multicolour (white, MC1 red, MC2 blue)
+  .byte $ff,$9b,$fc,$bf,$9b // [6800] .....
   .byte $f8,$6f,$9b,$e4,$9b,$9b,$98,$e6,$9a,$6c,$f9,$99,$bc,$aa,$56,$a8 // [6805] ..............V.
   .byte $55,$55,$54,$55,$55,$54,$aa,$56,$a8,$f9,$99,$bc,$e6,$9a,$6c,$9b // [6815] UUTUUT.V........
   .byte $9b,$98,$6f,$9b,$e4,$bf,$9b,$f8,$ff,$9b,$fc,$00,$00,$00,$00,$00 // [6825] ................

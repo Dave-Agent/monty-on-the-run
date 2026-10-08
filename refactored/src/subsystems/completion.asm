@@ -47,18 +47,20 @@ PlaceTreasure:
   rts                                 // [29A0:60       RTS]
 
 //==============================================================================
-// SECTION: monty_sprite_cycle
+// SECTION: AnimateFlag
+// P1_ROUTINE_NAME: AnimateFlagSprite
 // RANGE:   $2A4A-$2A58
 // STATUS:  understood
-// SUMMARY: Cycles zp.sprite0_ptr (Monty's own sprite) through pointers $A0-$A3
-//          during the boat sequence (one step every 8 zp.colour_cycle_store
-//          increments). Called from main.asm's GameFrameUpdate only while
-//          zp.completion_active is set.
+// SUMMARY: Animates the waving Union Jack flag on the completion screen: cycles
+//          zp.sprite0_ptr through pointers $A0-$A3 (union_jack_flag_spr, $6800)
+//          one step every 8 zp.colour_cycle_store increments. Sprite 0 is the
+//          flag here, not Monty. Called from main.asm's GameFrameUpdate only
+//          while zp.completion_active is set.
 // P2: Moved out of Sprites (not a general sprite utility — only ever reached
 //     during the Completion sequence) into Completion, alongside PlaceTreasure.
 //==============================================================================
                                       // XREF[1]: 0e18(c)
-CycleMontySprite:
+AnimateFlag:
   inc zp.colour_cycle_store           // [2A4A:e6 3e    INC $003e]
   lda zp.colour_cycle_store           // [2A4C:a5 3e    LDA $003e]
   and #$18                            // [2A4E:29 18    AND #$18]
@@ -79,7 +81,7 @@ CycleMontySprite:
 //          SpecialItems.HandleSICollision when Monty touches the treasure
 //          sprite placed by PlaceTreasure in room $2F). Freezes
 //          gameplay, loads victory room $30, fills prize area chars ($65-$67)
-//          across rows 19-21, sets up Monty and boat sprites, plays music track 2.
+//          across rows 19-21, sets up the flag (sprite 0) and boat sprites, plays music track 2.
 //          If passport not in inventory → GameOver.Arrested (bad ending).
 //          Otherwise: boat slides in from left (CompletionSlideBoatIn), Monty
 //          walks to it (CompletionWalkToBoat), boat slides out to France
@@ -137,9 +139,10 @@ Begin:                                // XREF[1]: Monty.event_dispatch_lo/hi (ev
 // P1_ROUTINE_NAME: InitDisplay
 // RANGE:   $29FD-$2A29
 // STATUS:  understood
-// SUMMARY: Positions boat sprite (sprite 7) at ($9B,$A3) and Monty (sprite 0)
-//          at ($7B,$56); both white (colour 1). Enables sprites, sets multicolor
-//          mode. Called from Begin before the boat animation sequence.
+// SUMMARY: Positions boat sprite (sprite 7) at ($9B,$A3) and the Union Jack flag
+//          (sprite 0, animated by AnimateFlag) at ($7B,$56), near the top of the
+//          screen; both white (colour 1), flag multicolour with shared red/blue
+//          ($D025=2, $D026=6). Enables sprites, sets multicolor mode. Called from Begin before the boat animation sequence.
 //==============================================================================
 SetupDisplay:
   lda #$9b                            // [29FD:a9 9b    LDA #$9b]
