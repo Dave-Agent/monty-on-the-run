@@ -873,6 +873,10 @@ InitializeInterrupts:
   sta CPU.MOS6510.PORT                // [0D4A:85 01    STA $0001]
   lda VIC.INTERRUPT_STATUS            // [0D4C:ad 19 d0 LDA $d019]
   sta VIC.INTERRUPT_STATUS            // [0D4F:8d 19 d0 STA $d019]
+  // KNOWN ORIGINAL BUG (edge case): this CLI unmasks IRQs before zp_attract_mode is set (InitAttractScreen,
+  // ~2.5k cycles later). A raster IRQ landing in that window takes the game path, whose character animation
+  // stores through the still-empty pointer table at $02E6 to $0000 (CPU port DDR), banking ROMs in -> CPU JAM.
+  // Timing dependent (~20% of launches under VICE). Left as-is for byte-identity; fixed in phase 2.
   cli                                 // [0D52:58       CLI]
   rts                                 // [0D53:60       RTS]
 
@@ -8223,6 +8227,7 @@ InitAttractScreen:
   jsr InitialiseZeroPage              // [3305:20 46 10 JSR $1046]
   lda #$01                            // [3308:a9 01    LDA #$1]
   sta zp_attract_mode                 // [330A:85 41    STA $0041]
+                                      // NOTE: IRQs are already live here (CLI at $0D52) - see KNOWN ORIGINAL BUG there.
   jsr InitialiseMusic                 // [330C:20 bd 30 JSR $30bd]
   jsr InitialiseGraphicsMode          // [330F:20 7f 30 JSR $307f]
   jsr UpdateAttractScreenChrs         // [3312:20 74 0a JSR $0a74]
