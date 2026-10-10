@@ -60,7 +60,11 @@ Initialize:
 // Acknowledge any VIC interrupt left pending before we enable.
   lda VIC.INTERRUPT_STATUS            // [0D4C:ad 19 d0 LDA $d019]
   sta VIC.INTERRUPT_STATUS            // [0D4F:8d 19 d0 STA $d019]
-  cli                                 // [0D52:58       CLI]
+// P2_DIVERGES: CLI removed here. Unmasking IRQs this early let a raster IRQ land before zp.attract_mode
+// was set (StartUp -> InitAttractScreen, ~2.5k cycles); the game path then ran AnimateCharacters through the
+// still-empty pointer table at $02E6 and stored to $0000 (CPU port DDR), banking the ROMs in -> CPU JAM (~20% of launches).
+// The caller now unmasks after zp.attract_mode is set (see InitAttractScreen).
+//  cli                                 // [0D52:58       CLI]
   rts                                 // [0D53:60       RTS]
 
 Handler:                              // IRQ vector entry point ($0D54)

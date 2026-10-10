@@ -74,7 +74,7 @@
 // SECTION: AttractScreenLoop
 // RANGE:   $32F4-$3374
 // STATUS:  understood
-// P2_DIVERGES: StartUp restructured — IRQ init inlined; sound_mode/cheat_mode seeded here rather than in InitialiseZeroPage
+// P2_DIVERGES: StartUp restructured — IRQ init inlined; sound_mode/cheat_mode seeded here rather than in InitialiseZeroPage; CLI moved from Irq.Initialize to after zp.attract_mode is set (fixes ~20% startup CPU JAM race)
 // SUMMARY: Two entry points sharing one attract-screen loop.
 //          StartUp ($32F4): cold-start only — disables IRQ, inits IRQ vectors,
 //            resets score ($0294-$0298 = '0'), falls into InitAttractScreen.
@@ -108,9 +108,12 @@ StartUp:
 InitAttractScreen:
   ldx #$fe                            // [3302:a2 fe    LDX #$fe]
   txs                                 // [3304:9a       TXS]
+// IRQs stay masked (Irq.Initialize no longer CLIs) until zp.attract_mode is set, so no IRQ can take the game path with ZP/state uninitialised.
+  sei
   jsr Utils.InitialiseZeroPage        // [3305:20 46 10 JSR $1046]
   lda #$01                            // [3308:a9 01    LDA #$1]
   sta zp.attract_mode                 // [330A:85 41    STA $0041]
+  cli                                 // unmask: IRQ handler now dispatches to the attract path
   jsr Utils.InitialiseMusic           // [330C:20 bd 30 JSR $30bd]
   jsr Utils.InitialiseGraphicsMode    // [330F:20 7f 30 JSR $307f]
   jsr Attract.UpdateChrs              // [3312:20 74 0a JSR $0a74]
