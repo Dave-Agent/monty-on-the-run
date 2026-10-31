@@ -89,7 +89,7 @@
                                       // XREF[2]: 0810(c), 0da1(c)
 StartUp:
   sei                                 // [32F4:78       SEI]
-// Cold-start only: ZP init no longer clears $06-$07 so we must seed them here.
+// Cold-start only: InitialiseZeroPage no longer clears $06-$08 (sound_mode, sfx_sweep_dir, cheat_mode), so seed them here.
   ldx #$01
   stx zp.sound_mode                   // music mode on cold start
   dex
