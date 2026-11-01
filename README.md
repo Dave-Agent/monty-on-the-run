@@ -317,20 +317,6 @@ rather than by diffing against phase 1.
 scripts behind the `just` recipes (standard-library Python, plus Node.js for
 the handbook); [the source guide](documentation/SOURCE_GUIDE.md) describes them.
 
-The `docs/` directory contains standalone HTML viewers (no server required —
-just open in a browser):
-
-| File                   | Contents                                       |
-| ---------------------- | ---------------------------------------------- |
-| `sprite_viewer.html`   | All VIC bank 1 sprites, filterable by category |
-| `enemy_sprites.html`   | Enemy sprite sheet with type IDs and names     |
-| `fk_sprites.html`      | Freedom Kit item sprites                       |
-| `hiscore_sprites.html` | Flying-banner composite sprites                |
-| `decor_viewer.html`    | Room decoration tile viewer                    |
-| `world_map.html`       | Room connectivity map                          |
-| `vic_bank_map.html`    | VIC bank 1 memory layout                       |
-| `migration_plan.html`  | Phase 2 migration plan for `main.asm`          |
-
 ---
 
 ## Original game

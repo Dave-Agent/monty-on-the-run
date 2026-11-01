@@ -17,7 +17,6 @@ change the game.
 | `refactored/src/subsystems/`      | One file per subsystem, a `_data.asm` for its tables, `_spr`/`_chr` for graphics |
 | `*/src/libs/`                     | VIC, SID, CIA and CPU register names (shared by both builds)                     |
 | `reference.sha256`                | SHA-256 of the original image (`$080E–$FF72`, no PRG header)                     |
-| `docs/`                           | Dave's standalone HTML viewers (sprites, enemies, decorations, VIC bank, map)    |
 | `documentation/`                  | This documentation, its images, recordings and the HTML handbook                 |
 | `tools/`                          | Build, launch, capture, decoding and handbook scripts                            |
 | `justfile`                        | Recipes for building, running, testing and the documentation                     |

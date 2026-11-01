@@ -46,6 +46,8 @@
 - `.vscode/` removed and ignored: editor settings are personal and held a local `KickAss.jar` path; the
   documentation no longer refers to VSCode tasks. The MOSaic credit was removed (MOSaic was not used on this project)
   and the hi-score credit line now links to the data it comes from.
+- `docs/` (the standalone HTML viewers) removed from the repository and ignored: they are generated and kept
+  outside it, so the front page shows only the source, the documentation and the tools.
 - `README.md`: documentation and quick-start sections; credits (Jason Perkins and Anthony Clarke, C64 code);
   removed the claim that the sprite engine multiplexes
 - `.gitignore`: `build/`, `reference/`, `__pycache__/`, `tools/docs/fonts/`
