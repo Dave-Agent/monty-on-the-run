@@ -85,7 +85,8 @@ frame between note changes.
 In Hubbard's driver a `$FE` track entry simply jumps to the end of the play routine. Here it first calls `$8003`: the
 high byte of the CBM80 warm-start vector, followed by the `CBM80` signature, run as code. That is `ADC ($C3),Y`, an
 illegal two-byte `NOP`, `SEC`, then `BMI $8056` (into the middle of the driver) or, if not taken, another illegal `NOP`
-and a `BRK`. Whatever it was for, it is unreachable in play. Only song 1 (game over) ends in `$FE`, and the game leaves
+and a `BRK`. It is not part of the CBM80 protection (the RESET redirect to `AntiHackScreen`); the driver simply calls into the same
+bytes. Whatever it was for, it is unreachable in play. Only song 1 (game over) ends in `$FE`, on all three voices, and the game leaves
 for the title, which restarts the music, 12.4 s after the game-over sequence begins, before the jingle reaches its end
 at 13.3 s (both measured in VICE). The refactored build removes the call.
 

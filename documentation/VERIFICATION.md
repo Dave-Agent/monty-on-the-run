@@ -45,10 +45,10 @@ kit. The capture run also collected the room `$0D` cupcake, the vase and the joy
 
 ---
 
-## Things Not Described Before
+## Oddities and Unused Code
 
-- **The `$FE` stop command** calls `$8003`, running the CBM80 header bytes as code. Only song 1 uses `$FE`, and the game
-  never reaches it (measured). A SID player does.
+- **The `$FE` stop command** calls `$8003`, running the CBM80 header bytes as code. It has nothing to do with the
+  protection. Only song 1 (game over) ends in `$FE`, and the game never reaches it (measured). A SID player does.
 - **`$95A0–$95F9`** is an unlabelled KERNAL-interrupt music test harness plus a KERNAL reset routine.
 - **Tile codes 9–15** are allowed by the map format but used by no room.
 - **Bit 1 of the enemy flags** (`enemy_dir_flags_tbl`) is never tested.
@@ -87,11 +87,10 @@ The rest points the same way, but it is an inference from the code, not a record
 
 ## Credits
 
-The upstream `README.md` credits the game to Peter Harrap (creator) and Jason Perkins (C64 code). The game's own
-hi-score table reads *written by Tony and Jason of Micro Projects for Gremlin Graphics, July 1985*, and the title
-scroller calls it *a Gremlin Graphics and Micro Projects joint production*. This repository's README and this
-documentation credit Peter Harrap (design), Jason Perkins and Anthony Clarke (C64 code), Rob Hubbard (music) and Gremlin
-Graphics (publisher). [CREDITS.md](CREDITS.md) has the full credits, with the tools and links.
+The game's own hi-score table reads *written by Tony and Jason of Micro Projects for Gremlin Graphics, July 1985*, and
+the title scroller calls it *a Gremlin Graphics and Micro Projects joint production*. This repository's README and
+this documentation credit Peter Harrap (design), Jason Perkins and Anthony Clarke (C64 code), Rob Hubbard (music) and
+Gremlin Graphics (publisher). [CREDITS.md](CREDITS.md) has the full credits, with the tools and links.
 
 ---
 

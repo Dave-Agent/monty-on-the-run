@@ -256,12 +256,9 @@ room, exactly one tile: the theme tile, caught mid-animation.
 
 ## Protection
 
-Two measures stop the game being broken into from the keyboard:
+One measure stops the game being broken into from the keyboard:
 
 - **CBM80 header.** `$8000–$8008` holds a cartridge signature whose cold and warm vectors both point at `AntiHackScreen`
   (`$7100`). Once the game is in memory, a RESET (from a reset button or cartridge, to break into a monitor) finds it,
   and the KERNAL jumps there instead of starting BASIC. The screen shows "THAT WAS SILLY, NO HACKING PLEASE !" in
   cycling colours and never returns.
-- **Header bytes as code.** The music driver's `$FE` (stop) track command calls `$8003`, executing the signature bytes
-  as instructions. Only the game-over jingle uses `$FE`, and the game leaves for the title (12.4 s) before the jingle
-  reaches it (13.3 s), so this never runs in play. See [SOUND.md](SOUND.md#the-fe-stop-command).
