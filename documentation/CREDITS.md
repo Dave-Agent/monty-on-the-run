@@ -70,16 +70,3 @@ Marked and Mermaid are vendored in `tools/vendor/` with their licences, which th
 © 2010–2019 Style and are not in the repository: their [licence](https://style64.org/c64-truetype/license) allows
 embedding them unmodified with `@font-face` but not offering the files for download.
 [HTML_DOCUMENTATION.md](HTML_DOCUMENTATION.md) says where to put them.
-
----
-
-## Playing the Music Elsewhere
-
-`just sound` builds `build/monty_on_the_run.sid` (see [SOUND.md](SOUND.md)). Besides VICE's `vsid`, any PSID player
-plays it:
-
-| Player    | Link                                                       |
-| :-------- | :--------------------------------------------------------- |
-| sidplayfp | [GitHub](https://github.com/libsidplayfp/sidplayfp)        |
-| JSIDPlay2 | [SourceForge](https://sourceforge.net/projects/jsidplay2/) |
-| DeepSID   | [deepsid.chordian.net](https://deepsid.chordian.net/)      |

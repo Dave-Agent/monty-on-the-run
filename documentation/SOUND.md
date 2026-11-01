@@ -163,5 +163,7 @@ init stub over them in the `.sid`.
 
 It holds `$8000–$95FF` unchanged, with a 21-byte init stub at `$95A0`. The stub calls `MusicInit` for songs; for effects
 it calls `MusicStop`, `ClearSFXTrigger` and `MusicPlaySFX`. The play address is `MusicPlay`. `just play` plays it in
-VICE's `vsid` (`just play tune=3` for song 2), and any PSID player (sidplayfp, JSIDPlay2, DeepSID) can play the file.
-`just sound-audio` re-records the clips above (about six minutes, in real time).
+VICE's `vsid` (`just play tune=3` for song 2), and any PSID player can play the file, such as
+[sidplayfp](https://github.com/libsidplayfp/sidplayfp), [JSIDPlay2](https://sourceforge.net/projects/jsidplay2/) or
+[DeepSID](https://deepsid.chordian.net/). `just sound-audio` re-records the clips above (about six minutes, in real
+time).

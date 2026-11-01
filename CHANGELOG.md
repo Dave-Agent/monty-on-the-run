@@ -33,7 +33,7 @@
 - `tools/check_cheat.py` and `just cheat-check`: VICE check that the cheat flag survives `startGame` and the
   cake appears in room `$01`
 - `documentation/CREDITS.md`: credits and links for the game, Dave Agent's reconstruction (with
-  ghidra-kickass-export), the documentation, every tool, library and font, and SID players; last in the handbook
+  ghidra-kickass-export), the documentation, every tool, library and font; last in the handbook
 - The Bon Voyage ending as `FreedomSequence` plays it: `capture_screens.py` captures the jetty, the boat and the sailing
   (with the passport) and the arrest (without), also alone with `--ending-only`; `GAMEPLAY.md` shows them
 - `GAMEPLAY.md` "The C5 Road" and `VERIFICATION.md` "The Late C5 Rooms": rooms `$31`–`$33` are the last road screens
