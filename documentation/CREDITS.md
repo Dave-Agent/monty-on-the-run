@@ -1,6 +1,6 @@
 # Monty on the Run – Credits and Links
 
-Who made the game, the reconstruction and this documentation, and where to get every tool and library they use.
+Who made the game and this documentation, and where to get every tool and library used.
 
 ---
 
@@ -19,18 +19,6 @@ The main theme is built on Charles Williams's *Devil's Galop*. The game's own hi
 Jason of Micro Projects for Gremlin Graphics, July 1985*; the text is in the data: the name table at `$73FF` in
 [`motr.asm`](../byte-perfect/src/motr.asm) and `name_table` in [`hiscore_data.asm`](../refactored/src/subsystems/hiscore_data.asm), and
 [VERIFICATION.md](VERIFICATION.md#credits) explains where this credit line comes from.
-
----
-
-## The Reconstruction
-
-The disassembly, the naming and commenting, and both builds (`byte-perfect/` and `refactored/`) are by **Dave Agent**,
-using Ghidra and his Ghidra-to-Kick-Assembler exporter.
-
-| Project               | Link                                                                                    |
-| :-------------------- | :-------------------------------------------------------------------------------------- |
-| This repository       | [Dave-Agent/monty-on-the-run](https://github.com/Dave-Agent/monty-on-the-run)           |
-| ghidra-kickass-export | [Dave-Agent/ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export) |
 
 ---
 
