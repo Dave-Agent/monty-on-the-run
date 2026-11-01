@@ -47,6 +47,8 @@
   documentation no longer refers to VSCode tasks. The MOSaic credit was removed (MOSaic was not used on this project)
   and the hi-score credit line now links to the data it comes from. `reference.sha256` was confirmed against the
   original image (it was first recorded from the build).
+- The HTML handbook starts at Gameplay: `README.md` and `documentation/README.md` are no longer part of it (the
+  sidebar replaces the index); the README's Methodology moved into `SOURCE_GUIDE.md` as "Method".
 - `docs/` (the standalone HTML viewers) removed from the repository and ignored: they are generated and kept
   outside it, so the front page shows only the source, the documentation and the tools.
 - `README.md`: documentation and quick-start sections; credits (Jason Perkins and Anthony Clarke, C64 code);

@@ -2,7 +2,7 @@
 
 ## Source of Truth
 
-The [complete HTML handbook](MONTY_ON_THE_RUN.html) gathers the README, the analysis chapters, the screens and graphics
+The [complete HTML handbook](MONTY_ON_THE_RUN.html) gathers the analysis chapters, the screens and graphics
 and the changelog into one offline document. Images, audio, styling, reader controls and the Mermaid diagram renderer
 are all embedded, so it opens in a browser with no network access.
 

@@ -25,8 +25,6 @@
             "id": "guide",
             "label": "The game and its code",
             "sources": [
-                "README.md",
-                "documentation/README.md",
                 "documentation/GAMEPLAY.md",
                 "documentation/GRAPHICS.md",
                 "documentation/SOUND.md",

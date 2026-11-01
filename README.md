@@ -292,22 +292,8 @@ byte-perfect/src/
 
 ## Methodology
 
-The reconstruction is a two-phase process.
-
-**Phase 1 (byte-perfect)** began with a Ghidra disassembly of the original tape
-binary, exported to KickAssembler syntax via the
-[ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export)
-plugin. That gave an assembler-ready monolith with all original addresses
-preserved. Every subsequent change — renaming, commenting, identifying data
-blocks, labelling self-modifying code — was verified to leave the assembled
-output byte-identical to the original.
-
-**Phase 2 (refactored)** extracts each subsystem into its own file and namespace.
-Code that patches its own operands at runtime is replaced with named operand
-labels (KickAssembler's `label:operand` syntax) so the locations being patched
-have names rather than raw addresses. Byte-identity is deliberately given up in
-this phase, so it is checked by assembling cleanly and running in an emulator
-rather than by diffing against phase 1.
+The source was produced in two phases, byte-perfect first and then refactored; the
+[source and toolchain guide](documentation/SOURCE_GUIDE.md#method) describes both.
 
 ---
 
