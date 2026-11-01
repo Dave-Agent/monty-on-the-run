@@ -24,7 +24,7 @@
 - `tools/extract_sound.py`: PSID v2 `build/monty_on_the_run.sid` (3 songs, 16 effects) using the game's own
   driver, piano rolls, `SOUND_DATA.md`; `tools/render_audio.py`: recordings through `vsid`
 - `tools/symbols.py`: label lookup from the symbol files, so the tools follow code that moves
-- `reference.sha256`: SHA-256 of the byte-perfect image as found (not checked against original media)
+- `reference.sha256`: SHA-256 of the original game binary (`$080E–$FF72`); the byte-perfect build is checked against it
 - `justfile` recipes
 - Where to download the C64 TrueType fonts (style64.org) and which files to copy: in the README's
   "Requirements", `documentation/HTML_DOCUMENTATION.md` and the `build_docs.mjs` notice
@@ -45,7 +45,8 @@
 
 - `.vscode/` removed and ignored: editor settings are personal and held a local `KickAss.jar` path; the
   documentation no longer refers to VSCode tasks. The MOSaic credit was removed (MOSaic was not used on this project)
-  and the hi-score credit line now links to the data it comes from.
+  and the hi-score credit line now links to the data it comes from. `reference.sha256` was confirmed against the
+  original image (it was first recorded from the build).
 - `docs/` (the standalone HTML viewers) removed from the repository and ignored: they are generated and kept
   outside it, so the front page shows only the source, the documentation and the tools.
 - `README.md`: documentation and quick-start sections; credits (Jason Perkins and Anthony Clarke, C64 code);

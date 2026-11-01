@@ -28,8 +28,8 @@ change the game.
 
 The source began as a Ghidra disassembly of the game image (`motr_080E_FF72.bin`), exported to Kick Assembler with Dave
 Agent's [ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export). It was then named and commented in
-two phases: first byte-perfect, then refactored. The original image isn't in this repository. `reference.sha256` was recorded from the
-byte-perfect build when this documentation was written; it has not been checked against an original tape. See
+two phases: first byte-perfect, then refactored. The original image isn't in this repository; `reference.sha256` is its SHA-256, and the
+byte-perfect build is checked against it. See
 [VERIFICATION.md](VERIFICATION.md).
 
 ---

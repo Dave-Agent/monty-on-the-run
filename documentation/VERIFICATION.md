@@ -216,9 +216,9 @@ Graphics (publisher). [CREDITS.md](CREDITS.md) has the full credits, with the to
 
 ## Not Verified
 
-- **The original image.** No tape or disk image was available. `reference.sha256` (`2f6975c0…4954389`) is the
-  byte-perfect build as found. It proves the source hasn't changed since; it does not prove the source matches a 1985
-  tape.
+- **The original image, by readers.** It isn't in this repository, so `reference.sha256` (`2f6975c0…4954389`) can't be
+  re-checked here. It is the SHA-256 of the original game binary the source was disassembled from (`$080E–$FF72`, no
+  load address); the owner confirmed it against that image on 02-11-2026, and both builds are checked against it.
 - **Playing it through.** Rooms were reached by setting the room variables, not by playing; the ending, the arrest and
   the C5 sequence were read from the code, not watched.
 - **Gameplay effects of the special items** come from the code and the source's catalogue (which says some were
