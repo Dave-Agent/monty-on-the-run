@@ -99,8 +99,8 @@ Understanding gained in one build is ported to the other by hand; keep them in s
 - **Self-modifying code** is named with Kick Assembler's `label:` on the operand byte.
 - **Region guards.** `refactored/src/main.asm` ends each region with `.errorif * > CODE_END` (and GFX, DATA, AUX), so
   growing code past `$3FFF`, `$7FFF`, `$CFFF` or `$FF72` fails the build.
-- **Comments can be wrong.** They were written while the code was being understood. [VERIFICATION.md](VERIFICATION.md)
-  lists the ones found to disagree with the code or with VICE.
+- **Comments can be wrong.** They were written while the code was being understood. Where a comment and the code
+  disagree, the code is right.
 
 ---
 

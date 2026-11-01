@@ -27,7 +27,7 @@ recordings embedded, into one page that reads offline in a browser.
 | :--------------------------------------------- | :----------------------------------------------------------- |
 | [ROOMS.md](ROOMS.md)                           | Every room's screenshot, enemies, items, tiles (generated)   |
 | [SOUND_DATA.md](SOUND_DATA.md)                 | Tracks, patterns, instruments and effect records (generated) |
-| [VERIFICATION.md](VERIFICATION.md)             | What was checked in VICE, and comments found to be wrong     |
+| [VERIFICATION.md](VERIFICATION.md)             | What was checked in VICE, and what was not                   |
 | [HTML_DOCUMENTATION.md](HTML_DOCUMENTATION.md) | Regenerating the figures, audio and the HTML handbook        |
 | [CREDITS.md](CREDITS.md)                       | The game, the reconstruction, tools, libraries, links        |
 

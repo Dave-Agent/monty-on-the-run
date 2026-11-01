@@ -5,7 +5,7 @@
 ### Added
 
 - `documentation/`: gameplay, architecture, data formats, graphics, sound and source/toolchain chapters, plus
-  `VERIFICATION.md` (what was checked in VICE, and source comments found to disagree with the code)
+  `VERIFICATION.md` (what was checked in VICE)
 - `documentation/ROOMS.md`: generated atlas of all 52 rooms (screenshot, map position, tiles and classes,
   enemies, coins, items, decorations, mechanisms); `documentation/SOUND_DATA.md`: generated songs, tracks,
   patterns, instruments and effect records
@@ -68,16 +68,13 @@
 ### Fixed
 
 - Refactored build: the I WANT TO CHEAT name had no effect, because `InitialiseZeroPage` started clearing at
-  `$08`, which is `zp.cheat_mode`. It now starts at `zp.cheat_mode + 1` (`$09`). An `.errorif` guard keeps
-  `sound_mode` and `sfx_sweep_dir` below the clear. The comments in `utils.asm`, `main.asm` and `zero_page.asm`
-  are corrected. One byte of the program changes (`$1DC2`: `$08` to `$09`). Before and after are in
-  `documentation/VERIFICATION.md`.
-- `documentation/VERIFICATION.md` lists source comments that disagree with the code
+  `$08`, which is `zp.cheat_mode`. It now starts at `zp.clear_start` (`$09`), after the three preserved
+  variables. An `.errorif` guard keeps `sound_mode`, `sfx_sweep_dir` and `cheat_mode` above it. The comments in
+  `utils.asm`, `main.asm` and `zero_page.asm` are corrected. One byte of the program changes (`$1DC2`: `$08` to
+  `$09`).
 - `documentation/VERIFICATION.md` said every decoded room cell matches VICE; 205 cells in 16 rooms are drawn
   at run time, and the table of causes is now there
 - `documentation/HTML_DOCUMENTATION.md`: the style64.org link uses https
 - `documentation/SOUND.md`: the leftover test harness has four routines, not three; the last two start at
   `$95CC` and `$95E3`, not `$95C9` and `$95DB`
-- `documentation/VERIFICATION.md`: `$220A` is an instruction inside `CheckPiledriverContact` (entry `$21FE`);
-  the multiplexer and credits entries describe the upstream README, which this README corrects
 - `documentation/MONTY_ON_THE_RUN.html` regenerated: it was stale after a `CHANGELOG.md` edit
