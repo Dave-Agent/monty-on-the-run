@@ -333,11 +333,16 @@ the handbook); [the source guide](documentation/SOURCE_GUIDE.md) describes them.
 This repository contains only reconstructed source code. The original binary is
 not included and is not required to build either version.
 
-## Credits for this reconstruction
+## Credits
 
-The disassembly, naming and both builds are by **Dave Agent**, using Ghidra and
+The reverse engineering is by **Dave Agent**: the disassembly, the naming and
+commenting, and both builds, using Ghidra and
 [ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export).
-The `documentation/` folder and HTML handbook, the screenshot, graphics and sound
-tooling and the `justfile` are by **Anthony Clarke**, one of the game's original
-authors. [CREDITS.md](documentation/CREDITS.md) lists every
-tool and library, with links.
+
+The [documentation](documentation/README.md), the
+[HTML handbook](documentation/MONTY_ON_THE_RUN.html) (every chapter in one
+offline page: download it and open it in a browser), the screenshot, graphics
+and sound tooling and the `justfile` are by **Anthony Clarke**, one of the
+game's original authors.
+
+[CREDITS.md](documentation/CREDITS.md) lists every tool and library, with links.
