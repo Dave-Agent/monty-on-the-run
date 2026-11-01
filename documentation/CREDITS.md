@@ -27,11 +27,10 @@ Jason of Micro Projects for Gremlin Graphics, July 1985*; the text is in the dat
 The disassembly, the naming and commenting, and both builds (`byte-perfect/` and `refactored/`) are by **Dave Agent**,
 using Ghidra and his Ghidra-to-Kick-Assembler exporter.
 
-| Project                           | Link                                                                                    |
-| :-------------------------------- | :-------------------------------------------------------------------------------------- |
-| Monty on the Run (Dave's repo)    | [Dave-Agent/monty-on-the-run](https://github.com/Dave-Agent/monty-on-the-run)           |
-| ghidra-kickass-export             | [Dave-Agent/ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export) |
-| This fork, with the documentation | [anthonyjclarke/monty-on-the-run](https://github.com/anthonyjclarke/monty-on-the-run)   |
+| Project               | Link                                                                                    |
+| :-------------------- | :-------------------------------------------------------------------------------------- |
+| This repository       | [Dave-Agent/monty-on-the-run](https://github.com/Dave-Agent/monty-on-the-run)           |
+| ghidra-kickass-export | [Dave-Agent/ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export) |
 
 ---
 
