@@ -1,7 +1,7 @@
 # Monty on the Run – Source and Toolchain Guide
 
 How the repository is laid out, how the two builds relate, the conventions in the source, and how to build, run and
-change the game from VSCode.
+change the game.
 
 ---
 
@@ -20,7 +20,7 @@ change the game from VSCode.
 | `docs/`                           | Dave's standalone HTML viewers (sprites, enemies, decorations, VIC bank, map)    |
 | `documentation/`                  | This documentation, its images, recordings and the HTML handbook                 |
 | `tools/`                          | Build, launch, capture, decoding and handbook scripts                            |
-| `justfile`, `.vscode/`            | Recipes and the matching VSCode tasks                                            |
+| `justfile`                        | Recipes for building, running, testing and the documentation                     |
 | `build/`                          | Output: PRGs, VICE symbol files, the `.sid`, RAM dumps (not committed)           |
 
 ---
@@ -29,9 +29,7 @@ change the game from VSCode.
 
 The source began as a Ghidra disassembly of the game image (`motr_080E_FF72.bin`), exported to Kick Assembler with Dave
 Agent's [ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export). It was then named and commented in
-two phases with his [MOSaic](https://github.com/Dave-Agent/MOSaic) method: first byte-perfect, then refactored. Unlike
-Frak64, this repository doesn't carry MOSaic's project scaffolding (`project.config`, `framework/`, `phase1/`,
-`phase2/`, the original media), and the original image isn't in it. `reference.sha256` was recorded from the
+two phases: first byte-perfect, then refactored. The original image isn't in this repository. `reference.sha256` was recorded from the
 byte-perfect build when this documentation was written; it has not been checked against an original tape. See
 [VERIFICATION.md](VERIFICATION.md).
 
@@ -122,27 +120,16 @@ would. It waits for a raster line well away from the start-up race window first.
 symbol files Kick Assembler writes (`build/motr.vs`, `build/motr_refactored.vs`), never through hard-coded numbers, so
 they keep working when code moves.
 
-### VSCode
-
-Open the folder and install the recommended extensions: *Kick Assembler 8-Bit Retro Studio*
-(`paulhocker.kick-assembler-vscode-ext`) and the Hex Editor. Then:
-
-| Command                  | Task                                                   |
-| :----------------------- | :----------------------------------------------------- |
-| `⇧⌘B`                    | MOTR: Build both (errors appear in the Problems panel) |
-| Terminal → Run Test Task | MOTR: Smoke test (both builds)                         |
-| Terminal → Run Task…     | Run in VICE, the `.sid`, the docs tasks                |
-
-`build.py` rewrites Kick Assembler's two-line errors as `file:line:col: error: message`, so a click in the Problems
-panel goes straight to the line. Use the tasks rather than the extension's own Run: it would autostart the byte-perfect
-PRG, which has no BASIC stub.
+`build.py` rewrites Kick Assembler's two-line errors as `file:line:col: error: message`, so an editor or terminal that
+understands that form can jump straight to the line. Launch through `just` or `tools/launch.py` rather than autostarting
+the byte-perfect PRG, which has no BASIC stub.
 
 ---
 
 ## Making a Change
 
-1. Edit the refactored source and run `just build-rf` (or `⇧⌘B`). Assembly errors and region overflows show in the
-   Problems panel.
+1. Edit the refactored source and run `just build-rf`. Assembly errors and region overflows are reported
+   as `file:line:col: error:`.
 2. Run `just launch-rf` to play it, or `just smoke` for the unattended check.
 3. To understand something first, find it in `byte-perfect/src/motr.asm` by its original address. If you change a name
    or comment there, `just build` must still pass.

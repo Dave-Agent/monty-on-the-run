@@ -56,8 +56,7 @@ just docs
 `just docs` builds the game, captures the screens, renders the figures, decodes the sound, records the audio (about six
 minutes in real time) and generates the HTML. `just docs-html` only regenerates the HTML from the current Markdown and
 images, `just docs-check` fails if a chapter names a label that is in neither build (`tools/doc_names.py`) or the saved
-HTML is stale, and `just docs-watch` regenerates it whenever a source changes. The same steps are VSCode tasks (**MOTR:
-Docs …**).
+HTML is stale, and `just docs-watch` regenerates it whenever a source changes.
 
 Screenshots differ slightly between runs (enemy positions depend on timing, and the score carries over from room to
 room), so only recapture them when something visible has changed. `capture_screens.py --ending-only` takes just the four

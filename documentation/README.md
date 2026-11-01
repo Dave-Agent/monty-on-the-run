@@ -17,7 +17,7 @@ recordings embedded, into one page that reads offline in a browser.
 | [SOUND.md](SOUND.md)               | Hubbard's driver, the three songs, effects, the `.sid`                 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Start-up, memory map, banking, interrupts, room pipeline               |
 | [DATA_FORMATS.md](DATA_FORMATS.md) | Every table the game reads, byte by byte                               |
-| [SOURCE_GUIDE.md](SOURCE_GUIDE.md) | Repository layout, the two builds, conventions, VSCode                 |
+| [SOURCE_GUIDE.md](SOURCE_GUIDE.md) | Repository layout, the two builds, conventions                         |
 
 ---
 

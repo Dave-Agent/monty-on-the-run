@@ -16,21 +16,20 @@ Who made the game, the reconstruction and this documentation, and where to get e
 | Publisher | Gremlin Graphics                                          |
 
 The main theme is built on Charles Williams's *Devil's Galop*. The game's own hi-score table reads *written by Tony and
-Jason of Micro Projects for Gremlin Graphics, July 1985*; [VERIFICATION.md](VERIFICATION.md#credits) explains where this
-credit line comes from.
+Jason of Micro Projects for Gremlin Graphics, July 1985*; the text is in the data: the name table at `$73FF` in
+[`motr.asm`](../byte-perfect/src/motr.asm) and `name_table` in [`hiscore_data.asm`](../refactored/src/subsystems/hiscore_data.asm), and
+[VERIFICATION.md](VERIFICATION.md#credits) explains where this credit line comes from.
 
 ---
 
 ## The Reconstruction
 
 The disassembly, the naming and commenting, and both builds (`byte-perfect/` and `refactored/`) are by **Dave Agent**,
-using Ghidra, his Ghidra-to-Kick-Assembler exporter and his MOSaic method. MOSaic is a Claude Code skill: the process,
-rules and tools for turning a C64 disk or tape image into byte-identical, commented, relocatable Kick Assembler source.
+using Ghidra and his Ghidra-to-Kick-Assembler exporter.
 
 | Project                           | Link                                                                                    |
 | :-------------------------------- | :-------------------------------------------------------------------------------------- |
 | Monty on the Run (Dave's repo)    | [Dave-Agent/monty-on-the-run](https://github.com/Dave-Agent/monty-on-the-run)           |
-| MOSaic                            | [Dave-Agent/MOSaic](https://github.com/Dave-Agent/MOSaic)                               |
 | ghidra-kickass-export             | [Dave-Agent/ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export) |
 | This fork, with the documentation | [anthonyjclarke/monty-on-the-run](https://github.com/anthonyjclarke/monty-on-the-run)   |
 
@@ -38,7 +37,7 @@ rules and tools for turning a C64 disk or tape image into byte-identical, commen
 
 ## The Documentation
 
-The chapters, the HTML handbook, the screenshot, graphics and sound tools, the `justfile` and the VSCode set-up are by
+The chapters, the HTML handbook, the screenshot, graphics and sound tools and the `justfile` are by
 **Anthony Clarke**. The handbook generator and its page templates are shared with the documentation of *Thing on a
 Spring* and *Frak!*, two more C64 reconstructions.
 
@@ -56,9 +55,6 @@ Spring* and *Frak!*, two more C64 reconstructions.
 | Python 3                          | All the tools (standard library only)     | [python.org](https://www.python.org/)                                                                   |
 | Node.js 20 or later               | Generating the HTML handbook              | [nodejs.org](https://nodejs.org/)                                                                       |
 | macOS `afconvert`                 | Compressing the recordings to AAC         | Part of macOS                                                                                           |
-| Visual Studio Code                | Editing and the tasks in `.vscode/`       | [code.visualstudio.com](https://code.visualstudio.com/)                                                 |
-| Kick Assembler 8-Bit Retro Studio | Kick Assembler in VSCode                  | [Marketplace](https://marketplace.visualstudio.com/items?itemName=paulhocker.kick-assembler-vscode-ext) |
-| Hex Editor                        | Looking at `build/*.prg` in VSCode        | [Marketplace](https://marketplace.visualstudio.com/items?itemName=ms-vscode.hexeditor)                  |
 
 ---
 

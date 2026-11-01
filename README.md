@@ -34,10 +34,8 @@ just smoke        # start both builds unattended and check they reach the title 
 just --list       # everything else, including `just docs` to regenerate the documentation
 ```
 
-In VSCode, install the recommended *Kick Assembler 8-Bit Retro Studio*
-extension; `⇧⌘B` builds both versions, with assembly errors in the Problems
-panel, and **Terminal → Run Task…** offers the run, smoke-test, sound and docs
-tasks. See [the source guide](documentation/SOURCE_GUIDE.md).
+See [the source guide](documentation/SOURCE_GUIDE.md) for the repository layout and
+the build and run workflow.
 
 ---
 
@@ -340,7 +338,9 @@ just open in a browser):
 - Designed by **Peter Harrap**
 - C64 version coded by **Jason Perkins** and **Anthony (Tony) Clarke** of
   Micro Projects; the game's own hi-score table reads *written by Tony and
-  Jason of Micro Projects for Gremlin Graphics, July 1985*
+  Jason of Micro Projects for Gremlin Graphics, July 1985* (see
+  the name table at `$73FF` in [`motr.asm`](byte-perfect/src/motr.asm) and `name_table` in
+  [`hiscore_data.asm`](refactored/src/subsystems/hiscore_data.asm))
 - Music by **Rob Hubbard**
 - Published by **Gremlin Graphics** in 1985
 
@@ -349,10 +349,9 @@ not included and is not required to build either version.
 
 ## Credits for this reconstruction
 
-The disassembly, naming and both builds are by **Dave Agent**, using Ghidra,
-[ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export)
-and his [MOSaic](https://github.com/Dave-Agent/MOSaic) method. The
-`documentation/` folder and HTML handbook, the screenshot, graphics and sound
-tooling, the `justfile` and the VSCode set-up are by **Anthony Clarke**, one of
-the game's original authors. [CREDITS.md](documentation/CREDITS.md) lists every
+The disassembly, naming and both builds are by **Dave Agent**, using Ghidra and
+[ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export).
+The `documentation/` folder and HTML handbook, the screenshot, graphics and sound
+tooling and the `justfile` are by **Anthony Clarke**, one of the game's original
+authors. [CREDITS.md](documentation/CREDITS.md) lists every
 tool and library, with links.
