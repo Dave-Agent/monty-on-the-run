@@ -1,0 +1,291 @@
+{
+  // Monty on the Run (C64) - build/run tasks. All tasks call the `just` recipes in justfile, which wrap
+  // tools/build.py (Kick Assembler), tools/launch.py (VICE) and the documentation tools.
+  // Needs: Java 17+, ~/tools/KickAss.jar (or KICKASS_JAR), VICE x64sc on PATH (or VICE_BIN), just, python3, node.
+
+  "version": "2.0.0",
+  "options": {
+    "cwd": "${workspaceFolder}"
+  },
+  "tasks": [
+    {
+      "label": "MOTR: Build both",
+      "detail": "Byte-perfect build + SHA-256 check, then assemble the refactored build",
+      "type": "shell",
+      "command": "just build-all",
+      "problemMatcher": {
+        "owner": "kickassembler",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): error: (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Build byte-perfect (verify)",
+      "detail": "Assemble byte-perfect/src/motr.asm -> build/motr.prg and check reference.sha256",
+      "type": "shell",
+      "command": "just build",
+      "problemMatcher": {
+        "owner": "kickassembler",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): error: (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Build refactored",
+      "detail": "Assemble refactored/src/main.asm -> build/motr_refactored.prg",
+      "type": "shell",
+      "command": "just build-rf",
+      "problemMatcher": {
+        "owner": "kickassembler",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): error: (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Run byte-perfect in VICE",
+      "detail": "Build, boot x64sc, load the PRG and start at StartUp",
+      "type": "shell",
+      "command": "just launch",
+      "problemMatcher": {
+        "owner": "kickassembler",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): error: (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Run refactored in VICE",
+      "detail": "Build, boot x64sc, load the PRG and start at StartUp",
+      "type": "shell",
+      "command": "just launch-rf",
+      "problemMatcher": {
+        "owner": "kickassembler",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): error: (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Smoke test (both builds)",
+      "detail": "Start both builds unattended and check they reach the title loop",
+      "type": "shell",
+      "command": "just smoke",
+      "problemMatcher": {
+        "owner": "kickassembler",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): error: (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Cheat check (both builds)",
+      "detail": "Check the I WANT TO CHEAT flag survives startGame and the cake appears in room $01",
+      "type": "shell",
+      "command": "just cheat-check",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Show start-up IRQ race",
+      "detail": "Start the byte-perfect build on raster line 300, as the KERNAL leaves it",
+      "type": "shell",
+      "command": "just race",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: List P2_DIVERGES",
+      "detail": "Where the refactored build behaves differently from the original",
+      "type": "shell",
+      "command": "just diverges",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Build .sid soundtrack",
+      "detail": "Write build/monty_on_the_run.sid, piano rolls and documentation/SOUND_DATA.md",
+      "type": "shell",
+      "command": "just sound",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Play soundtrack (vsid)",
+      "detail": "Build the .sid and play the main theme in VICE's SID player",
+      "type": "shell",
+      "command": "just play",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Docs (full refresh)",
+      "detail": "Build, capture screenshots, decode graphics and sound, record audio, generate the handbook",
+      "type": "shell",
+      "command": "just docs",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Docs HTML only",
+      "detail": "Regenerate documentation/MONTY_ON_THE_RUN.html from the Markdown and current images",
+      "type": "shell",
+      "command": "just docs-html",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Docs check",
+      "detail": "Fail if the saved HTML handbook is stale",
+      "type": "shell",
+      "command": "just docs-check",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Docs watch",
+      "detail": "Regenerate the handbook on every Markdown or image change",
+      "type": "shell",
+      "command": "just docs-watch",
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "MOTR: Docs verify room decoder",
+      "detail": "Compare decoded rooms with the VICE RAM dumps in build/memory",
+      "type": "shell",
+      "command": "just docs-verify",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    }
+  ]
+}
