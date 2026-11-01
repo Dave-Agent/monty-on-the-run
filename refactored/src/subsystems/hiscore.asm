@@ -33,10 +33,12 @@
 //          Triggers 10-25 (celebrity/easter-egg words): overwrites the entire
 //            16-char name with the matching entry from Data.replacements
 //            (yellow, converted to screen code via AND#$3F/OR#$40).
-//          Trigger 22 "I WANT TO CHEAT": also writes $01 → zp.cheat_mode ($080E)
-//            and flashes the border/background dark grey.
-//          Trigger 19 (16 spaces): uses zp.frame_toggle+9 as the replacement index,
-//            rotating through entries 9-15 as a pool of anonymous insults.
+//          Trigger 22 "I WANT TO CHEAT": also writes $01 → zp.cheat_mode (P1: $080E): this only makes
+//            the cake spawn in room $01; eating it sets $81 (bit 7 = invincible).
+//            Also flashes the border/background dark grey.
+//          Trigger 19 (16 spaces): uses zp.frame_toggle+9 as the replacement index;
+//            zp.frame_toggle is 0 or 1, so only entry 9 or 10 is ever chosen.
+//            Trigger 20 (also 16 spaces) can never match: 19 is tested first.
 //          All trigger bytes use AND #$3F so PETSCII letter codes compare
 //          correctly against the screen-code name buffer.
 //==============================================================================
@@ -122,9 +124,9 @@ ProcessName_substitute:               // XREF[1]: 0849(j)
   sta zp.s_trigger_idx                // [087E:85 56    STA $0056]  save substitution index
   cmp #$09                            // [0880:c9 09    CMP #$9]    index 9 = 16-spaces trigger: randomise
   bne !+                              // [0882:d0 05    BNE $0889]
-  lda zp.frame_toggle                 // [0884:a5 40    LDA $0040]  randomiser (value varies each call)
+  lda zp.frame_toggle                 // [0884:a5 40    LDA $0040]  frame parity (0 or 1), not a random value
   clc                                 // [0886:18       CLC]
-  adc #$09                            // [0887:69 09    ADC #$9]    pick from entries 9..9+zp.frame_toggle
+  adc #$09                            // [0887:69 09    ADC #$9]    pick entry 9 or 10 (zp.frame_toggle is 0 or 1)
 !:
   asl                                 // [0889:0a       ASL A]      × 16 = byte offset into table
   asl                                 // [088A:0a       ASL A]
@@ -147,7 +149,7 @@ ProcessName_substitute:               // XREF[1]: 0849(j)
   lda zp.s_trigger_idx                // [08A7:a5 56    LDA $0056]     original substitution index
   cmp #$0c                            // [08A9:c9 0c    CMP #$c]       12 = "I WANT TO CHEAT"
   bne !+                              // [08AB:d0 0d    BNE $08ba]
-  // Trigger 22: activate cheat mode for the next game
+  // Trigger 22: zp.cheat_mode=$01 for the next game (spawns the room $01 cake; eating it sets $81)
   lda #$01                            // [08AD:a9 01    LDA #$1]
   sta zp.cheat_mode                   // [08AF:8d 0e 08 STA $080e]
   lda #$0b                            // [08B2:a9 0b    LDA #$b]       dark grey
@@ -190,7 +192,7 @@ ScrollDisplay:
 // STATUS:  understood
 // SUMMARY: Interactive name entry for a new hi-score. Displays a blinking cursor
 //          at screen row 15 col 12–27 (up to 16 chars); colour-cycles each VSync.
-//          $8C (CRSR U/D) confirms; $8D (CRSR L/R) backspaces; $8E (CBM) → space;
+//          $8C (RETURN) confirms; $8D (INST/DEL) backspaces; $8E (SPACE) → space;
 //          high-bit chars rejected. Typed name left in screen RAM for ClearNewNameSlot
 //          to read. Calls InitialiseMusic on confirm. Called from CheckAndInsert.
 //==============================================================================
@@ -217,9 +219,9 @@ NameInput_cursor:
   beq !-                              // [32A7:f0 f4    BEQ $329d]    no key yet
   sta zp.s_tmp_a                      // [32A9:85 54    STA $0054]
   ldy zp.hiscore_name_col             // [32AB:a4 ec    LDY $00ec]
-  cmp #$8c                            // [32AD:c9 8c    CMP #$8c]     confirm (CRSR U/D)
+  cmp #$8c                            // [32AD:c9 8c    CMP #$8c]     confirm (RETURN)
   beq NameInput_confirm               // [32AF:f0 3a    BEQ $32eb]
-  cmp #$8d                            // [32B1:c9 8d    CMP #$8d]     backspace (CRSR L/R)
+  cmp #$8d                            // [32B1:c9 8d    CMP #$8d]     backspace (INST/DEL)
   bne !+                              // [32B3:d0 10    BNE $32c5]
   cpy #$00                            // [32B5:c0 00    CPY #$0]
   beq NameInput_cursor                // [32B7:f0 d8    BEQ $3291]    at col 0 → ignore
@@ -233,7 +235,7 @@ NameInput_cursor:
 !:
   cpy #$10                            // [32C5:c0 10    CPY #$10]     buffer full (16 chars)?
   beq NameInput_cursor                // [32C7:f0 c8    BEQ $3291]    yes → ignore
-  cmp #$8e                            // [32C9:c9 8e    CMP #$8e]     CBM key → treat as space
+  cmp #$8e                            // [32C9:c9 8e    CMP #$8e]     SPACE key → treat as space
   bne !+                              // [32CB:d0 04    BNE $32d1]
   lda #$20                            // [32CD:a9 20    LDA #$20]
   sta zp.s_tmp_a                      // [32CF:85 54    STA $0054]

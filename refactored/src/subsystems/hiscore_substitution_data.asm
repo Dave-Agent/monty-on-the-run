@@ -1,4 +1,4 @@
-// hiscore_data_substitutions.asm — ProcessName's easter-egg trigger/replacement
+// hiscore_substitution_data.asm — ProcessName's easter-egg trigger/replacement
 // text tables. Split out of hiscore_data.asm: that file's floating slot sits in
 // a tight gap before the fixed FreedomKit_sprites pin at $7800 (only ~258 bytes
 // to spare), too small for these two tables (441 bytes combined). Imported from
@@ -17,7 +17,8 @@
 //          Stored as PETSCII (ASCII); compared via AND #$3F → screen code.
 //          Triggers 0-9: rude words — chars 2-3 censored with '"'.
 //          Triggers 10-25: celebrity/easter-egg names — full name replaced
-//          from replacements. Trigger 22 also enables cheat mode.
+//          from replacements. Trigger 22 sets zp.cheat_mode=$01 (the room $01 cake
+//          spawns; eating it sets $81).
 //==============================================================================
 .encoding "ascii"
 
@@ -43,8 +44,8 @@ triggers:
   .text "WINE"; .byte $00             // [0911] 16 → SCOTTS , OK YAH!
   .text "FRANKIE"; .byte $00          // [0916] 17 → YUK,ERR,OH NO. !
   .text "MINTER"; .byte $00           // [091e] 18 → THE HAIRY BEAST.
-  .text "                "; .byte $00 // [0925] 19 → anonymous insult (zp.frame_toggle=0)
-  .text "                "; .byte $00 // [0936] 20 → THE NAMELESS ONE (no randomise)
+  .text "                "; .byte $00 // [0925] 19 → anonymous insult (zp.frame_toggle picks entry 9 or 10)
+  .text "                "; .byte $00 // [0936] 20 → never matches: same 16 spaces as 19, which is tested first
   .text "SPECTRUM"; .byte $00         // [0947] 21 → A LUMP OF JUNK !
   .text "I WANT TO CHEAT"; .byte $00  // [0950] 22 → YESSUM BOSS !! + cheat mode on
   .text "GEZ"; .byte $00              // [0960] 23 → MR COOL !!
@@ -60,8 +61,8 @@ triggers:
 // SUMMARY: 16 entries × 16 bytes of PETSCII replacement text for substitution
 //          triggers 10-25. Written to the name display (screen row 15 col 12,
 //          colour yellow) via ProcessName_substitute.
-//          Entries 9-15 double as the anonymous-insult pool for the 16-spaces
-//          trigger (trigger 19): zp.frame_toggle+9 selects which entry to show.
+//          Entries 9 and 10 double as the anonymous-insult pool for the 16-spaces
+//          trigger (trigger 19): zp.frame_toggle (0 or 1) + 9 selects which to show.
 //==============================================================================
 .encoding "ascii"
 
@@ -76,8 +77,8 @@ replacements:
   .text "YUK,ERR,OH NO. !"            // [09e4]  7: FRANKIE
   .text "THE HAIRY BEAST."            // [09f4]  8: MINTER
   .text "  A.N.ONYMOUS ! "            // [0a04]  9: spaces (zp.frame_toggle=0)
-  .text "THE NAMELESS ONE"            // [0a14] 10: spaces (zp.frame_toggle=1) / trigger 20
-  .text "A LUMP OF JUNK !"            // [0a24] 11: SPECTRUM / spaces (zp.frame_toggle=2)
+  .text "THE NAMELESS ONE"            // [0a14] 10: spaces (zp.frame_toggle=1)
+  .text "A LUMP OF JUNK !"            // [0a24] 11: SPECTRUM
   .text " YESSUM BOSS !! "            // [0a34] 12: I WANT TO CHEAT
   .text "MR COOL !!      "            // [0a44] 13: GEZ
   .text "PENTHOUSE 1/8/85"            // [0a54] 14: MADONNA

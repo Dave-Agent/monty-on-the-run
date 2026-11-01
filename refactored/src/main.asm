@@ -74,7 +74,7 @@
 // SECTION: AttractScreenLoop
 // RANGE:   $32F4-$3374
 // STATUS:  understood
-// P2_DIVERGES: StartUp restructured — IRQ init inlined; sound_mode/cheat_mode seeded here rather than in InitialiseZeroPage; CLI moved from Irq.Initialize to after zp.attract_mode is set (fixes ~20% startup CPU JAM race)
+// P2_DIVERGES: StartUp restructured — IRQ init inlined; sound_mode/cheat_mode seeded here rather than in InitialiseZeroPage; CLI moved from Irq.Initialize to after zp.attract_mode is set (fixes startup CPU JAM race)
 // SUMMARY: Two entry points sharing one attract-screen loop.
 //          StartUp ($32F4): cold-start only — disables IRQ, inits IRQ vectors,
 //            resets score ($0294-$0298 = '0'), falls into InitAttractScreen.
@@ -436,7 +436,7 @@ CHR_Screen:                                              // VIC bank 1 screen RA
 
 // hiscore_data.asm's own floating slot (before the fixed FreedomKit_sprites pin
 // at $7800) has no room for these two tables; they float here instead.
-#import "subsystems/hiscore_data_substitutions.asm"
+#import "subsystems/hiscore_substitution_data.asm"
 
 .errorif * > DATA_END, "GUARD: data region overflow into I/O space — ends at $" + toHexString(*)
 

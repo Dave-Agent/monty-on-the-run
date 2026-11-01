@@ -360,7 +360,7 @@ ClearGlyphs:
 // RANGE:   $1CEE-$1D1A
 // STATUS:  understood
 // SUMMARY: Seeds 3-column charset glyph buffers from piledriver_frame_data.
-//          Normal mode offset $00; cheat mode offset +$18 for alternate pattern.
+//          Normal mode offset $00; cheat mode (zp.cheat_mode bit 7 set, $81) offset +$18 for alternate pattern.
 //==============================================================================
                                       // XREF[2]: 1b1d(c), 1c35(c)
 SeedGlyphs:
@@ -396,9 +396,10 @@ SeedGlyphs:
 // RANGE:   $21FE-$2247
 // STATUS:  understood
 // SUMMARY: Detects when Monty steps on a piledriver tile (tile $62=head: fires
-//          ride; tile $63=base: sets speed counter). Shared by both room $13
-//          (piledriver, Monty rides down) and room $0C (rising bollard, Monty
-//          rides up) — same code path, different room context.
+//          ride; tile $63=base: sets zp.action_counter=4, event 4, piledriver death;
+//          only room $1F contains $63). Shared by both room $13 (piledriver) and
+//          room $0C (rising bollard); the ride goes up in both — same code path,
+//          different room context.
 //==============================================================================
                                       // XREF[1]: 0ddd(c)
 CheckContact:
@@ -409,7 +410,7 @@ CheckContact:
   cmp #$63                            // [2206:c9 63    CMP #$63]
   bne !+                              // [2208:d0 04    BNE $220e]        neither: return
   lda #$04                            // [220A:a9 04    LDA #$4]
-  sta zp.action_counter               // [220C:85 b7    STA $00b7]        piledriver base: set speed limiter
+  sta zp.action_counter               // [220C:85 b7    STA $00b7]        piledriver base: event 4 (Death.ByPiledriver)
 
                                       // XREF[1]: 2208(j)
 !:
@@ -555,6 +556,8 @@ CheckTiles:
 // SUMMARY: Clears zp.piledriver_ride_active on every room load. Room $0C only:
 //          plants the rising bollard tile $62 at row 15, col 27 (white). This
 //          is the sole setup for room $0C's bollard — no mechanisms_data entry.
+//          The same ride code (UpdateRide decrements Y) carries Monty up in both
+//          room $13 (piledriver) and room $0C (bollard).
 //==============================================================================
                                       // XREF[1]: 0e8c(c)
 InitState:

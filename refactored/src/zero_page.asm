@@ -1,6 +1,6 @@
 // zero_page.asm — zero-page variable layout.
 // All variables accessed as zp.name; scratch temporaries as zp.s_name.
-// Utils.InitialiseZeroPage clears everything after cheat_mode ($09-$FF) at startup and at each new game.
+// Utils.InitialiseZeroPage clears everything from zp.clear_start ($09-$FF) at startup and at each new game.
 //
 // ZP used: $E6 bytes ($02–$E7);  $18 free ($E8–$FF)  ← updated by 'just update-zp-comment'
 
@@ -13,8 +13,12 @@ music_patptr:            .byte $00    // music pattern pointer lo
 music_patptr_hi:         .byte $00    // music pattern pointer hi
 sound_mode:              .byte $01    // 0=SFX mode, 1=music mode — persists between games
 sfx_sweep_dir:           .byte $00    // SFX sweep direction: $80=inc (up), $00=dec (down); set by InitSFXVoices
-cheat_mode:              .byte $00    // $00=normal, $01=cake spawns (name cheat), $81=invincible; must stay the last byte InitialiseZeroPage keeps
-input_left:              .byte $00
+cheat_mode:              .byte $00    // $00=normal, $01=cake spawns (name cheat), $81=invincible
+
+// Utils.InitialiseZeroPage clears from here to $FF. Any variable that must survive it
+// (like the three above) goes ABOVE this label; the .errorif in utils.asm enforces that.
+clear_start:
+input_left:             .byte $00
 input_right:             .byte $00
 input_up:                .byte $00
 input_down:              .byte $00

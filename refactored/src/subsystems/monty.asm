@@ -29,7 +29,7 @@ UpdateMovement:
   beq !+                              // [14C0:f0 01    BEQ $14c3]
   rts                                 // [14C2:60       RTS]
 !:
-  lda zp.c5_drive_active             // [14C3:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active              // [14C3:a5 bc    LDA $00bc]
   beq !+                              // [14C5:f0 03    BEQ $14ca]
   jmp FreedomKit.C5DriveMovement      // [14C7:4c cb 2c JMP $2ccb]
 !:
@@ -645,6 +645,7 @@ Dispatch:
 Dispatch_idle:
   rts                                 // [2398:60       RTS]
 !:                                    // XREF[1]: 2396(j)
+  // events 3 (lift) and 6 (completion) always run; others are suppressed while zp.cheat_mode bit 7 is set ($81)
   cmp #$03                            // [2399:c9 03    CMP #$3]
   beq Dispatch_dispatch               // [239B:f0 09    BEQ $23a6]
   cmp #$06                            // [239D:c9 06    CMP #$6]

@@ -127,7 +127,8 @@ sector_idx:                       // room_id → index N; N=0 → sector_name_1 
   .byte $07,$07                         // [1ac6] rooms $24-$25 "DRIVE SIR CLIVE(S C5"
   .byte $08,$08,$08,$08,$08,$08,$08,$08,$08,$08  // [1ac8] rooms $26-$2F "DAS BOAT"
   .byte $09                             // [1ad2] room  $30     "BON VOYAGE MONSIEUR LE MONTY"
-  .byte $07,$07,$07,$07                 // [1ad3] rooms $31-$34 "DRIVE SIR CLIVE(S C5" (transit zone)
+  .byte $07,$07,$07                     // [1ad3] rooms $31-$33 "DRIVE SIR CLIVE(S C5" (transit zone)
+  .byte $07                             // [1ad6] spare byte: no room $34 (52 rooms, $00-$33)
 
 // Room load pipeline: pointer index, tilemap streams, spawn records, room definitions.
 // (merged from rooms.asm into Room.Data namespace)

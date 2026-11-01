@@ -43,7 +43,7 @@
 // STATUS:  understood
 // P2_DIVERGES: InitialiseMusic ($30BD-$30D7) split to Utils; fall-through replaced by jsr Utils.InitialiseMusic.
 // SUMMARY: Attract-screen per-frame key handler. Polls KeyPressToCharacter:
-//          $86 (CBM key) toggles zp.sound_mode then calls Utils.InitialiseMusic.
+//          $86 (F1) toggles zp.sound_mode then calls Utils.InitialiseMusic.
 //          $52 ('R') launches RemapKeyboardControls.
 //==============================================================================
                                       // XREF[1]: 331e(c)

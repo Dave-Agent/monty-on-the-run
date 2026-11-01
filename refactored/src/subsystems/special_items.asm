@@ -227,7 +227,7 @@ SpawnSIForRoom:                   // scan si_spawn_tbl for zp.room_id; set sprit
                                       // XREF[1]: 0dce(c)
 HandleSICollision:
   // gate: if dead check bit2, else check bit3 of zp.collision_store for Monty sprite touch
-  lda zp.c5_drive_active             // [2684:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active              // [2684:a5 bc    LDA $00bc]
   beq !+                              // [2686:f0 06    BEQ $268e]
   lda zp.collision_store              // [2688:a5 48    LDA $0048]
   and #$04                            // [268A:29 04    AND #$4]
@@ -248,7 +248,7 @@ HandleSICollision:
   and #$f0                            // [26A0:29 f0    AND #$f0]
   beq !++                             // [26A2:f0 0a    BEQ $26ae]
   ldy #$02                            // [26A4:a0 02    LDY #$2]
-  lda zp.c5_drive_active             // [26A6:a5 bc    LDA $00bc]
+  lda zp.c5_drive_active              // [26A6:a5 bc    LDA $00bc]
   beq !+                              // [26A8:f0 02    BEQ $26ac]
   ldy #$07                            // [26AA:a0 07    LDY #$7]
 !:
@@ -277,7 +277,7 @@ HandleSICollision:
   sta si_collected_tbl,y              // [26CC:99 08 03 STA $308,Y]
   cpy #$13                            // [26CF:c0 13    CPY #$13]  item 19 = last/secret
   bne !+                              // [26D1:d0 0d    BNE $26e0]
-  ora zp.cheat_mode                   // [26D3:0d 0e 08 ORA $080e]  collecting item 19 sets zp.cheat_mode
+  ora zp.cheat_mode                   // [26D3:0d 0e 08 ORA $080e]  collecting item 19 (A=$81) makes zp.cheat_mode $81: bit 7 = invincible
   sta zp.cheat_mode                   // [26D6:8d 0e 08 STA $080e]
   lda zp.vic_shadow_enable            // [26D9:a5 20    LDA $0020]
   and #$fe                            // [26DB:29 fe    AND #$fe]

@@ -389,7 +389,7 @@ CheckTileAbove:
 // STATUS:  understood
 // SUMMARY: Tests 1-2 tiles two rows below Monty. C=1 solid (collision), C=0 clear.
 //          Also handles tile type 4 (trap): if both columns are type-4, sets
-//          zp.action_counter=$05 to trigger the piledriver-contact event.
+//          zp.action_counter=$05: event 5, Death.ByHazard (the water/lava death).
 //==============================================================================
                                       // XREF[2]: 14dd(c), 15dc(c)
 CheckTileBelow:
@@ -723,7 +723,7 @@ WaitForVSync:
 // SECTION: InitialiseZeroPage
 // RANGE:   $1046-$104F
 // STATUS:  understood
-// P2_DIVERGES: clears from zp.cheat_mode+1 ($09) to $FF, not $06–$FF (ldx #$06), so the three
+// P2_DIVERGES: clears from zp.clear_start ($09) to $FF, not $06–$FF (ldx #$06), so the three
 //          variables P2 moved into ZP below it survive, as their $080E/$080F originals did.
 //          Was ldx #$08, which cleared zp.cheat_mode ($08) and broke I WANT TO CHEAT.
 // SUMMARY: Clears ZP $09-$FF. Skips $00-$08: $00-$01 are the CPU I/O port,
@@ -732,11 +732,12 @@ WaitForVSync:
 //          sfx_sweep_dir is set by InitSFXVoices before it is read).
 //==============================================================================
                                       // XREF[2]: 10a2(c), 3305(c)
-.errorif zp.sound_mode > zp.cheat_mode || zp.sfx_sweep_dir > zp.cheat_mode, "InitialiseZeroPage would clear sound_mode or sfx_sweep_dir"
+.errorif zp.sound_mode >= zp.clear_start || zp.sfx_sweep_dir >= zp.clear_start || zp.cheat_mode >= zp.clear_start, "InitialiseZeroPage would clear sound_mode, sfx_sweep_dir or cheat_mode: keep them above zp.clear_start"
+
 InitialiseZeroPage:
-// Clear zp.cheat_mode+1..$FF; the loop exits when inx wraps X to $00 (BNE not taken).
+// Clear zp.clear_start..$FF; the loop exits when inx wraps X to $00 (BNE not taken).
 // $0 is the loop base only — not a named variable.
-  ldx #zp.cheat_mode + 1              // [1046:a2 06    LDX #$6]
+  ldx #zp.clear_start                 // [1046:a2 06    LDX #$6]
   lda #$00                            // [1048:a9 00    LDA #$0]
 !:
   sta $0,x                            // [104A:95 00    STA $0,X]

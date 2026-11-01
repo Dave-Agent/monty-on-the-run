@@ -42,7 +42,7 @@
 
 // *** BLOCK START: monty_on_the_run (080e - ff72) ***
 .pc = $080e "monty_on_the_run"
-cheatmode:  .byte $00                 // [080e: 00]      $00=normal, $01=cheat mode active
+cheatmode:  .byte $00                 // [080e: 00]      $00=normal, $01=cake spawns in room $01 (name cheat), $81=invincible (set by eating the cake)
 sound_mode: .byte $01                 // [080f: 01]      0=SFX mode ; 1=music mode
 
 
@@ -61,10 +61,12 @@ jmp StartUp                           // [0810:4c f4 32 JMP $32f4]
 //          Triggers 10-25 (celebrity/easter-egg words): overwrites the entire
 //            16-char name with the matching entry from hi_score_replacements
 //            (yellow, converted to screen code via AND#$3F/OR#$40).
-//          Trigger 22 "I WANT TO CHEAT": also writes $01 → cheatmode ($080E)
-//            and flashes the border/background dark grey.
-//          Trigger 19 (16 spaces): uses zp_frame_toggle+9 as the replacement index,
-//            rotating through entries 9-15 as a pool of anonymous insults.
+//          Trigger 22 "I WANT TO CHEAT": also writes $01 → cheatmode ($080E): this only makes the
+//            cake spawn in room $01; eating it sets $81 (bit 7 = invincible).
+//            Also flashes the border/background dark grey.
+//          Trigger 19 (16 spaces): uses zp_frame_toggle+9 as the replacement index;
+//            zp_frame_toggle is 0 or 1, so only entry 9 or 10 is ever chosen.
+//            Trigger 20 (also 16 spaces) can never match: 19 is tested first.
 //          All trigger bytes use AND #$3F so PETSCII letter codes compare
 //          correctly against the screen-code name buffer.
 //==============================================================================
@@ -150,9 +152,9 @@ ProcessHiScoreName_substitute:        // XREF[1]: 0849(j)
   sta zps_trigger_idx                 // [087E:85 56    STA $0056]  save substitution index
   cmp #$09                            // [0880:c9 09    CMP #$9]    index 9 = 16-spaces trigger: randomise
   bne !+                              // [0882:d0 05    BNE $0889]
-  lda zp_frame_toggle                 // [0884:a5 40    LDA $0040]  randomiser (value varies each call)
+  lda zp_frame_toggle                 // [0884:a5 40    LDA $0040]  frame parity (0 or 1), not a random value
   clc                                 // [0886:18       CLC]
-  adc #$09                            // [0887:69 09    ADC #$9]    pick from entries 9..9+zp_frame_toggle
+  adc #$09                            // [0887:69 09    ADC #$9]    pick entry 9 or 10 (zp_frame_toggle is 0 or 1)
 !:
   asl                                 // [0889:0a       ASL A]      × 16 = byte offset into table
   asl                                 // [088A:0a       ASL A]
@@ -175,7 +177,7 @@ ProcessHiScoreName_substitute:        // XREF[1]: 0849(j)
   lda zps_trigger_idx                 // [08A7:a5 56    LDA $0056]     original substitution index
   cmp #$0c                            // [08A9:c9 0c    CMP #$c]       12 = "I WANT TO CHEAT"
   bne !+                              // [08AB:d0 0d    BNE $08ba]
-  // Trigger 22: activate cheat mode for the next game
+  // Trigger 22: cheatmode=$01 for the next game (spawns the room $01 cake; eating it sets $81)
   lda #$01                            // [08AD:a9 01    LDA #$1]
   sta cheatmode                       // [08AF:8d 0e 08 STA $080e]
   lda #$0b                            // [08B2:a9 0b    LDA #$b]       dark grey
@@ -238,9 +240,9 @@ hi_score_triggers:
   .byte $00
   .text "MINTER"   // [091e] 18 → THE HAIRY BEAST.
   .byte $00
-  .text "                " // [0925] 19 → anonymous insult (zp_frame_toggle picks entry 9+)
+  .text "                " // [0925] 19 → anonymous insult (zp_frame_toggle picks entry 9 or 10)
   .byte $00
-  .text "                " // [0936] 20 → THE NAMELESS ONE (no randomise)
+  .text "                " // [0936] 20 → never matches: same 16 spaces as 19, which is tested first
   .byte $00
   .text "SPECTRUM" // [0947] 21 → A LUMP OF JUNK !
   .byte $00
@@ -262,8 +264,8 @@ hi_score_triggers:
 // SUMMARY: 16 entries × 16 bytes of PETSCII replacement text for substitution
 //          triggers 10-25. Written to the name display (screen row 15 col 12,
 //          colour yellow) via ProcessHiScoreName_substitute.
-//          Entries 9-15 double as the anonymous-insult pool for the 16-spaces
-//          trigger (trigger 19): zp_frame_toggle+9 selects which entry to show.
+//          Entries 9 and 10 double as the anonymous-insult pool for the 16-spaces
+//          trigger (trigger 19): zp_frame_toggle (0 or 1) + 9 selects which to show.
 //==============================================================================
 .encoding "ascii"
 
@@ -278,8 +280,8 @@ hi_score_replacements:
   .text "YUK,ERR,OH NO. !"            // [09e4]  7: FRANKIE
   .text "THE HAIRY BEAST."            // [09f4]  8: MINTER
   .text "  A.N.ONYMOUS ! "            // [0a04]  9: spaces (zp_frame_toggle=0)
-  .text "THE NAMELESS ONE"            // [0a14] 10: spaces (zp_frame_toggle=1) / trigger 20
-  .text "A LUMP OF JUNK !"            // [0a24] 11: SPECTRUM / spaces (zp_frame_toggle=2)
+  .text "THE NAMELESS ONE"            // [0a14] 10: spaces (zp_frame_toggle=1)
+  .text "A LUMP OF JUNK !"            // [0a24] 11: SPECTRUM
   .text " YESSUM BOSS !! "            // [0a34] 12: I WANT TO CHEAT
   .text "MR COOL !!      "            // [0a44] 13: GEZ
   .text "PENTHOUSE 1/8/85"            // [0a54] 14: MADONNA
@@ -613,8 +615,8 @@ kbd_col_table:                        // CIA1 Port B column masks for keyboard m
 // SECTION: ProcessSprites
 // RANGE:   $0C07-$0D15
 // STATUS:  understood
-// SUMMARY: Per-frame sprite render routine; called twice per frame (main loop
-//          and raster IRQ). Five phases:
+// SUMMARY: Per-frame sprite render routine; called once per frame from the raster
+//          IRQ, by MainGameLoop (game) or AttractFrameUpdate (attract), never both. Five phases:
 //          1. Shadow buffer update: latch $D01E collision, copy Monty position
 //             (sprite 3) and compute jetpack position (sprite 2) into ZP shadow
 //             buffers. Skipped entirely during zp_attract_mode, level transition,
@@ -876,7 +878,8 @@ InitializeInterrupts:
   // KNOWN ORIGINAL BUG (edge case): this CLI unmasks IRQs before zp_attract_mode is set (InitAttractScreen,
   // ~2.5k cycles later). A raster IRQ landing in that window takes the game path, whose character animation
   // stores through the still-empty pointer table at $02E6 to $0000 (CPU port DDR), banking ROMs in -> CPU JAM.
-  // Timing dependent (~20% of launches under VICE). Left as-is for byte-identity; fixed in phase 2.
+  // Timing dependent: the window is 11.9% of a frame (~1 in 8), and 100% when launched from KERNAL idle
+  // (per A. Clarke, PR #2). Left as-is for byte-identity; fixed in phase 2.
   cli                                 // [0D52:58       CLI]
   rts                                 // [0D53:60       RTS]
 
@@ -1489,7 +1492,7 @@ SetupTileGraphics:
 //          WaitDelayHalf ($1015): preloads X=$80, falls into WaitDelay.
 //          WaitDelay ($1017): busy-wait; X = outer count × 256 Y-iterations of 4× NOP.
 //          ClearScreen ($1024): blanks all 4 screen pages, fills colour pages with $03.
-//          InitialiseZeroPage ($1046): zeroes ZP $06 upward (wraps to $00-$05).
+//          InitialiseZeroPage ($1046): zeroes ZP $06-$FF (stops when X wraps to $00; $00-$05 untouched).
 //          GenerateRandomNumber ($1050): mixes CIA1 timer into a 32-bit state at
 //            $42-$45, returns one byte. Preserves X/Y.
 //          WaitForVSync ($1081): waits for raster to leave then re-enter the bottom half
@@ -1558,12 +1561,12 @@ ClearScreen:
 // SECTION: InitialiseZeroPage
 // RANGE:   $1046-$104F
 // STATUS:  understood
-// SUMMARY: Zeroes the entire ZP: X starts at $06, counts up, wraps through
-//          $FF back to $00-$05, so all 256 bytes are cleared in one pass.
+// SUMMARY: Zeroes ZP $06-$FF: X starts at $06 and counts up; the loop ends when
+//          INX wraps X to $00 (BNE not taken), so $00-$05 are never cleared.
 //==============================================================================
                                       // XREF[2]: 10a2(c), 3305(c)
 InitialiseZeroPage:
-// Zero entire ZP: X starts at $06, wraps through $FF back to $00-$05.
+// Zero ZP $06-$FF: X starts at $06; the loop ends when INX wraps X to $00, so $00-$05 are not cleared.
 // $0 is the loop base only — not a named variable.
   ldx #$06                            // [1046:a2 06    LDX #$6]
   lda #$00                            // [1048:a9 00    LDA #$0]
@@ -2272,7 +2275,7 @@ enemy_copy_flag_tbl:                    // type_id → non-zero if type needs ex
 //            +5: range limit (step count at which direction flips)
 //            +6: current step counter (counts up from 0 or down from range)
 //            +7: speed (pixels/frame for vertical; sub-step rate for horizontal)
-//          Also contains GetScreenRowAddress ($1454) and ComputeMontyTilePointer
+//          Also contains GetScreenRowAddress ($1455) and ComputeMontyTilePointer
 //          ($149C), which compute screen-RAM pointers from pixel coordinates.
 //==============================================================================
 
@@ -2986,7 +2989,7 @@ CheckTileAbove:
 // STATUS:  understood
 // SUMMARY: Tests 1-2 tiles two rows below Monty. C=1 solid (collision), C=0 clear.
 //          Also handles tile type 4 (trap): if both columns are type-4, sets
-//          zp_action_counter=$05 to trigger the piledriver-contact event.
+//          zp_action_counter=$05: event 5, MontyDeathHazard (the water/lava death).
 //==============================================================================
                                       // XREF[2]: 14dd(c), 15dc(c)
 CheckTileBelow:
@@ -3468,7 +3471,8 @@ room_msg_idx_tbl:                       // room_id → index N; N=0 → sector_n
   .byte $07,$07                         // [1ac6] rooms $24-$25 "DRIVE SIR CLIVE(S C5"
   .byte $08,$08,$08,$08,$08,$08,$08,$08,$08,$08  // [1ac8] rooms $26-$2F "DAS BOAT"
   .byte $09                             // [1ad2] room  $30     "BON VOYAGE MONSIEUR LE MONTY"
-  .byte $07,$07,$07,$07                 // [1ad3] rooms $31-$34 "DRIVE SIR CLIVE(S C5" (transit zone)
+  .byte $07,$07,$07                     // [1ad3] rooms $31-$33 "DRIVE SIR CLIVE(S C5" (transit zone)
+  .byte $07                             // [1ad6] spare byte: no room $34 (52 rooms, $00-$33)
 
 //==============================================================================
 // SECTION: StepJumpArc
@@ -3890,7 +3894,7 @@ PiledriverClearBuffers:
 //==============================================================================
                                       // XREF[2]: 1b1d(c), 1c35(c)
 PiledriverInitFrame:
-  // seed 3-column glyph buffers from piledriver_frame_data; cheatmode uses +$18 offset
+  // seed 3-column glyph buffers from piledriver_frame_data; cheatmode bit 7 set ($81) uses +$18 offset
   ldy #$00                            // [1CEE:a0 00    LDY #$0]
   bit cheatmode                       // [1CF0:2c 0e 08 BIT $080e]
   bpl !+                              // [1CF3:10 02    BPL $1cf7]
@@ -4993,8 +4997,9 @@ DecrementScore:
 // SUMMARY: Clears zp_piledriver_ride_active on every room load. Room $0C only:
 //          plants rising bollard tile $62 at row 15, col 27 (white). This is
 //          the sole setup for the room $0C bollard — no mechanisms_data entry.
-//          Dual use: room $13 = standard downward piledriver (mechanisms_data);
-//          room $0C = rising bollard (static tile, same ride code lifts Monty up).
+//          Dual use: room $13 = piledriver (mechanisms_data); room $0C = rising
+//          bollard (static tile). The same ride code (UpdatePiledriverRide
+//          decrements Y) carries Monty up in both.
 //==============================================================================
                                       // XREF[1]: 0e8c(c)
 InitPiledriverState:
@@ -5017,9 +5022,10 @@ InitPiledriverState:
 // RANGE:   $21FE-$2247
 // STATUS:  understood
 // SUMMARY: Detects when Monty steps on a piledriver tile at his feet position
-//          (tile $62 = head: fires ride; tile $63 = base: sets speed counter).
-//          Shared by both room $13 (piledriver, Monty rides down) and room $0C
-//          (rising bollard, Monty rides up) — same code path, different room context.
+//          (tile $62 = head: fires ride; tile $63 = base: sets zp_action_counter=4,
+//          event 4, piledriver death; only room $1F contains $63).
+//          Shared by both room $13 (piledriver) and room $0C (rising bollard);
+//          the ride goes up in both — same code path, different room context.
 //==============================================================================
 CheckPiledriverContact:
   ldy #$29                            // [21FE:a0 29    LDY #$29]
@@ -5029,7 +5035,7 @@ CheckPiledriverContact:
   cmp #$63                            // [2206:c9 63    CMP #$63]
   bne !+                              // [2208:d0 04    BNE $220e]        neither: return
   lda #$04                            // [220A:a9 04    LDA #$4]
-  sta zp_action_counter               // [220C:85 b7    STA $00b7]        piledriver base: set speed limiter
+  sta zp_action_counter               // [220C:85 b7    STA $00b7]        piledriver base: event 4 (MontyDeathPiledriver)
 
                                       // XREF[1]: 2208(j)
 !:
@@ -5420,7 +5426,7 @@ SetTileProperty_store:
 //                                      bypasses cheat mode — lift always kills
 //            4 piledriver            → MontyDeathPiledriver: dissolve 48 frames (sfx_0c)
 //            5 tile-type-4 hazard    → MontyDeathHazard: dissolve 18 frames (sfx_0d)
-//            6 jerry can (SI item, room $23) → FreedomSequence: load room $30, MusicInit(2) (silent)
+//            6 treasure touched (room $2F) → FreedomSequence: load room $30, MusicInit(2) (silent)
 //            7 C5 vehicle crash      → MontyDeathC5Crash: reset C5 physics state, fixed respawn (sfx_0e)
 //          All paths except 6 reach MontyLifeLost ($2526): decrement lives;
 //          lives remain → restore saved position, clear state, set room_exit;
@@ -5440,7 +5446,7 @@ MontyEventDispatch:
 MontyEventDispatch_idle:
   rts                                 // [2398:60       RTS]
 !:                                    // XREF[1]: 2396(j)
-  // event 3 (lift) and 6 (Freedom) always execute; others suppressed by cheat mode
+  // event 3 (lift) and 6 (Freedom) always execute; others suppressed when cheatmode bit 7 is set ($81)
   cmp #$03                            // [2399:c9 03    CMP #$3]
   beq MontyEventDispatch_dispatch     // [239B:f0 09    BEQ $23a6]
   cmp #$06                            // [239D:c9 06    CMP #$6]
@@ -5479,7 +5485,7 @@ MontyEventDispatch_dispatch:
   jmp MontyDeathLift                  // [23cf:4c e4 24 JMP $24e4]        event=2 (lift squash; pre-dec=3)
   jmp MontyDeathPiledriver            // [23d2:4c b1 24 JMP $24b1]        event=3 (piledriver; pre-dec=4)
   jmp MontyDeathHazard                // [23d5:4c d0 24 JMP $24d0]        event=4 (tile-type-4 hazard; pre-dec=5)
-  jmp FreedomSequence                 // [23d8:4c a1 29 JMP $29a1]        event=5 (jerry can SI item; pre-dec=6)
+  jmp FreedomSequence                 // [23d8:4c a1 29 JMP $29a1]        event=5 (treasure touched; pre-dec=6)
   jmp MontyDeathC5Crash               // [23db:4c 98 24 JMP $2498]    event=6 (C5 vehicle crash; pre-dec=7)
 
 // Part of: MontyEventDispatch — event=0: split into 4 sprite pieces flying off screen
@@ -6061,7 +6067,7 @@ HandleSICollision:
   sta si_collected_tbl,y              // [26CC:99 08 03 STA $308,Y]
   cpy #$13                            // [26CF:c0 13    CPY #$13]  item 19 = last/secret
   bne !+                              // [26D1:d0 0d    BNE $26e0]
-  ora cheatmode                       // [26D3:0d 0e 08 ORA $080e]  collecting item 19 sets cheatmode
+  ora cheatmode                       // [26D3:0d 0e 08 ORA $080e]  collecting item 19 (A=$81) makes cheatmode $81: bit 7 = invincible
   sta cheatmode                       // [26D6:8d 0e 08 STA $080e]
   lda zp_vic_shadow_enable            // [26D9:a5 20    LDA $0020]
   and #$fe                            // [26DB:29 fe    AND #$fe]
@@ -6394,11 +6400,11 @@ CheckTeleporterContact:
   jsr MusicPlaySFX                    // [2891:20 91 95 JSR $9591]
   rts                                 // [2894:60       RTS]
 
-teleporter_dest_tbl:                  // sprite_x, sprite_y, room_x_offset, room_id — 4-byte entries, indexed by tile_match*4
-  .byte $34,$72,$11,$01               // [2895] sprite_x=$34 sprite_y=$72 x_off=$11 room=$01
-  .byte $60,$a2,$10,$05               // [2899] sprite_x=$60 sprite_y=$a2 x_off=$10 room=$05
-  .byte $28,$6a,$0c,$03               // [289d] sprite_x=$28 sprite_y=$6a x_off=$0c room=$03
-  .byte $17,$a2,$03,$03               // [28a1] sprite_x=$17 sprite_y=$a2 x_off=$03 room=$03
+teleporter_dest_tbl:                  // sprite_x, sprite_y, exit_tile_col, map_row — 4-byte entries, indexed by zp_tele_repeat_ctr*4; GetRoomID(map_row, exit_tile_col) = destination room
+  .byte $34,$72,$11,$01               // [2895] sprite_x=$34 sprite_y=$72 exit_tile_col=$11 map_row=$01 → room $06
+  .byte $60,$a2,$10,$05               // [2899] sprite_x=$60 sprite_y=$a2 exit_tile_col=$10 map_row=$05 → room $13
+  .byte $28,$6a,$0c,$03               // [289d] sprite_x=$28 sprite_y=$6a exit_tile_col=$0c map_row=$03 → room $1B
+  .byte $17,$a2,$03,$03               // [28a1] sprite_x=$17 sprite_y=$a2 exit_tile_col=$03 map_row=$03 → room $29
 
 //==============================================================================
 // SECTION: dissolve_animation
@@ -6616,13 +6622,13 @@ DisplayFreedomRoom:
 // SECTION: FreedomSequence
 // RANGE:   $29A1-$29FA
 // STATUS:  understood
-// SUMMARY: Victory sequence triggered when the jerry can (SI item, room $23)
-//          is collected (event=5). Freezes gameplay, loads victory room $30, fills the prize
+// SUMMARY: Victory sequence triggered when Monty touches the treasure in room $2F
+//          (sprite frame $9B; the jerry can only makes it appear) (event=5). Freezes gameplay, loads victory room $30, fills the prize
 //          area chars ($65-$67), inits freedom display, plays music track 2.
 //          If passport FK item not present → ArrestedEnding; else walks Monty
 //          offscreen via FreedomSlideSpritesIn/Out/WalkStep then GameOverAnimation.
 //==============================================================================
-FreedomSequence:                      // event=5 (counter=6): jerry can SI item collected; load victory room $30
+FreedomSequence:                      // event=5 (counter=6): treasure touched (sprite frame $9B); load victory room $30
   ldx #$01                            // [29A1:a2 01    LDX #$1]
   stx zp_freeze_flag                  // [29A3:86 0f    STX $000f]
   stx zp_completion_active            // [29A5:86 bb    STX $00bb]
@@ -7839,7 +7845,7 @@ InitialiseGraphicsMode:
 // RANGE:   $30A7-$30D7
 // STATUS:  understood
 // SUMMARY: Attract-screen per-frame key handler. Polls KeyPressToCharacter:
-//          $86 (CBM key) toggles sound on/off via InitialiseMusic (falls through).
+//          $86 (F1) toggles sound on/off via InitialiseMusic (falls through).
 //          $52 ('R') launches RemapKeyboardControls.
 //          InitialiseMusic ($30BD) is a secondary entry: starts or stops music
 //          based on sound_mode; also called by HiScoreNameInput_confirm and
@@ -8110,7 +8116,7 @@ ShowRemapControlPrompt:
 // STATUS:  understood
 // SUMMARY: Interactive name entry for a new hi-score. Displays a blinking cursor
 //          at screen row 15 col 12–27 (up to 16 chars); colour-cycles each VSync.
-//          $8C (CRSR U/D) confirms; $8D (CRSR L/R) backspaces; $8E (CBM) → space;
+//          $8C (RETURN) confirms; $8D (INST/DEL) backspaces; $8E (SPACE) → space;
 //          high-bit chars rejected. Typed name left in screen RAM for ClearNewNameSlot
 //          to read. Calls InitialiseMusic on confirm. Called from CheckAndInsertHiScore.
 //==============================================================================
@@ -8141,9 +8147,9 @@ HiScoreNameInput_cursor:
   beq !-                              // [32A7:f0 f4    BEQ $329d]    no key yet
   sta zps_tmp_a                       // [32A9:85 54    STA $0054]
   ldy zp_hiscore_name_col             // [32AB:a4 ec    LDY $00ec]
-  cmp #$8c                            // [32AD:c9 8c    CMP #$8c]     confirm (CRSR U/D)
+  cmp #$8c                            // [32AD:c9 8c    CMP #$8c]     confirm (RETURN)
   beq HiScoreNameInput_confirm        // [32AF:f0 3a    BEQ $32eb]
-  cmp #$8d                            // [32B1:c9 8d    CMP #$8d]     backspace (CRSR L/R)
+  cmp #$8d                            // [32B1:c9 8d    CMP #$8d]     backspace (INST/DEL)
   bne !+                              // [32B3:d0 10    BNE $32c5]
   cpy #$00                            // [32B5:c0 00    CPY #$0]
   beq HiScoreNameInput_cursor         // [32B7:f0 d8    BEQ $3291]    at col 0 → ignore
@@ -8157,7 +8163,7 @@ HiScoreNameInput_cursor:
 !:
   cpy #$10                            // [32C5:c0 10    CPY #$10]     buffer full (16 chars)?
   beq HiScoreNameInput_cursor         // [32C7:f0 c8    BEQ $3291]    yes → ignore
-  cmp #$8e                            // [32C9:c9 8e    CMP #$8e]     CBM key → treat as space
+  cmp #$8e                            // [32C9:c9 8e    CMP #$8e]     SPACE key → treat as space
   bne !+                              // [32CB:d0 04    BNE $32d1]
   lda #$20                            // [32CD:a9 20    LDA #$20]
   sta zps_tmp_a                       // [32CF:85 54    STA $0054]
@@ -10016,7 +10022,7 @@ tape_loader_bootstrap:
 //            $71CA-$72FF  unallocated VIC sprite frames $C7-$CB (zeros in PRG)
 //            $7300-$771E  hiscore_data — score table, name table (see hiscore_data section)
 //            $771F-$772B  hiscore_name_input_buf (13 bytes)
-//            $7800-$7AFF  flying_banner_1/2/3 sprite data (3 × 256 bytes)
+//            $7800-$7AFF  flying_banner_1/2/3 enemy sprite banks, types $20-$22 (3 × 256 bytes)
 //==============================================================================
 chr_charset:                                         // VIC bank 1 charset base; char N at chr_charset+N*8
   .byte $00,$00,$00,$00,$00                          // [4000] .....
@@ -11084,7 +11090,8 @@ hiscore_score_table:                                 // XREF[4]: 1190(r), 36c9(r
 // RANGE:   $771F-$7FFF
 // STATUS:  understood
 // SUMMARY: hiscore_name_input_buf ($771F), dead PRG data at $772C-$77FF and $7B00-$7FFF,
-//          and flying banner sprites ($7800-$7AFF, 3 × 4 frames pre-initialised in PRG).
+//          and the packed enemy sprite banks for types $20-$22 ($7800-$7AFF,
+//          flying_banner_1/2/3_spr: 3 banks × 4 frames, pre-initialised in PRG).
 //          The dead_data blocks occupy VIC bank-1 sprite-frame slots but are never read
 //          at runtime; the game overwrites those slots before use (confirmed dead data).
 //==============================================================================
