@@ -1,0 +1,51 @@
+{
+    "output": "documentation/MONTY_ON_THE_RUN.html",
+    "title": "Monty on the Run",
+    "brand": [
+        "MONTY ON",
+        "THE RUN"
+    ],
+    "logo": [
+        { "src": "documentation/images/graphics/anim-monty-somersault.gif", "alt": "Monty jumping (his somersault), as the game draws him" },
+        { "src": "documentation/images/graphics/anim-monty-walk-right.gif", "alt": "Monty walking, as the game draws him" }
+    ],
+    "retroFont": {
+        "text": "tools/docs/fonts/C64_Pro-STYLE.woff2",
+        "mono": "tools/docs/fonts/C64_Pro_Mono-STYLE.woff2",
+        "textFamily": "C64 Pro",
+        "monoFamily": "C64 Pro Mono",
+        "labelOff": "Switch to the C64 font",
+        "labelOn": "Switch to the standard font",
+        "credit": "C64 Pro and C64 Pro Mono fonts © 2010–2019 Style (style64.org/c64-truetype), embedded unmodified with @font-face as their licence allows."
+    },
+    "description": "Monty on the Run (C64, Gremlin Graphics 1985) reverse engineering: gameplay, every room, graphics, Rob Hubbard's music and effects, architecture, data formats, toolchain and verification notes.",
+    "includes": "VICE screenshots of all 52 rooms and both endings, a world map, decoded tiles, decorations, sprites and enemies, animations, the three songs and every sound effect as playable audio, and diagrams",
+    "groups": [
+        {
+            "id": "guide",
+            "label": "The game and its code",
+            "sources": [
+                "README.md",
+                "documentation/README.md",
+                "documentation/GAMEPLAY.md",
+                "documentation/GRAPHICS.md",
+                "documentation/SOUND.md",
+                "documentation/ARCHITECTURE.md",
+                "documentation/DATA_FORMATS.md",
+                "documentation/SOURCE_GUIDE.md"
+            ]
+        },
+        {
+            "id": "reference",
+            "label": "Reference",
+            "sources": [
+                "documentation/ROOMS.md",
+                "documentation/SOUND_DATA.md",
+                "documentation/VERIFICATION.md",
+                "CHANGELOG.md",
+                "documentation/HTML_DOCUMENTATION.md",
+                "documentation/CREDITS.md"
+            ]
+        }
+    ]
+}

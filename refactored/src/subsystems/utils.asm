@@ -723,16 +723,20 @@ WaitForVSync:
 // SECTION: InitialiseZeroPage
 // RANGE:   $1046-$104F
 // STATUS:  understood
-// P2_DIVERGES: clears $08–$FF (ldx #$08) not $06–$FF (ldx #$06); sound_mode/cheat_mode handled in AttractScreenLoop
-// SUMMARY: Clears ZP $08-$FF. Skips $00-$07: $00-$01 are the CPU I/O port,
-//          $02-$05 are Rob Hubbard music state, $06-$07 are zp.sound_mode /
-//          zp.cheat_mode (explicitly initialised at cold-start only).
+// P2_DIVERGES: clears from zp.cheat_mode+1 ($09) to $FF, not $06–$FF (ldx #$06), so the three
+//          variables P2 moved into ZP below it survive, as their $080E/$080F originals did.
+//          Was ldx #$08, which cleared zp.cheat_mode ($08) and broke I WANT TO CHEAT.
+// SUMMARY: Clears ZP $09-$FF. Skips $00-$08: $00-$01 are the CPU I/O port,
+//          $02-$05 are Rob Hubbard music state, $06 zp.sound_mode, $07 zp.sfx_sweep_dir,
+//          $08 zp.cheat_mode (sound_mode/cheat_mode are seeded at cold start in StartUp;
+//          sfx_sweep_dir is set by InitSFXVoices before it is read).
 //==============================================================================
                                       // XREF[2]: 10a2(c), 3305(c)
+.errorif zp.sound_mode > zp.cheat_mode || zp.sfx_sweep_dir > zp.cheat_mode, "InitialiseZeroPage would clear sound_mode or sfx_sweep_dir"
 InitialiseZeroPage:
-// Clear $08-$FF; the loop exits when inx wraps X to $00 (BNE not taken).
+// Clear zp.cheat_mode+1..$FF; the loop exits when inx wraps X to $00 (BNE not taken).
 // $0 is the loop base only — not a named variable.
-  ldx #$08                            // [1046:a2 08    LDX #$8]
+  ldx #zp.cheat_mode + 1              // [1046:a2 06    LDX #$6]
   lda #$00                            // [1048:a9 00    LDA #$0]
 !:
   sta $0,x                            // [104A:95 00    STA $0,X]

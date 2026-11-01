@@ -4,14 +4,40 @@ A fully-annotated 6502 assembly reconstruction of the 1985 Commodore 64 game
 *Monty on the Run* by Gremlin Graphics. Every function, data block, and memory
 address is identified, named, and commented. Two buildable versions are provided:
 
-| Directory | Description |
-|-----------|-------------|
-| [`refactored/`](#refactored) | Multi-file, namespace-structured. SMC removed or named. Dead code largely excised. |
+| Directory                        | Description                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| [`refactored/`](#refactored)     | Multi-file, namespace-structured. SMC removed or named. Dead code largely excised.   |
 | [`byte-perfect/`](#byte-perfect) | Single-file monolith. Assembled output is bit-for-bit identical to the original PRG. |
 
 Both share the same hardware register libraries. Neither includes the original
 binary. You only need a legal copy of the tape release if you want to verify
 byte-identity yourself; it is not needed to build either version.
+
+**Documentation.** [`documentation/`](documentation/README.md) covers gameplay,
+every room, the graphics, Rob Hubbard's music, the architecture, the data
+formats and the toolchain. Open
+[`documentation/MONTY_ON_THE_RUN.html`](documentation/MONTY_ON_THE_RUN.html) for
+all of it in one offline page, with screenshots of all 52 rooms, decoded
+graphics and playable recordings of the music and sound effects.
+
+---
+
+## Quick start
+
+With Java 17+, Kick Assembler (`~/tools/KickAss.jar` or `KICKASS_JAR`), VICE
+(`x64sc`), [just](https://github.com/casey/just) and Python 3:
+
+```bash
+just build-all    # byte-perfect build checked against reference.sha256, then the refactored build
+just launch-rf    # start the refactored build in VICE
+just smoke        # start both builds unattended and check they reach the title screen
+just --list       # everything else, including `just docs` to regenerate the documentation
+```
+
+In VSCode, install the recommended *Kick Assembler 8-Bit Retro Studio*
+extension; `⇧⌘B` builds both versions, with assembly errors in the Problems
+panel, and **Terminal → Run Task…** offers the run, smoke-test, sound and docs
+tasks. See [the source guide](documentation/SOURCE_GUIDE.md).
 
 ---
 
@@ -20,6 +46,11 @@ byte-identity yourself; it is not needed to build either version.
 - **Java 17 or later**
 - **KickAssembler** — [theweb.dk/KickAssembler](https://theweb.dk/KickAssembler/)
 - **VICE** ([vice-emu.sourceforge.io](https://vice-emu.sourceforge.io)) or a real C64 to run the output
+- Optional, for the HTML handbook's C64 font option and `just docs-check`: Style's
+  **[C64 TrueType](https://style64.org/c64-truetype)** fonts. Download the package and copy
+  `C64_Pro-STYLE.woff2` and `C64_Pro_Mono-STYLE.woff2` from its `fonts/` folder, unmodified, into
+  `tools/docs/fonts/`. Their [licence](https://style64.org/c64-truetype/license) does not allow offering the
+  files for download, so they are not in this repository
 
 ---
 
@@ -192,7 +223,7 @@ refactored/src/
     irq.asm             IRQ handler, raster timing
     monty.asm           Player movement, collision, death, dispatch
     enemy.asm           Enemy spawn, movement, collision
-    sprites.asm         Sprite engine, multiplexer, per-frame VIC updates
+    sprites.asm         Sprite engine: shadow registers to the VIC once a frame
     room.asm            Room loading, scrolling, tile placement (tables and
                         tile-set pointer in room_data.asm)
     tiles_data.asm      Shared tile graphics library (121 tiles, all rooms)
@@ -284,28 +315,44 @@ rather than by diffing against phase 1.
 
 ## Tools
 
+`tools/` holds the build, launch, screenshot, graphics, sound and handbook
+scripts behind the `just` recipes (standard-library Python, plus Node.js for
+the handbook); [the source guide](documentation/SOURCE_GUIDE.md) describes them.
+
 The `docs/` directory contains standalone HTML viewers (no server required —
 just open in a browser):
 
-| File | Contents |
-|------|----------|
-| `sprite_viewer.html` | All VIC bank 1 sprites, filterable by category |
-| `enemy_sprites.html` | Enemy sprite sheet with type IDs and names |
-| `fk_sprites.html` | Freedom Kit item sprites |
-| `hiscore_sprites.html` | Flying-banner composite sprites |
-| `decor_viewer.html` | Room decoration tile viewer |
-| `world_map.html` | Room connectivity map |
-| `vic_bank_map.html` | VIC bank 1 memory layout |
-| `migration_plan.html` | Phase 2 migration plan for `main.asm` |
+| File                   | Contents                                       |
+| ---------------------- | ---------------------------------------------- |
+| `sprite_viewer.html`   | All VIC bank 1 sprites, filterable by category |
+| `enemy_sprites.html`   | Enemy sprite sheet with type IDs and names     |
+| `fk_sprites.html`      | Freedom Kit item sprites                       |
+| `hiscore_sprites.html` | Flying-banner composite sprites                |
+| `decor_viewer.html`    | Room decoration tile viewer                    |
+| `world_map.html`       | Room connectivity map                          |
+| `vic_bank_map.html`    | VIC bank 1 memory layout                       |
+| `migration_plan.html`  | Phase 2 migration plan for `main.asm`          |
 
 ---
 
 ## Original game
 
-- *Monty on the Run* was created by **Peter Harrap** 
-- C64 version coded by **Jason Perkins**
-- Published by **Gremlin Graphics** in 1985. 
-- Music by **Rob Hubbard**.
+- Designed by **Peter Harrap**
+- C64 version coded by **Jason Perkins** and **Anthony (Tony) Clarke** of
+  Micro Projects; the game's own hi-score table reads *written by Tony and
+  Jason of Micro Projects for Gremlin Graphics, July 1985*
+- Music by **Rob Hubbard**
+- Published by **Gremlin Graphics** in 1985
 
 This repository contains only reconstructed source code. The original binary is
 not included and is not required to build either version.
+
+## Credits for this reconstruction
+
+The disassembly, naming and both builds are by **Dave Agent**, using Ghidra,
+[ghidra-kickass-export](https://github.com/Dave-Agent/ghidra-kickass-export)
+and his [MOSaic](https://github.com/Dave-Agent/MOSaic) method. The
+`documentation/` folder and HTML handbook, the screenshot, graphics and sound
+tooling, the `justfile` and the VSCode set-up are by **Anthony Clarke**, one of
+the game's original authors. [CREDITS.md](documentation/CREDITS.md) lists every
+tool and library, with links.

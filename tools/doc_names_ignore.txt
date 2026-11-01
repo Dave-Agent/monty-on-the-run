@@ -1,0 +1,5 @@
+# Words in the docs that look like labels but are not: naming-convention examples in SOURCE_GUIDE.md.
+_spr
+_chr
+zp_name
+snake_case_tbl

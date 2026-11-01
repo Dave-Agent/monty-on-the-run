@@ -4,3 +4,14 @@
 
 # KickAssembler / Ghidra source records — never published
 **/.source.txt
+
+# Build output and tool scratch: derived, never committed (build/memory holds the VICE RAM dumps)
+/build/
+__pycache__/
+
+# The original game image is never committed; reference.sha256 holds its hash. Put a copy here to diff by byte.
+/reference/
+
+# Style's C64 TrueType fonts: licensed for @font-face embedding, not for redistribution as files.
+# Copy them here unmodified from style64.org/c64-truetype to get the handbook's C64 font option.
+/tools/docs/fonts/
