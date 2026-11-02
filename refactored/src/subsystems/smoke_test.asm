@@ -1,8 +1,9 @@
 // smoke_test.asm — Temporary diagnostics; not part of the shipping game.
 //
-// Roadmap:
-//   Phase 1 (now): Q = next room, W = previous room.
-//   Phase 2 (next): replace room_nav_tbl placeholder spawn coords with per-room surveyed points.
+// Only called from the game loop when SMOKE_TEST = true in main.asm (the code is
+// always assembled, but unreferenced when false). Committed as false, so the
+// default build behaves like the original.
+// Q = next room, W = previous room; spawn points come from SmokeTest.Data.spawn_tbl.
 
 .namespace SmokeTest {
 
@@ -14,15 +15,14 @@
 .label NUM_ROOMS = 52
 
 //==============================================================================
-// SECTION: CheckNavKeys
-// RANGE:   $7100-$72FF (approx; anti_hack_screen removed in phase2, freeing $7100-$72FF)
+// SECTION: CheckKeys
+// RANGE:   $7065-$7153 (phase 2 build address; no phase 1 equivalent; includes helpers and key_prev)
 // STATUS:  understood
 // SUMMARY: Direct CIA1 poll for Q and W — called from GameFrameUpdate every frame.
 //          Q: jump to next room (wraps after room 51).
 //          W: jump to previous room (wraps before room 0).
-//          Uses the same mechanism as the in-game teleporter:
-//            set zp.monty_sprite_x2/y2, zp.exit_tile_col, zp.map_row, zp.room_exit=1
-//            → RoomLoop detects exit → GetRoomID(map_row, exit_tile_col) → LoadRoom.
+//          Jumps by calling Room.LoadRoom directly (see JumpToRoom): Monty's spawn
+//          position, exit_tile_col and map_row are seeded from spawn_tbl first.
 //          This game drives COLUMNS via $DC00 and reads ROWS via $DC01 (active-low).
 //          key_press_map index = (row * 8) + col, verified against game's own tables:
 //            Q: col 7 ($DC00=$7F), row 1 (bit 6 of $DC01 = $40); map index 15
@@ -30,7 +30,7 @@
 //          key_prev tracks held state; fires on press edge to prevent repeat.
 //          Restores $DC00 to $FF on exit so joystick reads are unaffected.
 //==============================================================================
-CheckFunctionKeys:
+CheckKeys:
   // Q: col 7 ($7F drives $DC00), row 1 (bit 6 of $DC01); key_prev bit 0
   lda #$7f
   sta CIA.DATA_PORT_A_1       // drive column 7 low
@@ -73,15 +73,19 @@ CheckFunctionKeys:
 !restore:
   lda #$ff
   sta CIA.DATA_PORT_A_1       // deselect all columns
-  jsr ShowRoomInHud
+  jsr ShowRoomId
   rts
 
 //==============================================================================
-// Part of: CheckNavKeys — display zp.room_id as 2 decimal digits at HUD cols 3-4
-// Digit → screen code: digit + $40 (Monty charset; same mapping as UpdateScreenHeader)
+// Part of: CheckKeys — display zp.room_id as 2 decimal digits in the first two
+// visible characters of the sector name line (row 24, cols 1-2; col 0 is hidden by
+// the border, so the screen shows cols 1-38). DisplaySectorName never draws left of
+// col 6 (col byte >= 2, drawn from col 4 + col byte), and it clears the row on each
+// room load, so CheckKeys redraws it every frame.
+// Digit → screen code: digit + $70 (Monty charset; same mapping as the lives digit in HUD.Update)
 // Divide-by-10: subtract $0A until underflow; X = tens, Y = units (last remainder)
 //==============================================================================
-ShowRoomInHud:
+ShowRoomId:
   lda zp.room_id
   ldx #$00
 !:
@@ -95,18 +99,18 @@ ShowRoomInHud:
   txa
   clc
   adc #$70                    // tens digit → screen code ($70 = '0' in Monty charset)
-  sta CHR_Screen + 3
+  sta CHR_Screen + 24*$28 + 1
   tya
   clc
   adc #$70                    // units digit → screen code
-  sta CHR_Screen + 4
+  sta CHR_Screen + 24*$28 + 2
   lda #CYAN
-  sta VIC.COLOR_RAM + 3
-  sta VIC.COLOR_RAM + 4
+  sta VIC.COLOR_RAM + 24*$28 + 1
+  sta VIC.COLOR_RAM + 24*$28 + 2
   rts
 
 //==============================================================================
-// Part of: CheckNavKeys — increment/decrement zp.room_id with wrapping
+// Part of: CheckKeys — increment/decrement zp.room_id with wrapping
 //==============================================================================
 JumpToNextRoom:
   .if (START_SMOKE_ROOM != 0) {
@@ -146,7 +150,7 @@ JumpToPrevRoom:
   // fall through into JumpToRoom
 
 //==============================================================================
-// Part of: CheckNavKeys — call LoadRoom directly; spawn from per-room table
+// Part of: CheckKeys — call LoadRoom directly; spawn from per-room table
 //==============================================================================
 JumpToRoom:
   // Room $2F: seed prerequisite — DisplayRoom only shows the prize when

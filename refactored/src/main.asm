@@ -293,7 +293,7 @@ RoomLoop:
 // P1_ROUTINE_NAME: MainGameLoop
 // RANGE:   $0DA4-$0E28
 // STATUS:  understood
-// P2_DIVERGES: jsr SmokeTest.CheckFunctionKeys added after ReadPlayerInput (F1/F2 nav smoke test)
+// P2_DIVERGES: jsr SmokeTest.CheckKeys added after ReadPlayerInput (Q/W room-jump smoke test); assembled only when SMOKE_TEST = true (committed false)
 // SUMMARY: Called from the raster IRQ handler each frame. Toggles zp.frame_toggle
 //          0/1 per frame; calls music, input, and sprite routines every frame.
 //          Full game-world subsystems (room-loop, enemies, sprites) gated by
@@ -310,7 +310,7 @@ GameFrameUpdate:
 // Core per-frame work: always run regardless of game state.
   jsr Music.Play                      // [0DAC:20 12 80 JSR $8012]
   jsr Controls.ReadPlayerInput        // [0DAF:20 84 0b JSR $0b84]
-  .if (SMOKE_TEST) { jsr SmokeTest.CheckFunctionKeys }   // Q/W room navigation
+  .if (SMOKE_TEST) { jsr SmokeTest.CheckKeys }   // Q/W room navigation
   jsr Sprites.ProcessSprites          // [0DB2:20 07 0c JSR $0c07]
 // Skip full game-world update if NMI death/pause flag is set.
   lda zp.freeze_flag                  // [0DB5:a5 0f    LDA $000f]

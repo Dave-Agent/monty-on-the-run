@@ -6,7 +6,7 @@
 //==============================================================================
 // SECTION: spawn_tbl
 // P1_ROUTINE_NAME: spawn_tbl
-// RANGE:   TBD
+// RANGE:   $7154-$7223 (phase 2 build address; no phase 1 equivalent)
 // STATUS:  understood
 // SUMMARY: 52 × 4-byte per-room navigation records:
 //          spawn_x, spawn_y    — Monty's start position in screen coords
