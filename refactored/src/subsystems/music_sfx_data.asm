@@ -871,36 +871,52 @@ sfx_tbl:                              // 16-byte records: [cfg v1{flo fhi plo ph
                                        // Row names = the ID Music.PlaySFX is called with; unused rows are never
                                        // referenced by any lda #id;jsr PlaySFX call or by event_sfx_tbl.
 .namespace sfx {
+
 teleporter_warp:
   .byte $60,$33,$98,$80,$01,$41,$0f,$00,$00,$57,$00,$06,$15,$0f,$00,$5f // [9454] rate=0 swp_up  v1_ctl=$41 end=$5F
+
 jump:
   .byte $62,$40,$03,$40,$02,$41,$0c,$00,$32,$90,$00,$08,$43,$0a,$00,$58 // [9464] rate=2 swp_up  v1_ctl=$41 end=$58
+
 piledriver_descend:
   .byte $50,$40,$08,$80,$08,$41,$0a,$90,$06,$14,$14,$02,$47,$0f,$a0,$20 // [9474] rate=0 swp_dn  v1_ctl=$41 end=$20
+
 jetpack_thrust:
   .byte $62,$10,$08,$20,$00,$81,$0e,$00,$08,$01,$80,$08,$81,$0f,$00,$4f // [9484] rate=2 swp_up  v1_ctl=$81 end=$4F
+
 lift_ascend:
   .byte $21,$28,$08,$40,$08,$11,$0f,$90,$02,$60,$80,$06,$15,$0f,$90,$4f // [9494] rate=1 swp_up  v1_ctl=$11 end=$4F
+
 lift_descend_piledriver_ride:
   .byte $11,$4f,$08,$40,$08,$11,$0f,$90,$02,$60,$80,$06,$15,$0f,$90,$28 // [94a4] rate=1 swp_dn  v1_ctl=$11 end=$28
+
 unused_06:
   .byte $64,$04,$04,$80,$08,$41,$0a,$a0,$02,$00,$14,$01,$47,$0f,$80,$5f // [94b4] rate=4 swp_up  v1_ctl=$41 end=$5F — unused
+
 coin_collected:
   .byte $a0,$30,$c8,$00,$08,$41,$09,$00,$02,$79,$00,$08,$41,$0a,$00,$50 // [94c4] rate=0 no_freq  v1_ctl=$41 end=$50
+
 item_collected:
   .byte $80,$50,$38,$40,$08,$41,$09,$00,$00,$21,$80,$08,$15,$0b,$00,$30 // [94d4] rate=0 no_freq  v1_ctl=$41 end=$30
+
 death_smoke_stack:
   .byte $50,$6f,$14,$40,$00,$81,$0a,$00,$14,$27,$00,$08,$15,$0d,$00,$30 // [94e4] rate=0 swp_dn  v1_ctl=$81 end=$30
+
 death_enemy_alive:
   .byte $50,$45,$05,$40,$00,$81,$02,$00,$80,$c0,$00,$08,$15,$4f,$f0,$18 // [94f4] rate=0 swp_dn  v1_ctl=$81 end=$18
+
 unused_0b:
   .byte $60,$10,$07,$80,$00,$81,$0a,$00,$25,$01,$00,$02,$17,$0c,$00,$24 // [9504] rate=0 swp_up  v1_ctl=$81 end=$24 — unused
+
 death_piledriver:
   .byte $12,$30,$02,$80,$00,$11,$0f,$f0,$08,$01,$00,$02,$11,$0f,$f0,$14 // [9514] rate=2 swp_dn  v1_ctl=$11 end=$14
+
 death_hazard:
   .byte $10,$1a,$02,$20,$00,$81,$0f,$f0,$21,$01,$00,$03,$85,$0f,$f0,$07 // [9524] rate=0 swp_dn  v1_ctl=$81 end=$07
+
 death_lift_squash_c5_crash:
   .byte $a0,$33,$1a,$80,$00,$81,$0a,$00,$00,$0d,$00,$02,$81,$0b,$00,$5f // [9534] rate=0 no_freq  v1_ctl=$81 end=$5F
+
 unused_0f:
   .byte $20,$0a,$03,$80,$00,$41,$0a,$00,$04,$71,$a0,$00,$51,$0b,$f0,$20 // [9544] rate=0 swp_up  v1_ctl=$41 end=$20 — unused
 } // .namespace sfx
