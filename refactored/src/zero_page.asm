@@ -2,7 +2,7 @@
 // All variables accessed as zp.name; scratch temporaries as zp.s_name.
 // Utils.InitialiseZeroPage clears everything from zp.clear_start ($09-$FF) at startup and at each new game.
 //
-// ZP used: $E6 bytes ($02–$E7);  $18 free ($E8–$FF)  ← updated by 'just update-zp-comment'
+// ZP used: $E6 bytes ($02–$E7);  $18 free ($E8–$FF)
 
 .namespace zp {
 
